@@ -1,0 +1,82 @@
+"""Trans Invert 后端主应用"""
+from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from app.core.settings import settings
+from app.routers import texts
+from app.schemas.text import APIResponse
+
+# 创建FastAPI应用
+app = FastAPI(
+    title="Trans Invert API",
+    description="回译法语言练习平台后端API",
+    version="1.0.0",
+    debug=settings.DEBUG
+)
+
+# 配置CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=settings.ALLOWED_ORIGINS,
+    allow_credentials=True,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["*"],
+)
+
+# 注册路由
+app.include_router(texts.router)
+
+@app.get("/", response_model=APIResponse)
+async def root():
+    """根路径"""
+    return APIResponse(
+        success=True,
+        data={"message": "Trans Invert API", "version": "1.0.0"},
+        message="API运行正常"
+    )
+
+@app.get("/health", response_model=APIResponse)
+async def health_check():
+    """健康检查"""
+    return APIResponse(
+        success=True,
+        data={
+            "status": "healthy",
+            "environment": settings.APP_ENV,
+            "deepseek_configured": bool(settings.DEEPSEEK_API_KEY)
+        },
+        message="服务运行正常"
+    )
+
+@app.exception_handler(HTTPException)
+async def http_exception_handler(request, exc):
+    """HTTP异常处理"""
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "success": False,
+            "error": exc.detail,
+            "message": "请求处理失败"
+        }
+    )
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request, exc):
+    """通用异常处理"""
+    return JSONResponse(
+        status_code=500,
+        content={
+            "success": False,
+            "error": "内部服务器错误",
+            "message": "服务暂时不可用，请稍后重试"
+        }
+    )
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(
+        "app.main:app",
+        host=settings.APP_HOST,
+        port=settings.APP_PORT,
+        reload=settings.DEBUG
+    )

@@ -1,0 +1,8 @@
+# 如果不使用pyproject.toml，可以使用这个requirements.txt
+fastapi>=0.111.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.7.0
+httpx>=0.27.0
+jinja2>=3.1.0
+python-multipart>=0.0.9
+python-dotenv>=1.0.0
