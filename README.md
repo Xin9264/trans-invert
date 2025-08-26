@@ -8,7 +8,7 @@
 2. AI语法分析+翻译（DeepSeek V3）
 3. 遮盖原文，看中文写英文
 4. AI智能评判，提供改进建议
-5. 优质打字体验（参考qwerty-learner）
+
 
 ## 技术栈
 
@@ -42,19 +42,6 @@ trans_invert/
 ├── docker-compose.dev.yml
 ├── start.sh
 └── test_api.py
-```
-
-## 测试
-
-```bash
-# API测试
-python test_api.py
-
-# 手动测试
-# 1. 启动服务
-# 2. 访问前端上传文本
-# 3. 等待AI分析
-# 4. 开始练习
 ```
 
 ---
