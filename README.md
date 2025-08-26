@@ -22,7 +22,7 @@
 ```bash
 # 1. 配置环境变量
 cp backend/.env.example backend/.env
-# 编辑 backend/.env，设置 DEEPSEEK_API_KEY
+# 编辑 backend/.env，设置您的 DEEPSEEK_API_KEY
 
 # 2. 启动服务
 ./start.sh
@@ -32,6 +32,8 @@ cp backend/.env.example backend/.env
 # 后端: http://localhost:8000
 # API文档: http://localhost:8000/docs
 ```
+
+⚠️ **重要**: 请确保在 `backend/.env` 文件中设置您的 DeepSeek API 密钥，不要将API密钥提交到代码仓库中！
 
 ## 项目结构
 
