@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { textAPI, practiceAPI } from '../utils/api';
 import { Text, TextAnalysis } from '../types';
 import TypingComponent from '../components/TypingComponent';
+import TextHighlighter from '../components/TextHighlighter';
 import { ArrowLeft, Eye, EyeOff, RotateCcw } from 'lucide-react';
 
 const Practice: React.FC = () => {
@@ -17,6 +18,38 @@ const Practice: React.FC = () => {
   const [feedback, setFeedback] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [practiceMode, setPracticeMode] = useState<'study' | 'practice' | 'completed'>('study'); // 新增练习模式状态
+  const [highlights, setHighlights] = useState<any[]>([]); // 文本高亮数据
+
+  // 高亮数据的存储键
+  const getHighlightStorageKey = (textId: string) => `highlights_${textId}`;
+
+  // 保存高亮数据到localStorage
+  const saveHighlights = (textId: string, highlightData: any[]) => {
+    try {
+      localStorage.setItem(getHighlightStorageKey(textId), JSON.stringify(highlightData));
+    } catch (error) {
+      console.warn('Failed to save highlights to localStorage:', error);
+    }
+  };
+
+  // 从localStorage加载高亮数据
+  const loadHighlights = (textId: string): any[] => {
+    try {
+      const saved = localStorage.getItem(getHighlightStorageKey(textId));
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.warn('Failed to load highlights from localStorage:', error);
+      return [];
+    }
+  };
+
+  // 处理高亮变化
+  const handleHighlightChange = (newHighlights: any[]) => {
+    setHighlights(newHighlights);
+    if (id) {
+      saveHighlights(id, newHighlights);
+    }
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,6 +92,10 @@ const Practice: React.FC = () => {
               createdBy: ''
             });
           }
+
+          // 加载保存的高亮数据
+          const savedHighlights = loadHighlights(id);
+          setHighlights(savedHighlights);
         } else {
           setError(analysisResponse.message || '文本分析尚未完成，请稍后重试');
         }
@@ -261,9 +298,12 @@ const Practice: React.FC = () => {
             <div className="card border-red-200 bg-red-50">
               <h3 className="text-lg font-semibold text-red-900 mb-4">原文 (仅供参考)</h3>
               <div className="prose prose-red max-w-none">
-                <p className="text-red-800 leading-relaxed whitespace-pre-wrap font-mono">
-                  {text.content}
-                </p>
+                <TextHighlighter 
+                  text={text.content}
+                  highlights={highlights}
+                  onHighlightChange={handleHighlightChange}
+                  className="text-red-800"
+                />
               </div>
             </div>
           )}
@@ -276,14 +316,17 @@ const Practice: React.FC = () => {
             <div className="space-y-6">
               <div className="card">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">英文原文</h2>
-                <div className="prose prose-gray max-w-none mb-6">
-                  <p className="text-gray-700 leading-relaxed whitespace-pre-wrap font-mono text-lg">
-                    {text.content}
-                  </p>
+                <div className="mb-6">
+                  <TextHighlighter 
+                    text={text.content}
+                    highlights={highlights}
+                    onHighlightChange={handleHighlightChange}
+                    className="mb-4"
+                  />
                 </div>
                 <div className="border-t pt-4">
                   <p className="text-sm text-gray-600 mb-4">
-                    📖 请仔细阅读上面的英文原文和左侧的中文翻译，理解文本的含义和语法结构。
+                    📖 请仔细阅读上面的英文原文和左侧的中文翻译，理解文本的含义和语法结构。你可以选中文本并添加高亮标记重点内容。
                   </p>
                   <button
                     onClick={handleStartPractice}
