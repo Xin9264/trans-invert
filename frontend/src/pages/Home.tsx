@@ -2,11 +2,12 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { textAPI } from '../utils/api';
 import { Text } from '../types';
-import { BookOpen, Clock, TrendingUp } from 'lucide-react';
+import { BookOpen, Clock, TrendingUp, Download } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [texts, setTexts] = useState<Text[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isExporting, setIsExporting] = useState(false);
 
   useEffect(() => {
     const fetchTexts = async () => {
@@ -33,6 +34,39 @@ const Home: React.FC = () => {
 
     fetchTexts();
   }, []);
+
+  const handleExportMaterials = async () => {
+    if (texts.length === 0) {
+      alert('没有练习材料可以导出');
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const blob = await textAPI.exportMaterials();
+      
+      // 创建下载链接
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      
+      // 生成文件名
+      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
+      link.download = `practice_materials_${timestamp}.json`;
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      
+      alert('练习材料导出成功！');
+    } catch (error) {
+      console.error('导出失败:', error);
+      alert('导出失败，请重试');
+    } finally {
+      setIsExporting(false);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -96,7 +130,23 @@ const Home: React.FC = () => {
 
       {/* Recent Texts */}
       <div className="py-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">练习材料</h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-900">练习材料</h2>
+          {texts.length > 0 && (
+            <button
+              onClick={handleExportMaterials}
+              disabled={isExporting}
+              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+              {isExporting ? (
+                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+              ) : (
+                <Download size={16} />
+              )}
+              <span>{isExporting ? '导出中...' : '导出材料'}</span>
+            </button>
+          )}
+        </div>
         {texts.length === 0 ? (
           <div className="text-center py-12">
             <p className="text-gray-500 mb-4">还没有练习材料</p>

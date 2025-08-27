@@ -28,6 +28,28 @@ class PracticeEvaluationResponse(BaseModel):
     overall_feedback: str = Field(..., description="整体评价")
     is_acceptable: bool = Field(..., description="是否可接受（语法和语义基本正确）")
 
+class PracticeHistoryRecord(BaseModel):
+    """练习历史记录"""
+    id: str = Field(..., description="记录ID")
+    timestamp: str = Field(..., description="练习时间")
+    text_title: str = Field(..., description="文章标题")
+    text_content: str = Field(..., description="英文原文")
+    chinese_translation: str = Field(..., description="中文翻译")
+    user_input: str = Field(..., description="用户输入")
+    ai_evaluation: Dict[str, Any] = Field(..., description="AI评价")
+    score: int = Field(..., ge=0, le=100, description="得分")
+
+class PracticeHistoryExport(BaseModel):
+    """练习历史导出格式"""
+    export_version: str = Field(default="1.0", description="导出格式版本")
+    export_time: str = Field(..., description="导出时间")
+    total_records: int = Field(..., description="记录总数")
+    records: List[PracticeHistoryRecord] = Field(..., description="练习记录列表")
+
+class PracticeHistoryImportRequest(BaseModel):
+    """练习历史导入请求"""
+    data: PracticeHistoryExport = Field(..., description="导入数据")
+
 class APIResponse(BaseModel):
     """统一API响应格式"""
     success: bool = Field(..., description="请求是否成功")

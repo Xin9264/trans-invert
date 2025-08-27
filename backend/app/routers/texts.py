@@ -1,14 +1,18 @@
 """文本处理路由"""
 import uuid
 import json
-from typing import Dict, Any
+from datetime import datetime
+from typing import Dict, Any, List
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, Response
 from app.schemas.text import (
     TextUploadRequest, 
     TextAnalysisResponse, 
     PracticeSubmitRequest,
     PracticeEvaluationResponse,
+    PracticeHistoryRecord,
+    PracticeHistoryExport,
+    PracticeHistoryImportRequest,
     APIResponse
 )
 from app.services.deepseek_service import deepseek_service
@@ -18,6 +22,7 @@ router = APIRouter(prefix="/api/texts", tags=["texts"])
 # 内存存储（简化版，生产环境应使用数据库）
 texts_storage: Dict[str, Dict[str, Any]] = {}
 analyses_storage: Dict[str, Dict[str, Any]] = {}
+practice_history: List[PracticeHistoryRecord] = []
 
 def count_words(text: str) -> int:
     """计算单词数量"""
@@ -93,7 +98,7 @@ async def get_text_analysis(text_id: str):
         if text_id not in analyses_storage:
             return APIResponse(
                 success=False,
-                message="文本分析正在进行中，请稍后再试"
+                message="文本分析正在进行中，稍安勿躁"
             )
         
         analysis = analyses_storage[text_id]
@@ -137,6 +142,27 @@ async def submit_practice(request: PracticeSubmitRequest):
             overall_feedback=evaluation["overall_feedback"],
             is_acceptable=evaluation["is_acceptable"]
         )
+        
+        # 保存练习历史
+        history_record = PracticeHistoryRecord(
+            id=str(uuid.uuid4()),
+            timestamp=datetime.now().isoformat(),
+            text_title=texts_storage[request.text_id]["title"],
+            text_content=original_text,
+            chinese_translation=translation,
+            user_input=request.user_input,
+            ai_evaluation={
+                "score": evaluation["score"],
+                "corrections": evaluation["corrections"],
+                "overall_feedback": evaluation["overall_feedback"],
+                "is_acceptable": evaluation["is_acceptable"]
+            },
+            score=evaluation["score"]
+        )
+        practice_history.append(history_record)
+        
+        # 按时间倒序排列（最新的在前面）
+        practice_history.sort(key=lambda x: x.timestamp, reverse=True)
         
         return APIResponse(
             success=True,
@@ -222,14 +248,38 @@ async def submit_practice_stream(request: PracticeSubmitRequest):
         
         async def generate_stream():
             """生成流式响应"""
+            evaluation_result = None
             try:
                 async for chunk in deepseek_service.evaluate_answer_stream(
                     original_text=original_text,
                     translation=translation,
                     user_input=request.user_input
                 ):
+                    # 保存完整的评估结果
+                    if chunk.get("type") == "complete":
+                        evaluation_result = chunk.get("result")
+                    
                     # 将每个chunk转换为SSE格式
                     yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+                
+                # 在流式响应完成后保存历史记录
+                if evaluation_result:
+                    history_record = PracticeHistoryRecord(
+                        id=str(uuid.uuid4()),
+                        timestamp=datetime.now().isoformat(),
+                        text_title=texts_storage[request.text_id]["title"],
+                        text_content=original_text,
+                        chinese_translation=translation,
+                        user_input=request.user_input,
+                        ai_evaluation=evaluation_result,
+                        score=evaluation_result["score"]
+                    )
+                    practice_history.append(history_record)
+                    
+                    # 按时间倒序排列（最新的在前面）
+                    practice_history.sort(key=lambda x: x.timestamp, reverse=True)
+                    
+                    print(f"✅ 流式练习记录已保存: {history_record.id}, 得分: {history_record.score}")
                 
                 # 发送结束标记
                 yield "data: [DONE]\n\n"
@@ -258,3 +308,127 @@ async def submit_practice_stream(request: PracticeSubmitRequest):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"提交练习失败: {str(e)}")
+
+@router.get("/practice/history", response_model=APIResponse)
+async def get_practice_history():
+    """获取练习历史记录"""
+    try:
+        return APIResponse(
+            success=True,
+            data=practice_history,
+            message=f"获取到 {len(practice_history)} 条历史记录"
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取历史记录失败: {str(e)}")
+
+@router.get("/practice/history/export")
+async def export_practice_history():
+    """导出练习历史为JSON文件"""
+    try:
+        export_data = PracticeHistoryExport(
+            export_time=datetime.now().isoformat(),
+            total_records=len(practice_history),
+            records=practice_history
+        )
+        
+        # 生成JSON内容
+        json_content = export_data.model_dump_json(indent=2)
+        
+        # 生成文件名
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"practice_history_{timestamp}.json"
+        
+        return Response(
+            content=json_content,
+            media_type="application/json",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "Content-Type": "application/json; charset=utf-8"
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"导出历史记录失败: {str(e)}")
+
+@router.post("/practice/history/import", response_model=APIResponse)
+async def import_practice_history(request: PracticeHistoryImportRequest):
+    """导入练习历史"""
+    try:
+        global practice_history
+        
+        imported_records = request.data.records
+        
+        # 验证导入数据
+        if not imported_records:
+            raise HTTPException(status_code=400, detail="导入数据为空")
+        
+        # 合并历史记录，避免重复
+        existing_ids = {record.id for record in practice_history}
+        new_records = [record for record in imported_records if record.id not in existing_ids]
+        
+        # 添加新记录
+        practice_history.extend(new_records)
+        
+        # 按时间倒序排列
+        practice_history.sort(key=lambda x: x.timestamp, reverse=True)
+        
+        return APIResponse(
+            success=True,
+            data={
+                "imported_count": len(new_records),
+                "total_count": len(practice_history),
+                "duplicate_count": len(imported_records) - len(new_records)
+            },
+            message=f"成功导入 {len(new_records)} 条新记录，跳过 {len(imported_records) - len(new_records)} 条重复记录"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"导入历史记录失败: {str(e)}")
+
+@router.get("/materials/export")
+async def export_practice_materials():
+    """导出所有练习材料为JSON文件"""
+    try:
+        materials = []
+        
+        for text_id, text_info in texts_storage.items():
+            # 获取对应的分析结果
+            analysis = analyses_storage.get(text_id)
+            
+            material = {
+                "text_id": text_id,
+                "title": text_info["title"],
+                "content": text_info["content"],
+                "word_count": text_info["word_count"],
+                "created_at": text_info["created_at"],
+                "analysis": analysis if analysis else None
+            }
+            materials.append(material)
+        
+        export_data = {
+            "export_version": "1.0",
+            "export_time": datetime.now().isoformat(),
+            "total_materials": len(materials),
+            "materials": materials
+        }
+        
+        # 生成JSON内容
+        json_content = json.dumps(export_data, ensure_ascii=False, indent=2)
+        
+        # 生成文件名
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"practice_materials_{timestamp}.json"
+        
+        return Response(
+            content=json_content,
+            media_type="application/json",
+            headers={
+                "Content-Disposition": f"attachment; filename={filename}",
+                "Content-Type": "application/json; charset=utf-8"
+            }
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"导出练习材料失败: {str(e)}")

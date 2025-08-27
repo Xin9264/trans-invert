@@ -61,6 +61,33 @@ export interface PracticeEvaluation {
   is_acceptable: boolean;
 }
 
+export interface PracticeHistoryRecord {
+  id: string;
+  timestamp: string;
+  text_title: string;
+  text_content: string;
+  chinese_translation: string;
+  user_input: string;
+  ai_evaluation: {
+    score: number;
+    corrections: Array<{
+      original: string;
+      suggestion: string;
+      reason: string;
+    }>;
+    overall_feedback: string;
+    is_acceptable: boolean;
+  };
+  score: number;
+}
+
+export interface PracticeHistoryExport {
+  export_version: string;
+  export_time: string;
+  total_records: number;
+  records: PracticeHistoryRecord[];
+}
+
 export const textAPI = {
   // 上传文本
   upload: async (request: TextUploadRequest): Promise<APIResponse<{ text_id: string; word_count: number }>> => {
@@ -84,6 +111,14 @@ export const textAPI = {
   getAll: async (): Promise<APIResponse<any[]>> => {
     const response = await api.get('/api/texts/');
     return response;
+  },
+
+  // 导出练习材料
+  exportMaterials: async (): Promise<Blob> => {
+    const response = await api.get('/api/texts/materials/export', {
+      responseType: 'blob'
+    });
+    return response as unknown as Blob;
   }
 };
 
@@ -91,6 +126,26 @@ export const practiceAPI = {
   // 提交练习答案
   submit: async (request: PracticeSubmitRequest): Promise<APIResponse<PracticeEvaluation>> => {
     const response = await api.post('/api/texts/practice/submit', request);
+    return response;
+  },
+
+  // 获取练习历史
+  getHistory: async (): Promise<APIResponse<PracticeHistoryRecord[]>> => {
+    const response = await api.get('/api/texts/practice/history');
+    return response;
+  },
+
+  // 导出练习历史
+  exportHistory: async (): Promise<Blob> => {
+    const response = await api.get('/api/texts/practice/history/export', {
+      responseType: 'blob'
+    });
+    return response as unknown as Blob;
+  },
+
+  // 导入练习历史
+  importHistory: async (data: PracticeHistoryExport): Promise<APIResponse<any>> => {
+    const response = await api.post('/api/texts/practice/history/import', { data });
     return response;
   },
 
