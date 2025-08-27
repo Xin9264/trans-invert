@@ -88,6 +88,27 @@ async def analyze_text_background(text_id: str, content: str):
             "word_count": count_words(content)
         }
 
+async def re_analyze_imported_text(text_id: str, content: str, existing_translation: str):
+    """重新分析从历史记录导入的文本"""
+    try:
+        analysis_result = await deepseek_service.analyze_text(content)
+        
+        # 更新分析结果，但保留已有的翻译（来自历史记录）
+        analyses_storage[text_id] = {
+            "text_id": text_id,
+            "translation": existing_translation,  # 保留历史记录中的翻译
+            "grammar_points": analysis_result["grammar_points"],
+            "difficulty": analysis_result["difficulty"],
+            "key_points": analysis_result["key_points"],
+            "word_count": count_words(content)
+        }
+        
+        print(f"✅ 导入文本 {text_id} 重新分析完成")
+        
+    except Exception as e:
+        print(f"❌ 导入文本 {text_id} 重新分析失败: {str(e)}")
+        # 保持原有的简化分析结果
+
 @router.get("/{text_id}/analysis", response_model=APIResponse)
 async def get_text_analysis(text_id: str):
     """获取文本分析结果"""
@@ -351,10 +372,10 @@ async def export_practice_history():
         raise HTTPException(status_code=500, detail=f"导出历史记录失败: {str(e)}")
 
 @router.post("/practice/history/import", response_model=APIResponse)
-async def import_practice_history(request: PracticeHistoryImportRequest):
-    """导入练习历史"""
+async def import_practice_history(request: PracticeHistoryImportRequest, background_tasks: BackgroundTasks):
+    """导入练习历史并同步添加对应的练习材料"""
     try:
-        global practice_history
+        global practice_history, texts_storage, analyses_storage
         
         imported_records = request.data.records
         
@@ -372,14 +393,64 @@ async def import_practice_history(request: PracticeHistoryImportRequest):
         # 按时间倒序排列
         practice_history.sort(key=lambda x: x.timestamp, reverse=True)
         
+        # 从历史记录中提取练习材料并添加到材料库
+        new_materials_count = 0
+        existing_materials_count = 0
+        
+        for record in new_records:
+            # 检查是否已存在相同内容的材料（通过内容匹配）
+            material_exists = False
+            for existing_text_id, existing_text in texts_storage.items():
+                if existing_text["content"].strip() == record.text_content.strip():
+                    material_exists = True
+                    break
+            
+            if not material_exists:
+                # 生成新的文本ID
+                text_id = str(uuid.uuid4())
+                
+                # 添加到练习材料库
+                texts_storage[text_id] = {
+                    "id": text_id,
+                    "title": record.text_title,
+                    "content": record.text_content,
+                    "word_count": count_words(record.text_content),
+                    "created_at": record.timestamp  # 使用历史记录的时间
+                }
+                
+                # 添加对应的分析结果（先使用历史记录中的信息）
+                analyses_storage[text_id] = {
+                    "text_id": text_id,
+                    "translation": record.chinese_translation,
+                    "grammar_points": ["从历史记录导入", "可进行练习"],  # 简化的语法要点
+                    "difficulty": 3,  # 默认难度
+                    "key_points": ["从历史记录导入"],  # 简化的关键词
+                    "word_count": count_words(record.text_content)
+                }
+                
+                # 后台重新分析文本以获得更完整的分析结果
+                background_tasks.add_task(
+                    re_analyze_imported_text, 
+                    text_id, 
+                    record.text_content, 
+                    record.chinese_translation
+                )
+                
+                new_materials_count += 1
+                print(f"✅ 从历史记录导入新练习材料: {record.text_title} (ID: {text_id})")
+            else:
+                existing_materials_count += 1
+        
         return APIResponse(
             success=True,
             data={
                 "imported_count": len(new_records),
                 "total_count": len(practice_history),
-                "duplicate_count": len(imported_records) - len(new_records)
+                "duplicate_count": len(imported_records) - len(new_records),
+                "new_materials_count": new_materials_count,
+                "existing_materials_count": existing_materials_count
             },
-            message=f"成功导入 {len(new_records)} 条新记录，跳过 {len(imported_records) - len(new_records)} 条重复记录"
+            message=f"成功导入 {len(new_records)} 条历史记录，跳过 {len(imported_records) - len(new_records)} 条重复记录。新增 {new_materials_count} 个练习材料，{existing_materials_count} 个材料已存在。"
         )
         
     except HTTPException:
