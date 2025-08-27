@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Palette, X } from 'lucide-react';
+import { X } from 'lucide-react';
 
 interface HighlightData {
   id: string;
@@ -55,7 +55,6 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
     const textElement = textRef.current;
     if (!textElement) return;
 
-    const fullText = textElement.textContent || '';
     const beforeRange = document.createRange();
     beforeRange.setStart(textElement, 0);
     beforeRange.setEnd(range.startContainer, range.startOffset);
@@ -233,27 +232,18 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
             </div>
           ) : (
             // 显示颜色选择选项
-            <div className="flex flex-col items-center space-y-3">
-              <div className="flex items-center space-x-2 text-sm text-gray-600">
-                <Palette size={16} />
-                <span>选择高亮颜色</span>
-              </div>
-              <div className="flex space-x-2">
-                {HIGHLIGHT_COLORS.map((color) => (
-                  <button
-                    key={color.value}
-                    onClick={() => addHighlight(color.value)}
-                    className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors flex items-center justify-center"
-                    style={{ backgroundColor: color.value }}
-                    title={`${color.name} - ${color.label}`}
-                  >
-                    <span className="sr-only">{color.name}</span>
-                  </button>
-                ))}
-              </div>
-              <div className="text-xs text-gray-500 text-center max-w-48">
-                选择颜色为 "{selectedRange?.text}" 添加高亮
-              </div>
+            <div className="flex space-x-2 p-2">
+              {HIGHLIGHT_COLORS.map((color) => (
+                <button
+                  key={color.value}
+                  onClick={() => addHighlight(color.value)}
+                  className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors flex items-center justify-center"
+                  style={{ backgroundColor: color.value }}
+                  title={`${color.name} - ${color.label}`}
+                >
+                  <span className="sr-only">{color.name}</span>
+                </button>
+              ))}
             </div>
           )}
         </div>
