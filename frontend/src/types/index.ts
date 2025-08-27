@@ -15,13 +15,16 @@ export interface Text {
   createdAt: string;
 }
 
+export interface DifficultWord {
+  word: string;
+  meaning: string;
+}
+
 export interface TextAnalysis {
   id: string;
   textId: string;
-  grammarAnalysis: {
-    points: string[];
-    difficulty: number;
-  };
+  difficultWords: DifficultWord[];
+  difficulty: number;
   translation: string;
   keyPoints: string[];
   createdAt: string;

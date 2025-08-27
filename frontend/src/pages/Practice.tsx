@@ -71,10 +71,8 @@ const Practice: React.FC = () => {
           setAnalysis({
             id: analysisData.text_id,
             textId: analysisData.text_id,
-            grammarAnalysis: {
-              points: analysisData.grammar_points,
-              difficulty: analysisData.difficulty
-            },
+            difficultWords: analysisData.difficult_words || [],
+            difficulty: analysisData.difficulty,
             translation: analysisData.translation,
             keyPoints: analysisData.key_points,
             createdAt: new Date().toISOString()
@@ -278,18 +276,29 @@ const Practice: React.FC = () => {
             </div>
           </div>
 
-          {/* 语法要点 */}
-          {analysis.grammarAnalysis?.points && (
+          {/* 难词解释 */}
+          {analysis.difficultWords && analysis.difficultWords.length > 0 && (
             <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">语法要点</h3>
-              <ul className="space-y-2">
-                {analysis.grammarAnalysis.points.map((point: string, index: number) => (
-                  <li key={index} className="flex items-start space-x-2">
-                    <span className="w-2 h-2 bg-primary-600 rounded-full mt-2 flex-shrink-0"></span>
-                    <span className="text-gray-700">{point}</span>
-                  </li>
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">难词解释</h3>
+              <div className="space-y-3">
+                {analysis.difficultWords.map((word, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="flex-shrink-0">
+                      <span className="inline-flex items-center justify-center w-6 h-6 bg-primary-600 text-white text-xs font-medium rounded-full">
+                        {index + 1}
+                      </span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-gray-900">
+                        {word.word}
+                      </div>
+                      <div className="text-sm text-gray-600 mt-1">
+                        {word.meaning}
+                      </div>
+                    </div>
+                  </div>
                 ))}
-              </ul>
+              </div>
             </div>
           )}
 

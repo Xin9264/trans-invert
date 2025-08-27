@@ -91,15 +91,15 @@ class DeepSeekService:
             result = self._extract_json_from_response(response)
             
             # 验证必要字段
-            required_fields = ["translation", "grammar_points", "difficulty", "key_points"]
+            required_fields = ["translation", "difficult_words", "difficulty", "key_points"]
             for field in required_fields:
                 if field not in result:
                     raise Exception(f"AI响应缺少必要字段: {field}")
             
             # 确保数据类型正确
             result["difficulty"] = int(result["difficulty"])
-            if not isinstance(result["grammar_points"], list):
-                result["grammar_points"] = []
+            if not isinstance(result["difficult_words"], list):
+                result["difficult_words"] = []
             if not isinstance(result["key_points"], list):
                 result["key_points"] = []
             
@@ -109,7 +109,7 @@ class DeepSeekService:
             # 返回默认结果
             return {
                 "translation": f"文本分析失败: {str(e)}",
-                "grammar_points": ["分析失败，请稍后重试"],
+                "difficult_words": [{"word": "分析失败", "meaning": "请稍后重试"}],
                 "difficulty": 3,
                 "key_points": ["分析失败"]
             }

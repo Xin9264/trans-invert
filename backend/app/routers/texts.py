@@ -68,7 +68,7 @@ async def analyze_text_background(text_id: str, content: str):
         analyses_storage[text_id] = {
             "text_id": text_id,
             "translation": analysis_result["translation"],
-            "grammar_points": analysis_result["grammar_points"],
+            "difficult_words": analysis_result["difficult_words"],
             "difficulty": analysis_result["difficulty"],
             "key_points": analysis_result["key_points"],
             "word_count": count_words(content)
@@ -82,7 +82,7 @@ async def analyze_text_background(text_id: str, content: str):
         analyses_storage[text_id] = {
             "text_id": text_id,
             "translation": "分析失败，请重试",
-            "grammar_points": ["分析失败"],
+            "difficult_words": [{"word": "分析失败", "meaning": "请稍后重试"}],
             "difficulty": 3,
             "key_points": ["分析失败"],
             "word_count": count_words(content)
@@ -97,7 +97,7 @@ async def re_analyze_imported_text(text_id: str, content: str, existing_translat
         analyses_storage[text_id] = {
             "text_id": text_id,
             "translation": existing_translation,  # 保留历史记录中的翻译
-            "grammar_points": analysis_result["grammar_points"],
+            "difficult_words": analysis_result["difficult_words"],
             "difficulty": analysis_result["difficulty"],
             "key_points": analysis_result["key_points"],
             "word_count": count_words(content)
@@ -422,7 +422,7 @@ async def import_practice_history(request: PracticeHistoryImportRequest, backgro
                 analyses_storage[text_id] = {
                     "text_id": text_id,
                     "translation": record.chinese_translation,
-                    "grammar_points": ["从历史记录导入", "可进行练习"],  # 简化的语法要点
+                    "difficult_words": [{"word": "导入", "meaning": "从历史记录导入"}],  # 简化的难词
                     "difficulty": 3,  # 默认难度
                     "key_points": ["从历史记录导入"],  # 简化的关键词
                     "word_count": count_words(record.text_content)

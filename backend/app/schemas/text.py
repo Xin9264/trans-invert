@@ -11,7 +11,7 @@ class TextAnalysisResponse(BaseModel):
     """AI文本分析响应"""
     text_id: str = Field(..., description="文本唯一标识")
     translation: str = Field(..., description="中文翻译")
-    grammar_points: List[str] = Field(..., description="语法要点")
+    difficult_words: List[Dict[str, str]] = Field(..., description="难词列表，包含word和meaning")
     difficulty: int = Field(..., ge=1, le=5, description="难度等级(1-5)")
     key_points: List[str] = Field(..., description="关键词汇或短语")
     word_count: int = Field(..., description="单词数量")

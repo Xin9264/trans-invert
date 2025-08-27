@@ -36,10 +36,15 @@ export interface TextUploadRequest {
   title?: string;
 }
 
+export interface DifficultWord {
+  word: string;
+  meaning: string;
+}
+
 export interface TextAnalysis {
   text_id: string;
   translation: string;
-  grammar_points: string[];
+  difficult_words: DifficultWord[];
   difficulty: number;
   key_points: string[];
   word_count: number;
