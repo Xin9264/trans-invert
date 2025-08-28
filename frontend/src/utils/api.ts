@@ -1,8 +1,8 @@
 import axios from 'axios';
 
-// 在生产环境中使用相对路径，开发环境使用完整URL
+// 优先使用环境变量，然后根据环境选择默认值
 const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 
-  ((import.meta as any).env?.MODE === 'production' ? '' : 'http://localhost:8000');
+  ((import.meta as any).env?.MODE === 'production' ? 'https://trans-invert-production.up.railway.app' : 'http://localhost:8000');
 
 // 本地存储管理
 export const localStorageManager = {

@@ -16,11 +16,11 @@ app = FastAPI(
     debug=settings.DEBUG
 )
 
-# 配置CORS
+# 配置CORS - 开发和部署阶段允许所有源
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.ALLOWED_ORIGINS,
-    allow_credentials=True,
+    allow_origins=["*"],  # 允许所有源，生产环境应该配置具体域名
+    allow_credentials=False,  # 使用 * 时必须设为 False
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )

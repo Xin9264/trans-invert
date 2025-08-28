@@ -35,7 +35,7 @@ class Settings(BaseModel):
     OPENAI_MODEL: str = os.getenv("OPENAI_MODEL", "gpt-4.1")
     
     # CORS 配置
-    ALLOWED_ORIGINS: List[str] = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+    ALLOWED_ORIGINS: List[str] = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,https://trans-invert-6msn9n32f-wang-xins-projects-60bfd166.vercel.app,https://*.vercel.app").split(",")
     
     # 速率限制配置
     ENABLE_RATE_LIMIT: bool = os.getenv("ENABLE_RATE_LIMIT", "false").lower() == "true"
