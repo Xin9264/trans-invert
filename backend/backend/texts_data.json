@@ -6,21 +6,39 @@
       "title": "puma 1",
       "content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.",
       "word_count": 64,
-      "created_at": "now"
+      "created_at": "2025-08-27T00:00:00.000000",
+      "last_opened": "2025-08-28T06:43:08.228350"
     },
     "f19bc656-6302-4e72-87b5-66ced6fbe7a9": {
       "id": "f19bc656-6302-4e72-87b5-66ced6fbe7a9",
       "title": "puma 2",
       "content": "The hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
       "word_count": 209,
-      "created_at": "now"
+      "created_at": "2025-08-27T00:00:00.000000",
+      "last_opened": "2025-08-28T06:50:48.404585"
     },
     "de43a07d-0826-44df-ac2b-29602a0b93a5": {
       "id": "de43a07d-0826-44df-ac2b-29602a0b93a5",
       "title": "AI dopamine1",
       "content": "There is a dopamine cycle in doing AI research that is pretty interesting.\n\nEvery day you wake up and you think about what experiment to run. You think thing X matters so you decide to improve it or ablate it. Then you write the code and pay some compute to find out the answer. Then you get dopamine or confusion depending on whether the result matched expectations.",
       "word_count": 67,
-      "created_at": "now"
+      "created_at": "2025-08-27T00:00:00.000000"
+    },
+    "8d189f86-b836-4af6-88c1-7a2488d30450": {
+      "id": "8d189f86-b836-4af6-88c1-7a2488d30450",
+      "title": "AI dopamine2",
+      "content": "For experiments that are small scale you can get several reward signals quickly and develop your intuition. Other times you make a big bet that is non-obvious or controversial and go through a period of hard work, dopamine starvation, and uncertainty to do it. If it works out it's a immense high but if it fails it's natural to be consumed by helplessness.",
+      "word_count": 63,
+      "created_at": "2025-08-27T00:00:00.000000",
+      "last_opened": "2025-08-28T06:30:02.522477"
+    },
+    "831fbf7f-f0ce-4926-afa1-f6ad2e10ab76": {
+      "id": "831fbf7f-f0ce-4926-afa1-f6ad2e10ab76",
+      "title": "AI dopamine3",
+      "content": "Sometimes there is an element of ego. You may believe in X or not, and keep working to find evidence to support it or excuses for why it doesn't apply in that experiment. There can be an underlying urge to either to prove your abilities or to show that you’re still relevant in the quickly changing landscape. Science is supposedly objective but the reality is that there is a huge social aspect to it, and respect of peers is an valuable reward signal to seek.\n\nThat’s how I feel about it, at least. Every day is a small journey further into the jungle of human knowledge. Not a bad life at all—one i’m willing to do for a long time.",
+      "word_count": 120,
+      "created_at": "2025-08-28T06:50:38.248051",
+      "last_opened": "2025-08-28T07:28:25.501964"
     }
   }
 }

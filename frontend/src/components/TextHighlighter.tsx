@@ -34,23 +34,78 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
   const [colorPickerPosition, setColorPickerPosition] = useState({ x: 0, y: 0 });
   const [activeHighlights, setActiveHighlights] = useState<HighlightData[]>(highlights);
   const textRef = useRef<HTMLDivElement>(null);
+  const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     setActiveHighlights(highlights);
   }, [highlights]);
 
-  const handleTextSelection = () => {
-    const selection = window.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-
-    const range = selection.getRangeAt(0);
-    const selectedText = selection.toString().trim();
-    
-    if (selectedText.length === 0) {
-      setShowColorPicker(false);
-      return;
+  const handleSelectionChange = () => {
+    // 清除之前的延迟
+    if (selectionTimeoutRef.current) {
+      clearTimeout(selectionTimeoutRef.current);
     }
 
+    // 防抖处理，避免选择过程中的抖动
+    selectionTimeoutRef.current = setTimeout(() => {
+      const selection = window.getSelection();
+      if (!selection || selection.rangeCount === 0) {
+        setShowColorPicker(false);
+        return;
+      }
+
+      const range = selection.getRangeAt(0);
+      const selectedText = selection.toString().trim();
+      
+      // 忽略空选择和折叠的选择
+      if (selectedText.length === 0 || range.collapsed) {
+        setShowColorPicker(false);
+        return;
+      }
+
+      // 确保选择在我们的文本容器内
+      const textElement = textRef.current;
+      if (!textElement || !textElement.contains(range.commonAncestorContainer)) {
+        setShowColorPicker(false);
+        return;
+      }
+
+      handleTextSelection(range, selectedText);
+    }, 50); // 50ms 防抖延迟
+  };
+
+  const calculateSmartPosition = (range: Range) => {
+    const rects = range.getClientRects();
+    if (rects.length === 0) return { x: 0, y: 0 };
+
+    // 使用第一个矩形作为基准
+    const rect = rects[0];
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // 计算理想位置（选中文本上方中央）
+    let x = rect.left + rect.width / 2;
+    let y = rect.top - 10;
+    
+    // 防止溢出右边缘
+    if (x + 150 > viewportWidth) { // 假设弹窗宽度约 300px
+      x = viewportWidth - 160;
+    }
+    
+    // 防止溢出左边缘
+    if (x < 10) {
+      x = 10;
+    }
+    
+    // 防止溢出顶部
+    if (y < 10) {
+      y = rect.bottom + 10; // 改为显示在选中文本下方
+    }
+    
+    return { x, y };
+  };
+
+  const handleTextSelection = (range: Range, selectedText: string) => {
     // 计算选中文本在整个文本中的位置
     const textElement = textRef.current;
     if (!textElement) return;
@@ -66,26 +121,30 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
       startOffset >= h.start && endOffset <= h.end
     );
 
+    // 计算智能位置
+    const position = calculateSmartPosition(range);
+    setColorPickerPosition(position);
+
     if (clickedHighlight) {
-      // 显示取消高亮选项
-      const rect = range.getBoundingClientRect();
-      setColorPickerPosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top - 10
-      });
       setSelectedRange({ start: clickedHighlight.start, end: clickedHighlight.end, text: clickedHighlight.text });
-      setShowColorPicker(true);
     } else {
-      // 显示颜色选择器
-      const rect = range.getBoundingClientRect();
-      setColorPickerPosition({
-        x: rect.left + rect.width / 2,
-        y: rect.top - 10
-      });
       setSelectedRange({ start: startOffset, end: endOffset, text: selectedText });
-      setShowColorPicker(true);
     }
+    
+    setShowColorPicker(true);
   };
+
+  // 监听全局 selectionchange 事件
+  useEffect(() => {
+    document.addEventListener('selectionchange', handleSelectionChange);
+    
+    return () => {
+      document.removeEventListener('selectionchange', handleSelectionChange);
+      if (selectionTimeoutRef.current) {
+        clearTimeout(selectionTimeoutRef.current);
+      }
+    };
+  }, [activeHighlights]);
 
   const addHighlight = (color: string) => {
     if (!selectedRange) return;
@@ -131,68 +190,92 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
       return text;
     }
 
-    // 按位置排序高亮，避免重叠问题
+    // 按位置排序高亮
     const sortedHighlights = [...activeHighlights].sort((a, b) => a.start - b.start);
     
-    // 合并重叠的高亮区域
+    // 合并相同颜色的相邻/重叠区域
     const mergedHighlights = [];
     for (const highlight of sortedHighlights) {
       const lastMerged = mergedHighlights[mergedHighlights.length - 1];
-      if (lastMerged && highlight.start <= lastMerged.end) {
-        // 有重叠，扩展现有高亮区域
+      
+      if (lastMerged && 
+          lastMerged.color === highlight.color &&
+          highlight.start <= lastMerged.end) {
         lastMerged.end = Math.max(lastMerged.end, highlight.end);
-        lastMerged.colors = lastMerged.colors || [lastMerged.color];
-        if (!lastMerged.colors.includes(highlight.color)) {
-          lastMerged.colors.push(highlight.color);
-        }
       } else {
-        // 无重叠，添加新的高亮区域
         mergedHighlights.push({ ...highlight });
       }
     }
 
-    // 使用 React.Fragment 避免额外的包装元素
-    const parts = [];
-    let lastIndex = 0;
-
-    mergedHighlights.forEach((highlight, index) => {
-      // 添加高亮前的普通文本
-      if (highlight.start > lastIndex) {
-        parts.push(text.slice(lastIndex, highlight.start));
-      }
-
-      // 添加高亮文本，使用mark元素提供更好的语义
-      const backgroundColor = highlight.colors && highlight.colors.length > 1
-        ? highlight.colors[0] // 如果有多个颜色，使用第一个作为主色
-        : highlight.color;
-      
-      const highlightStyle = {
-        backgroundColor,
-        padding: '1px 2px',
-        borderRadius: '2px',
-        border: 'none',
-        color: 'inherit',
-        boxShadow: highlight.colors && highlight.colors.length > 1 
-          ? `inset 0 0 0 1px ${highlight.colors[1]}` // 第二个颜色作为边框
-          : 'none'
-      };
-
-      parts.push(
-        <mark
-          key={`highlight_${index}`}
-          style={highlightStyle}
-          data-highlight-id={highlight.id}
-        >
-          {text.slice(highlight.start, highlight.end)}
-        </mark>
-      );
-
-      lastIndex = highlight.end;
+    // 创建所有断点位置
+    const breakpoints = new Set([0, text.length]);
+    mergedHighlights.forEach(h => {
+      breakpoints.add(h.start);
+      breakpoints.add(h.end);
     });
-
-    // 添加最后剩余的文本
-    if (lastIndex < text.length) {
-      parts.push(text.slice(lastIndex));
+    
+    const sortedBreakpoints = Array.from(breakpoints).sort((a, b) => a - b);
+    
+    // 为每个区间找到应用的高亮
+    const parts = [];
+    for (let i = 0; i < sortedBreakpoints.length - 1; i++) {
+      const start = sortedBreakpoints[i];
+      const end = sortedBreakpoints[i + 1];
+      
+      if (start >= end) continue;
+      
+      // 找到覆盖此区间的高亮
+      const applicableHighlights = mergedHighlights.filter(h => 
+        h.start <= start && h.end >= end
+      );
+      
+      const textSlice = text.slice(start, end);
+      
+      if (applicableHighlights.length === 0) {
+        // 无高亮的普通文本
+        parts.push(textSlice);
+      } else if (applicableHighlights.length === 1) {
+        // 单一高亮
+        const highlight = applicableHighlights[0];
+        parts.push(
+          <mark
+            key={`highlight_${start}_${end}`}
+            style={{
+              backgroundColor: highlight.color,
+              padding: '1px 2px',
+              borderRadius: '2px',
+              border: 'none',
+              color: 'inherit'
+            }}
+            data-highlight-id={highlight.id}
+          >
+            {textSlice}
+          </mark>
+        );
+      } else {
+        // 多重高亮重叠
+        const primaryHighlight = applicableHighlights[0];
+        const otherColors = applicableHighlights.slice(1).map(h => h.color);
+        
+        parts.push(
+          <mark
+            key={`highlight_${start}_${end}`}
+            style={{
+              backgroundColor: primaryHighlight.color,
+              padding: '1px 2px',
+              borderRadius: '2px',
+              border: `1px solid ${otherColors[0]}`,
+              color: 'inherit',
+              boxShadow: otherColors.length > 1 
+                ? `inset 0 0 0 1px ${otherColors[1]}` 
+                : 'none'
+            }}
+            data-highlight-id={primaryHighlight.id}
+          >
+            {textSlice}
+          </mark>
+        );
+      }
     }
 
     return parts;
@@ -223,8 +306,6 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
       <div
         ref={textRef}
         className="select-text cursor-text leading-relaxed font-mono text-lg p-4 bg-white rounded-lg border-2 border-gray-200"
-        onMouseUp={handleTextSelection}
-        onTouchEnd={handleTextSelection}
       >
         {renderHighlightedText()}
       </div>
@@ -236,7 +317,9 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
           style={{
             left: `${colorPickerPosition.x}px`,
             top: `${colorPickerPosition.y}px`,
-            transform: 'translate(-50%, -100%)'
+            transform: 'translate(-50%, -100%)',
+            transition: 'opacity 150ms ease, transform 150ms ease',
+            opacity: showColorPicker ? 1 : 0,
           }}
         >
           {isClickedHighlight ? (
