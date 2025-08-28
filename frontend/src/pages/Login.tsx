@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authAPI } from '../utils/api';
-import { useAppStore } from '../store';
+// import { useAppStore } from '../store';
 import { LogIn } from 'lucide-react';
 
 const Login: React.FC = () => {
@@ -10,7 +9,7 @@ const Login: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { setUser } = useAppStore();
+  // const { setUser } = useAppStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -19,14 +18,8 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
-      const response = await authAPI.login({ email, password });
-      if (response.success) {
-        localStorage.setItem('token', response.data.token);
-        setUser(response.data.user);
-        navigate('/');
-      } else {
-        setError(response.message || '登录失败');
-      }
+      // Temporarily disable authentication - redirect directly
+      navigate('/');
     } catch (error: any) {
       setError(error.response?.data?.message || '登录失败，请重试');
     } finally {

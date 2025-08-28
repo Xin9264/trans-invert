@@ -63,7 +63,11 @@ api.interceptors.response.use(
     if (response.data && typeof response.data.success === 'boolean') {
       return response.data;
     }
-    return response.data;
+    // 如果不是统一格式，包装成统一格式
+    return {
+      success: true,
+      data: response.data
+    };
   },
   (error) => {
     console.error('API Error:', error);
@@ -143,25 +147,25 @@ export interface PracticeHistoryExport {
 export const textAPI = {
   // 上传文本
   upload: async (request: TextUploadRequest): Promise<APIResponse<{ text_id: string; word_count: number }>> => {
-    const response = await api.post('/api/texts/upload', request);
+    const response = await api.post('/api/texts/upload', request) as APIResponse<{ text_id: string; word_count: number }>;
     return response;
   },
 
   // 获取文本分析结果
   getAnalysis: async (textId: string): Promise<APIResponse<TextAnalysis>> => {
-    const response = await api.get(`/api/texts/${textId}/analysis`);
+    const response = await api.get(`/api/texts/${textId}/analysis`) as APIResponse<TextAnalysis>;
     return response;
   },
 
   // 获取文本信息
   getById: async (textId: string, includeContent: boolean = false): Promise<APIResponse<any>> => {
-    const response = await api.get(`/api/texts/${textId}?include_content=${includeContent}`);
+    const response = await api.get(`/api/texts/${textId}?include_content=${includeContent}`) as APIResponse<any>;
     return response;
   },
 
   // 获取所有文本列表
   getAll: async (): Promise<APIResponse<any[]>> => {
-    const response = await api.get('/api/texts/');
+    const response = await api.get('/api/texts/') as APIResponse<any[]>;
     return response;
   },
 
@@ -175,13 +179,13 @@ export const textAPI = {
 
   // 导入练习材料
   importMaterials: async (data: any): Promise<APIResponse<any>> => {
-    const response = await api.post('/api/texts/materials/import', data);
+    const response = await api.post('/api/texts/materials/import', data) as APIResponse<any>;
     return response;
   },
 
   // 删除练习材料
   deleteMaterial: async (textId: string): Promise<APIResponse<any>> => {
-    const response = await api.delete(`/api/texts/${textId}`);
+    const response = await api.delete(`/api/texts/${textId}`) as APIResponse<any>;
     return response;
   }
 };
@@ -189,19 +193,19 @@ export const textAPI = {
 export const practiceAPI = {
   // 提交练习答案
   submit: async (request: PracticeSubmitRequest): Promise<APIResponse<PracticeEvaluation>> => {
-    const response = await api.post('/api/texts/practice/submit', request);
+    const response = await api.post('/api/texts/practice/submit', request) as APIResponse<PracticeEvaluation>;
     return response;
   },
 
   // 获取练习历史
   getHistory: async (): Promise<APIResponse<PracticeHistoryRecord[]>> => {
-    const response = await api.get('/api/texts/practice/history');
+    const response = await api.get('/api/texts/practice/history') as APIResponse<PracticeHistoryRecord[]>;
     return response;
   },
 
   // 获取特定文本的练习历史
   getTextHistory: async (textId: string): Promise<APIResponse<PracticeHistoryRecord[]>> => {
-    const response = await api.get(`/api/texts/${textId}/practice/history`);
+    const response = await api.get(`/api/texts/${textId}/practice/history`) as APIResponse<PracticeHistoryRecord[]>;
     return response;
   },
 
@@ -215,7 +219,7 @@ export const practiceAPI = {
 
   // 导入练习历史
   importHistory: async (data: PracticeHistoryExport): Promise<APIResponse<any>> => {
-    const response = await api.post('/api/texts/practice/history/import', { data });
+    const response = await api.post('/api/texts/practice/history/import', { data }) as APIResponse<any>;
     return response;
   },
 
@@ -345,7 +349,7 @@ export const practiceAPI = {
 export const healthAPI = {
   // 健康检查
   check: async (): Promise<APIResponse<any>> => {
-    const response = await api.get('/health');
+    const response = await api.get('/health') as APIResponse<any>;
     return response;
   }
 };

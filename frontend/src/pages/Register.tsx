@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { authAPI } from '../utils/api';
-import { useAppStore } from '../store';
+// import { useAppStore } from '../store';
 import { UserPlus } from 'lucide-react';
 
 const Register: React.FC = () => {
@@ -12,7 +11,7 @@ const Register: React.FC = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const { setUser } = useAppStore();
+  // const { setUser } = useAppStore();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -32,14 +31,8 @@ const Register: React.FC = () => {
     setIsLoading(true);
 
     try {
-      const response = await authAPI.register({ username, email, password });
-      if (response.success) {
-        localStorage.setItem('token', response.data.token);
-        setUser(response.data.user);
-        navigate('/');
-      } else {
-        setError(response.message || '注册失败');
-      }
+      // Temporarily disable authentication - redirect directly
+      navigate('/');
     } catch (error: any) {
       setError(error.response?.data?.message || '注册失败，请重试');
     } finally {
