@@ -28,7 +28,7 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, onConfig
     volcano: {
       name: '火山引擎',
       defaultBaseUrl: 'https://ark.cn-beijing.volces.com/api/v3',
-      defaultModel: 'doubao-seed-1-6-250615',
+      defaultModel: 'doubao-1-5-pro-32k-250115',
       description: '字节跳动旗下的火山引擎AI服务'
     },
     openai: {
@@ -250,11 +250,11 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, onConfig
               API密钥 *
             </label>
             <input
-              type="password"
+              type="text"
               value={apiKey}
               onChange={(e) => setApiKey(e.target.value)}
               placeholder="请输入API密钥"
-              autoComplete="new-password"
+              autoComplete="off"
               data-form-type="other"
               name="api-key-input"
               className="w-full p-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"

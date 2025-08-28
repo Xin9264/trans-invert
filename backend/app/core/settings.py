@@ -27,7 +27,7 @@ class Settings(BaseModel):
     # 火山引擎 API 配置
     ARK_API_KEY: str = os.getenv("ARK_API_KEY", "")
     ARK_BASE_URL: str = os.getenv("ARK_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
-    ARK_MODEL: str = os.getenv("ARK_MODEL", "doubao-seed-1-6-250615")
+    ARK_MODEL: str = os.getenv("ARK_MODEL", "doubao-1-5-pro-32k-250115")
     
     # OpenAI API 配置
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")

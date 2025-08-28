@@ -2,6 +2,27 @@
   "version": "1.0",
   "records": [
     {
+      "id": "10fa0921-9a76-4c7d-b427-7cec325b027a",
+      "timestamp": "2025-08-28T16:59:42.261559",
+      "text_title": "joke",
+      "text_content": "A man walks into a library and whispers, “Excuse me, can I have a burger, fries, and a soda?”\n\nThe librarian looks shocked and says, “Sir, this is a library!”\n\nThe man nods, lowers his voice even more, and whispers, “Sorry… can I have a burger, fries, and a soda?”\n\nThe librarian sighs and replies, “Sir, we don’t serve food here.”\n\nThe man frowns. “Then why do you call it a library? Every time I come here, you people shush me like it’s a five-star restaurant!”\n\nThe librarian whispers back, “Because the menu is books.”",
+      "chinese_translation": "一个男人走进一个图书馆并低声说：“打扰一下，我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员看起来很震惊并说：“先生，这是图书馆！” 那个男人点点头，把声音压得更低，并低声说：“对不起……我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员叹了口气并回答：“先生，我们这里不提供食物。” 那个男人皱起眉头。“那为什么你们叫这里图书馆？每次我来这儿，你们这些人都像五星级餐厅一样让我安静！” 图书管理员低声回答：“因为菜单是书。”",
+      "user_input": "A man walks into a library and whispers, “Excuse me, can I have a burger, fries, and a soda?” The librarian looks shocked and says, “Sir, this is a library!” The man nods, lowers his voice even more, and whispers, “Sorry… can I have a burger, fries, and a soda?” The librarian sighs and replies, “Sir, we don’t serve food here.” The man frowns. “Then why do you call it a library? Every time I come here, you people shush me like it’s a five-star restaurant!” The librarian whispers back, “Because the book is menu.”",
+      "ai_evaluation": {
+        "score": 85,
+        "corrections": [
+          {
+            "original": "Because the book is menu.",
+            "suggestion": "Because the menu is books.",
+            "reason": "原句语序和单复数使用错误，正确表达应该是“菜单是书”，即“the menu is books”，而不是“书是菜单”。"
+          }
+        ],
+        "overall_feedback": "整体表现良好，大部分内容准确无误，基本传达了原文的意思。仅在最后一句存在语法错误，建议仔细检查句子的结构和单复数使用，以提高准确性。",
+        "is_acceptable": true
+      },
+      "score": 85
+    },
+    {
       "id": "95f321ce-026f-4245-ac5c-1edcf352159c",
       "timestamp": "2025-08-28T16:48:26.405946",
       "text_title": "aaa",

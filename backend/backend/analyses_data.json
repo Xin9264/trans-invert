@@ -221,6 +221,41 @@
         "unlock a story"
       ],
       "word_count": 53
+    },
+    "d7429098-85a3-40ec-b5e4-a41f43aef8b3": {
+      "text_id": "d7429098-85a3-40ec-b5e4-a41f43aef8b3",
+      "translation": "一个男人走进一个图书馆并低声说：“打扰一下，我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员看起来很震惊并说：“先生，这是图书馆！” 那个男人点点头，把声音压得更低，并低声说：“对不起……我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员叹了口气并回答：“先生，我们这里不提供食物。” 那个男人皱起眉头。“那为什么你们叫这里图书馆？每次我来这儿，你们这些人都像五星级餐厅一样让我安静！” 图书管理员低声回答：“因为菜单是书。”",
+      "difficult_words": [
+        {
+          "word": "whispers",
+          "meaning": "低声说，耳语"
+        },
+        {
+          "word": "librarian",
+          "meaning": "图书管理员"
+        },
+        {
+          "word": "shocked",
+          "meaning": "震惊的，吃惊的"
+        },
+        {
+          "word": "serve",
+          "meaning": "供应（食物、饮料等）"
+        },
+        {
+          "word": "menu",
+          "meaning": "菜单"
+        }
+      ],
+      "difficulty": 2,
+      "key_points": [
+        "walks into",
+        "Excuse me",
+        "can I have",
+        "serve food",
+        "five-star restaurant"
+      ],
+      "word_count": 95
     }
   }
 }

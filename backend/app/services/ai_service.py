@@ -65,7 +65,7 @@ class AIService:
     def _get_model(self) -> str:
         """获取模型名称"""
         if self.provider == AIProvider.VOLCANO:
-            return os.getenv("ARK_MODEL", "doubao-seed-1-6-250615")
+            return os.getenv("ARK_MODEL", "doubao-1-5-pro-32k-250115")
         elif self.provider == AIProvider.OPENAI:
             return os.getenv("OPENAI_MODEL", "gpt-4.1")
         else:
