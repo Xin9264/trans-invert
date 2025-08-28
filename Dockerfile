@@ -18,9 +18,6 @@ COPY backend/app ./app
 # Create static directory for frontend files (if needed)
 RUN mkdir -p ./static
 
-# Copy frontend static files if they exist
-COPY backend/static ./static
-
 EXPOSE 8000
 
 # Production command (no --reload)

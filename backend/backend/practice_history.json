@@ -2,6 +2,27 @@
   "version": "1.0",
   "records": [
     {
+      "id": "ecddbe98-43d2-4f20-b7b5-8fd10f7feb33",
+      "timestamp": "2025-08-28T19:51:31.641047",
+      "text_title": "joke",
+      "text_content": "A man walks into a library and whispers, “Excuse me, can I have a burger, fries, and a soda?”\n\nThe librarian looks shocked and says, “Sir, this is a library!”\n\nThe man nods, lowers his voice even more, and whispers, “Sorry… can I have a burger, fries, and a soda?”\n\nThe librarian sighs and replies, “Sir, we don’t serve food here.”\n\nThe man frowns. “Then why do you call it a library? Every time I come here, you people shush me like it’s a five-star restaurant!”\n\nThe librarian whispers back, “Because the menu is books.”",
+      "chinese_translation": "一个男人走进一个图书馆并低声说：“打扰一下，我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员看起来很震惊并说：“先生，这是图书馆！” 那个男人点点头，把声音压得更低，并低声说：“对不起……我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员叹了口气并回答：“先生，我们这里不提供食物。” 那个男人皱起眉头。“那为什么你们叫这里图书馆？每次我来这儿，你们这些人都像五星级餐厅一样让我安静！” 图书管理员低声回答：“因为菜单是书。”",
+      "user_input": "A man walks into a library and whispers, “Excuse me, can I have a burger, fries, and a soda?” The librarian looks shocked and says, “Sir, this is a library!” The man nods, lowers his voice even more, and whispers, “Sorry… can I have a burger, fries, and a soda?” The librarian sighs and replies, “Sir, we don’t serve food here.” The man frowns. “Then why do you call it a library? Every time I come here, you people shush me like it’s a five-star restaurant!” The librarian whispers back",
+      "ai_evaluation": {
+        "score": 30,
+        "corrections": [
+          {
+            "original": "The librarian whispers back",
+            "suggestion": "The librarian whispers back, “Because the menu is books.”",
+            "reason": "译文未完整翻译原文内容，遗漏了图书管理员最后的回应，导致关键信息缺失，偏离原文含义"
+          }
+        ],
+        "overall_feedback": "你翻译的部分语句准确无误，但存在严重的内容缺失问题，遗漏了原文的关键句子，使得整体译文不完整。建议在翻译时仔细检查，确保涵盖原文的所有重要信息，避免出现类似的错误。",
+        "is_acceptable": false
+      },
+      "score": 30
+    },
+    {
       "id": "a39b2cdd-6446-4620-ab66-517e882fc176",
       "timestamp": "2025-08-28T17:24:28.740566",
       "text_title": "AI dopamine1",
