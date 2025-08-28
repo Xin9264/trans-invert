@@ -113,6 +113,262 @@
         "is_acceptable": true
       },
       "score": 85
+    },
+    {
+      "id": "2b740986-5a4c-440c-9d31-8fc55e3e14e1",
+      "timestamp": "2025-08-28T07:06:20.664091",
+      "text_title": "AI dopamine3",
+      "text_content": "Sometimes there is an element of ego. You may believe in X or not, and keep working to find evidence to support it or excuses for why it doesn't apply in that experiment. There can be an underlying urge to either to prove your abilities or to show that you’re still relevant in the quickly changing landscape. Science is supposedly objective but the reality is that there is a huge social aspect to it, and respect of peers is an valuable reward signal to seek.\n\nThat’s how I feel about it, at least. Every day is a small journey further into the jungle of human knowledge. Not a bad life at all—one i’m willing to do for a long time.",
+      "chinese_translation": "有时有一个自负的元素。你可能相信X或不相信，并继续工作以找到证据来支持它或借口为什么它不适用于那个实验。可能有一个潜在的冲动要么证明你的能力要么显示你仍然在快速变化的领域中相关。科学据称是客观的但现实是它有一个巨大的社交方面，而同行的尊重是一个有价值的奖励信号去寻求。那是我对它的感觉，至少。每一天是一个小旅程进一步进入人类知识的丛林。不是一个坏的生活完全——一个我愿意做很长时间的生活。",
+      "user_input": "Some times there is an element of ego. You may believe in X or not and keep working to find evidence to support it or excuses why it doesn't supply in that experiment. There can be a underlying 冲动 to either prove your ability or show that you are still relevant in the quick changing langscape. Science is supposedly objective but the reality is that it has a giant social aspect, but the respect of peers is a valuable reward signal to seek. It's the feeling from me to it, at least. Every day is a little journey that steps into the jungle of human knowledge. Not a bad life at all-one I'm ready to speed enough time to live.",
+      "ai_evaluation": {
+        "score": 72,
+        "corrections": [
+          {
+            "original": "Some times",
+            "suggestion": "Sometimes",
+            "reason": "拼写错误，应为单个词"
+          },
+          {
+            "original": "doesn't supply",
+            "suggestion": "doesn't apply",
+            "reason": "语义错误，原文指'适用'而非'供应'"
+          },
+          {
+            "original": "underlying 冲动",
+            "suggestion": "underlying urge",
+            "reason": "中英混杂，应统一使用英文"
+          },
+          {
+            "original": "quick changing langscape",
+            "suggestion": "quickly changing landscape",
+            "reason": "形容词形式错误及拼写错误"
+          },
+          {
+            "original": "giant social aspect, but",
+            "suggestion": "huge social aspect, and",
+            "reason": "用词偏差及连词错误，原文无转折关系"
+          },
+          {
+            "original": "It's the feeling from me to it",
+            "suggestion": "That's how I feel about it",
+            "reason": "表达不自然，偏离原文语义"
+          },
+          {
+            "original": "steps into the jungle",
+            "suggestion": "further into the jungle",
+            "reason": "动词选择偏差，原文强调深入而非踏入"
+          },
+          {
+            "original": "ready to speed enough time to live",
+            "suggestion": "willing to do for a long time",
+            "reason": "严重语义偏离，原文表达长期从事的意愿而非'加速度过时间'"
+          }
+        ],
+        "overall_feedback": "基本传达了原文核心思想，但存在多处用词错误、语法不规范和语义偏差问题。建议注意：1) 避免中英混杂 2) 准确理解短语含义（如apply/supply）3) 保持复合句的逻辑连贯性。在表达个人观点部分需要更自然的英语表达方式。",
+        "is_acceptable": true
+      },
+      "score": 72
+    },
+    {
+      "id": "1305f5ef-d4cd-41a3-91fc-7dd824f754c4",
+      "timestamp": "2025-08-28T07:05:51.956394",
+      "text_title": "AI dopamine3",
+      "text_content": "Sometimes there is an element of ego. You may believe in X or not, and keep working to find evidence to support it or excuses for why it doesn't apply in that experiment. There can be an underlying urge to either to prove your abilities or to show that you’re still relevant in the quickly changing landscape. Science is supposedly objective but the reality is that there is a huge social aspect to it, and respect of peers is an valuable reward signal to seek.\n\nThat’s how I feel about it, at least. Every day is a small journey further into the jungle of human knowledge. Not a bad life at all—one i’m willing to do for a long time.",
+      "chinese_translation": "有时有一个自负的元素。你可能相信X或不相信，并继续工作以找到证据来支持它或借口为什么它不适用于那个实验。可能有一个潜在的冲动要么证明你的能力要么显示你仍然在快速变化的领域中相关。科学据称是客观的但现实是它有一个巨大的社交方面，而同行的尊重是一个有价值的奖励信号去寻求。那是我对它的感觉，至少。每一天是一个小旅程进一步进入人类知识的丛林。不是一个坏的生活完全——一个我愿意做很长时间的生活。",
+      "user_input": "Some times there is an element of ego. You may believe in X or not and keep working to find evidence to support it or excuses why it doesn't supply in that experiment. There can be a underlying 冲动 to either prove your ability or show that you are still relevant in the quick changing langscape. Science is supposedly objective but the reality is that it has a giant social aspect, but the respect of peers is a valuable reward signal to seek. It's the feeling from me to it, at least. Every day is a little journey that steps into the jungle of human knowledge. Not a bad life at all-one I'm ready to speed enough time to live.",
+      "ai_evaluation": {
+        "score": 72,
+        "corrections": [
+          {
+            "original": "Some times",
+            "suggestion": "Sometimes",
+            "reason": "拼写错误，应为单个词 'Sometimes'"
+          },
+          {
+            "original": "doesn't supply",
+            "suggestion": "doesn't apply",
+            "reason": "用词错误，'supply' 不符合语境，应为 'apply'（适用）"
+          },
+          {
+            "original": "a underlying 冲动",
+            "suggestion": "an underlying urge",
+            "reason": "语法错误（应用 'an' 而非 'a'）且混入中文词汇，应为英文 'urge'"
+          },
+          {
+            "original": "quick changing langscape",
+            "suggestion": "quickly changing landscape",
+            "reason": "词性错误（'quick' 应为副词 'quickly'）和拼写错误（'langscape' 应为 'landscape'）"
+          },
+          {
+            "original": "but the respect of peers",
+            "suggestion": "and respect of peers",
+            "reason": "逻辑连接词错误，此处应为并列关系而非转折，用 'and' 更合适"
+          },
+          {
+            "original": "It's the feeling from me to it",
+            "suggestion": "That’s how I feel about it",
+            "reason": "表达不自然且语法结构偏差，原句更地道"
+          },
+          {
+            "original": "steps into the jungle",
+            "suggestion": "further into the jungle",
+            "reason": "语义偏差，原文强调“深入”而非“步入”"
+          },
+          {
+            "original": "ready to speed enough time to live",
+            "suggestion": "willing to do for a long time",
+            "reason": "表达严重偏离原意，原意为“愿意长期从事”而非“准备加速时间生活”"
+          }
+        ],
+        "overall_feedback": "基本传达了原文核心意思，但存在多处语法错误、用词不当和表达偏差。部分句子（如最后一句）语义严重偏离。建议加强词汇准确性和复杂句式的掌握，注意中英文思维差异。",
+        "is_acceptable": false
+      },
+      "score": 72
+    },
+    {
+      "id": "c9354d8f-d04d-4794-9160-1c55e8b9adfc",
+      "timestamp": "2025-08-28T06:36:59.649980",
+      "text_title": "AI dopamine2",
+      "text_content": "For experiments that are small scale you can get several reward signals quickly and develop your intuition. Other times you make a big bet that is non-obvious or controversial and go through a period of hard work, dopamine starvation, and uncertainty to do it. If it works out it's a immense high but if it fails it's natural to be consumed by helplessness.",
+      "chinese_translation": "对于是小规模的实验你可以快速获得几个奖励信号并发展你的直觉。其他时候你下一个大的赌注那是非显而易见或有争议的并经历一段时期的努力工作、多巴胺饥饿和不确定性去做它。如果它成功它是一个巨大的高涨但如果失败被无助感消耗是自然的。",
+      "user_input": "For experiments that are small scale you can quickly get some reward signals and develop your intuition. Other times you make a bet which is non-obvious or controversial and go through a period of hard work, dopamine starvation and uncertainty to do it. If it works it is an immense high but if it fails it is natural to be consumed by hopelessness.",
+      "ai_evaluation": {
+        "score": 95,
+        "corrections": [
+          {
+            "original": "hopelessness",
+            "suggestion": "helplessness",
+            "reason": "原文使用'helplessness'（无助感）表达一种无力改变的状态，而'hopelessness'（绝望感）语义偏差较大，改变了原文的心理状态描述"
+          }
+        ],
+        "overall_feedback": "整体翻译准确流畅，完美保留了原文的对比结构和情感层次。仅有一处近义词使用偏差，将'helplessness'误作'hopelessness'，但未影响整体理解。句式处理自然，成功再现了原文的学术口语风格。",
+        "is_acceptable": true
+      },
+      "score": 95
+    },
+    {
+      "id": "0cd0e7c3-af6b-47d7-ae75-27d676d584fd",
+      "timestamp": "2025-08-28T06:33:07.990429",
+      "text_title": "AI dopamine2",
+      "text_content": "For experiments that are small scale you can get several reward signals quickly and develop your intuition. Other times you make a big bet that is non-obvious or controversial and go through a period of hard work, dopamine starvation, and uncertainty to do it. If it works out it's a immense high but if it fails it's natural to be consumed by helplessness.",
+      "chinese_translation": "对于是小规模的实验你可以快速获得几个奖励信号并发展你的直觉。其他时候你下一个大的赌注那是非显而易见或有争议的并经历一段时期的努力工作、多巴胺饥饿和不确定性去做它。如果它成功它是一个巨大的高涨但如果失败被无助感消耗是自然的。",
+      "user_input": "For experiments that are small scale you can quickly get some reward signals and develop your intuition. Ohter time your next debt will be non-obvious or controvercial and go through a period of hard working, dopamine starvation and uncerntity to do it. If it works it is an immense reward but if it fails it is natural to be consumed by hopeless",
+      "ai_evaluation": {
+        "score": 65,
+        "corrections": [
+          {
+            "original": "Ohter time",
+            "suggestion": "Other times",
+            "reason": "拼写错误和单复数错误"
+          },
+          {
+            "original": "your next debt",
+            "suggestion": "you make a big bet",
+            "reason": "语义错误：'debt'（债务）与原文'bet'（赌注）含义完全不同"
+          },
+          {
+            "original": "controvercial",
+            "suggestion": "controversial",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "hard working",
+            "suggestion": "hard work",
+            "reason": "词性错误：应该使用名词形式"
+          },
+          {
+            "original": "uncerntity",
+            "suggestion": "uncertainty",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "an immense reward",
+            "suggestion": "an immense high",
+            "reason": "语义偏差：原文强调情绪上的'high'（高涨）而非单纯的'reward'（奖励）"
+          },
+          {
+            "original": "hopeless",
+            "suggestion": "helplessness",
+            "reason": "语义偏差：'hopeless'（绝望的）是形容词，原文使用名词'helplessness'（无助感）"
+          }
+        ],
+        "overall_feedback": "译文基本传达了原文的主要意思，但存在较多拼写错误和关键语义偏差。特别是将'bet'（赌注）误译为'debt'（债务）严重改变了原意。需要注意名词形式的使用和准确理解词汇含义。建议加强拼写检查和仔细对照原文语义。",
+        "is_acceptable": false
+      },
+      "score": 65
+    },
+    {
+      "id": "39839310-75f3-440d-bd56-fe2aa93fd12a",
+      "timestamp": "2025-08-28T06:20:46.323277",
+      "text_title": "AI dopamine2",
+      "text_content": "For experiments that are small scale you can get several reward signals quickly and develop your intuition. Other times you make a big bet that is non-obvious or controversial and go through a period of hard work, dopamine starvation, and uncertainty to do it. If it works out it's a immense high but if it fails it's natural to be consumed by helplessness.",
+      "chinese_translation": "对于是小规模的实验你可以快速获得几个奖励信号并发展你的直觉。其他时候你下一个大的赌注那是非显而易见或有争议的并经历一段时期的努力工作、多巴胺饥饿和不确定性去做它。如果它成功它是一个巨大的高涨但如果失败被无助感消耗是自然的。",
+      "user_input": "For experiments that are small scale you can quickly get some reward signals and develop your intuition. Other time your next big debt will be non-obvious or controversial and go through a period of hard working, dopamine starvation and uncertainty to do it. If it works it is an immense reward but if it fails it is natural to be consumed by hopeless.",
+      "ai_evaluation": {
+        "score": 72,
+        "corrections": [
+          {
+            "original": "Other time your next big debt",
+            "suggestion": "Other times you make a big bet",
+            "reason": "语法错误：'time'应为复数'times'表示'有时候'；'debt'(债务)是严重语义错误，应为'bet'(赌注)"
+          },
+          {
+            "original": "go through a period of hard working",
+            "suggestion": "go through a period of hard work",
+            "reason": "语法错误：'hard working'是形容词，此处需要名词'hard work'"
+          },
+          {
+            "original": "if it works it is an immense reward",
+            "suggestion": "if it works out it's an immense high",
+            "reason": "语义偏差：原文'immense high'强调情绪高涨，'reward'(奖励)未能准确传达这种情感体验"
+          },
+          {
+            "original": "consumed by hopeless",
+            "suggestion": "consumed by helplessness",
+            "reason": "语法错误：'hopeless'是形容词，此处需要名词'helplessness'(无助感)"
+          }
+        ],
+        "overall_feedback": "基本传达了原文意思，但存在几处关键语法错误和语义偏差。特别是将'bet'(赌注)误写为'debt'(债务)严重改变了原意。建议注意名词形式的使用和关键词汇的准确选择。",
+        "is_acceptable": true
+      },
+      "score": 72
+    },
+    {
+      "id": "70e9526c-7359-4bef-87ba-e3fd38da8d09",
+      "timestamp": "2025-08-28T06:03:17.764736",
+      "text_title": "AI dopamine1",
+      "text_content": "There is a dopamine cycle in doing AI research that is pretty interesting.\n\nEvery day you wake up and you think about what experiment to run. You think thing X matters so you decide to improve it or ablate it. Then you write the code and pay some compute to find out the answer. Then you get dopamine or confusion depending on whether the result matched expectations.",
+      "chinese_translation": "有一个在做AI研究中的多巴胺循环是相当有趣的。每天你醒来并且你思考要运行什么实验。你认为事物X重要所以你决定改进它或消融它。然后你写代码并支付一些计算来找出答案。然后你得到多巴胺或困惑取决于结果是否匹配期望。",
+      "user_input": "There is a dopamine cycle in doing AI research that is pretty interesting. Every day you wake up and think about what experiments to run. You think thing X matters so you decide to improve or abalate it. Then you write code and pay some compute to find the answer. Then you get dopamine or confision which depened on whether the result matches the expection.",
+      "ai_evaluation": {
+        "score": 85,
+        "corrections": [
+          {
+            "original": "abalate",
+            "suggestion": "ablate",
+            "reason": "拼写错误，正确拼写为 'ablate'"
+          },
+          {
+            "original": "confision",
+            "suggestion": "confusion",
+            "reason": "拼写错误，正确拼写为 'confusion'"
+          },
+          {
+            "original": "depened",
+            "suggestion": "depends",
+            "reason": "拼写和语法错误，正确形式为 'depends'"
+          },
+          {
+            "original": "expection",
+            "suggestion": "expectations",
+            "reason": "拼写错误，正确拼写为 'expectations'"
+          }
+        ],
+        "overall_feedback": "整体表达流畅，意思准确传达了原文内容。主要问题是几处拼写错误和语法小错误，但不影响理解。建议加强拼写检查，注意动词形式和名词单复数的正确使用。",
+        "is_acceptable": true
+      },
+      "score": 85
     }
   ]
 }

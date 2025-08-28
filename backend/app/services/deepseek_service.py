@@ -1,4 +1,5 @@
 """DeepSeek AI服务"""
+import asyncio
 import json
 import re
 from typing import Dict, Any, Optional
@@ -120,7 +121,74 @@ class DeepSeekService:
         translation: str, 
         user_input: str
     ):
-        """流式评估用户答案"""
+        """流式评估用户答案，带重试机制"""
+        max_retries = 2
+        
+        for attempt in range(max_retries + 1):
+            try:
+                # 发送重试状态通知
+                if attempt > 0:
+                    yield {
+                        "type": "progress",
+                        "progress": 0,
+                        "content": f"正在重试 (尝试 {attempt + 1}/{max_retries + 1})..."
+                    }
+                    # 短暂等待
+                    await asyncio.sleep(1)
+                
+                # 进行实际的流式评估
+                success = False
+                last_error = None
+                
+                async for result in self._do_stream_evaluation(original_text, translation, user_input, attempt + 1, max_retries + 1):
+                    yield result
+                    
+                    # 检查是否成功完成
+                    if result.get("type") == "complete":
+                        success = True
+                        return  # 成功完成，退出所有重试
+                    elif result.get("type") == "error":
+                        last_error = result.get("error", "未知错误")
+                        break  # 跳出内层循环，进行重试
+                
+                if success:
+                    return
+                    
+            except Exception as e:
+                last_error = str(e)
+                print(f"⚠️ 第 {attempt + 1} 次尝试失败: {e}")
+                
+                if attempt < max_retries:
+                    yield {
+                        "type": "progress",
+                        "progress": 0,
+                        "content": f"网络异常，正在重试... ({attempt + 2}/{max_retries + 1})"
+                    }
+                    await asyncio.sleep(2)  # 等待后重试
+                    continue
+        
+        # 所有重试都失败了，返回默认结果
+        print(f"❌ 所有重试都失败，返回默认结果。最后错误: {last_error}")
+        yield {
+            "type": "complete",
+            "result": {
+                "score": 70,
+                "corrections": [],
+                "overall_feedback": f"评估服务暂时不可用，请稍后重试。错误: {last_error or '网络连接异常'}",
+                "is_acceptable": True
+            },
+            "progress": 100
+        }
+    
+    async def _do_stream_evaluation(
+        self, 
+        original_text: str, 
+        translation: str, 
+        user_input: str,
+        current_attempt: int,
+        max_attempts: int
+    ):
+        """执行单次流式评估"""
         try:
             # 使用模板渲染提示词
             prompt = template_service.render_evaluate_answer_prompt(
@@ -128,6 +196,12 @@ class DeepSeekService:
                 translation=translation,
                 user_input=user_input
             )
+            
+            yield {
+                "type": "progress",
+                "progress": 10,
+                "content": f"开始AI评估... (尝试 {current_attempt}/{max_attempts})"
+            }
             
             # 准备流式请求
             payload = {
@@ -142,7 +216,8 @@ class DeepSeekService:
                 "Content-Type": "application/json"
             }
             
-            timeout = httpx.Timeout(60.0, connect=10.0)
+            # 设置更短的超时时间以便快速重试
+            timeout = httpx.Timeout(25.0, connect=5.0)
             
             # 流式请求
             async with httpx.AsyncClient(timeout=timeout) as client:
@@ -151,31 +226,48 @@ class DeepSeekService:
                     response.raise_for_status()
                     
                     collected_content = ""
+                    chunk_count = 0
+                    last_progress_time = asyncio.get_event_loop().time()
+                    
                     async for line in response.aiter_lines():
+                        current_time = asyncio.get_event_loop().time()
+                        
+                        # 检查是否超过15秒没有进度更新
+                        if current_time - last_progress_time > 15:
+                            raise Exception("响应超时：15秒内没有收到数据")
+                        
                         if line.startswith("data: "):
                             data_str = line[6:]  # 移除 "data: " 前缀
                             if data_str.strip() == "[DONE]":
                                 break
                             
                             try:
-                                import json
                                 data = json.loads(data_str)
                                 if "choices" in data and len(data["choices"]) > 0:
                                     delta = data["choices"][0].get("delta", {})
                                     if "content" in delta:
                                         content = delta["content"]
                                         collected_content += content
+                                        chunk_count += 1
+                                        last_progress_time = current_time  # 更新进度时间
                                         
                                         # 尝试解析JSON进度
                                         progress = self._calculate_json_progress(collected_content)
                                         yield {
                                             "type": "progress",
                                             "content": content,
-                                            "progress": progress,
+                                            "progress": min(90, progress),
                                             "full_content": collected_content
                                         }
                             except json.JSONDecodeError:
                                 continue
+                    
+                    # 验证响应内容
+                    if len(collected_content.strip()) < 10:
+                        raise Exception("AI响应内容为空或过短")
+                    
+                    if chunk_count == 0:
+                        raise Exception("没有收到有效的流式数据")
                     
                     # 处理完整响应
                     try:
@@ -202,18 +294,21 @@ class DeepSeekService:
                         }
                         
                     except Exception as e:
-                        # 返回默认结果
-                        yield {
-                            "type": "complete",
-                            "result": {
-                                "score": 70,
-                                "corrections": [],
-                                "overall_feedback": f"评估失败: {str(e)}，请稍后重试。",
-                                "is_acceptable": True
-                            },
-                            "progress": 100
-                        }
+                        # 解析失败，抛出异常让重试机制处理
+                        raise Exception(f"解析AI响应失败: {str(e)}")
                         
+        except httpx.TimeoutException:
+            yield {
+                "type": "error",
+                "error": "请求超时，请检查网络连接",
+                "progress": 0
+            }
+        except httpx.HTTPError as e:
+            yield {
+                "type": "error",
+                "error": f"网络连接错误: {str(e)}",
+                "progress": 0
+            }
         except Exception as e:
             yield {
                 "type": "error",

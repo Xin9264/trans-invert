@@ -95,6 +95,74 @@
         "match expectations"
       ],
       "word_count": 67
+    },
+    "8d189f86-b836-4af6-88c1-7a2488d30450": {
+      "text_id": "8d189f86-b836-4af6-88c1-7a2488d30450",
+      "translation": "对于是小规模的实验你可以快速获得几个奖励信号并发展你的直觉。其他时候你下一个大的赌注那是非显而易见或有争议的并经历一段时期的努力工作、多巴胺饥饿和不确定性去做它。如果它成功它是一个巨大的高涨但如果失败被无助感消耗是自然的。",
+      "difficult_words": [
+        {
+          "word": "dopamine",
+          "meaning": "多巴胺"
+        },
+        {
+          "word": "starvation",
+          "meaning": "饥饿，匮乏"
+        },
+        {
+          "word": "immense",
+          "meaning": "巨大的"
+        },
+        {
+          "word": "consumed",
+          "meaning": "被消耗，被吞噬"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "small scale",
+        "reward signals",
+        "big bet",
+        "non-obvious",
+        "works out"
+      ],
+      "word_count": 63
+    },
+    "831fbf7f-f0ce-4926-afa1-f6ad2e10ab76": {
+      "text_id": "831fbf7f-f0ce-4926-afa1-f6ad2e10ab76",
+      "translation": "有时有一个自负的元素。你可能相信X或不相信，并继续工作以找到证据来支持它或借口为什么它不适用于那个实验。可能有一个潜在的冲动要么证明你的能力要么显示你仍然在快速变化的领域中相关。科学据称是客观的但现实是它有一个巨大的社交方面，而同行的尊重是一个有价值的奖励信号去寻求。那是我对它的感觉，至少。每一天是一个小旅程进一步进入人类知识的丛林。不是一个坏的生活完全——一个我愿意做很长时间的生活。",
+      "difficult_words": [
+        {
+          "word": "ego",
+          "meaning": "自负，自我"
+        },
+        {
+          "word": "underlying",
+          "meaning": "潜在的，根本的"
+        },
+        {
+          "word": "landscape",
+          "meaning": "领域，景观"
+        },
+        {
+          "word": "objective",
+          "meaning": "客观的"
+        },
+        {
+          "word": "peers",
+          "meaning": "同行，同辈"
+        }
+      ],
+      "difficulty": 4,
+      "key_points": [
+        "element of ego",
+        "keep working to find",
+        "underlying urge",
+        "prove your abilities",
+        "quickly changing landscape",
+        "valuable reward signal",
+        "further into the jungle of human knowledge"
+      ],
+      "word_count": 120
     }
   }
 }

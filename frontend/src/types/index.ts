@@ -13,6 +13,7 @@ export interface Text {
   wordCount: number;
   createdBy: string;
   createdAt: string;
+  lastOpened?: string;
 }
 
 export interface DifficultWord {

@@ -26,7 +26,10 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [retryCount, setRetryCount] = useState(0);
+  const [isRetrying, setIsRetrying] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 调整文本框高度的函数
   const adjustTextareaHeight = useCallback(() => {
@@ -60,41 +63,116 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
     
     setIsSubmitting(true);
     setProgress(0);
+    setRetryCount(0);
+    setIsRetrying(false);
     
-    try {
-      if (onSubmit) {
-        // 使用自定义提交函数（流式）
-        await onSubmit(userInput, (progressValue: number) => {
-          setProgress(progressValue);
-        });
-      } else {
-        // 默认提交行为
-        const endTime = new Date();
-        const timeSpent = startTime ? (endTime.getTime() - startTime.getTime()) / 1000 : 0;
-        const wordCount = userInput.trim().split(/\s+/).length;
-        const wpm = timeSpent > 0 ? Math.round((wordCount / timeSpent) * 60) : 0;
-
-        const stats: TypingStats = {
-          wpm,
-          timeSpent,
-          wordCount
-        };
-
-        // 模拟进度
-        for (let i = 0; i <= 100; i += 20) {
-          setProgress(i);
-          await new Promise(resolve => setTimeout(resolve, 200));
+    const attemptSubmit = async (attempt: number = 0): Promise<void> => {
+      try {
+        // 清除之前的超时
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
         }
         
-        onComplete(userInput, stats);
+        // 设置30秒超时
+        const timeoutPromise = new Promise<never>((_, reject) => {
+          timeoutRef.current = setTimeout(() => {
+            reject(new Error('请求超时，请重试'));
+          }, 30000);
+        });
+        
+        if (onSubmit) {
+          // 使用自定义提交函数（流式）
+          const submitPromise = onSubmit(userInput, (progressValue: number) => {
+            setProgress(progressValue);
+            
+            // 如果进度卡在100%超过10秒，自动重试
+            if (progressValue >= 100) {
+              setTimeout(() => {
+                if (isSubmitting && progress >= 100 && attempt < 2) {
+                  console.warn('检测到进度卡在100%，准备重试...');
+                  // 不直接重试，让超时处理
+                }
+              }, 10000);
+            }
+          });
+          
+          await Promise.race([submitPromise, timeoutPromise]);
+          
+          // 清除超时
+          if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current);
+          }
+        } else {
+          // 默认提交行为
+          const endTime = new Date();
+          const timeSpent = startTime ? (endTime.getTime() - startTime.getTime()) / 1000 : 0;
+          const wordCount = userInput.trim().split(/\s+/).length;
+          const wpm = timeSpent > 0 ? Math.round((wordCount / timeSpent) * 60) : 0;
+
+          const stats: TypingStats = {
+            wpm,
+            timeSpent,
+            wordCount
+          };
+
+          // 模拟进度
+          for (let i = 0; i <= 100; i += 20) {
+            setProgress(i);
+            await new Promise(resolve => setTimeout(resolve, 200));
+          }
+          
+          onComplete(userInput, stats);
+        }
+      } catch (error) {
+        console.error(`提交失败 (尝试 ${attempt + 1}/3):`, error);
+        
+        // 清除超时
+        if (timeoutRef.current) {
+          clearTimeout(timeoutRef.current);
+        }
+        
+        // 如果是超时或网络错误，且尝试次数少于3次，则重试
+        if (attempt < 2 && (
+          error instanceof Error && (
+            error.message.includes('超时') ||
+            error.message.includes('网络') ||
+            error.message.includes('timeout') ||
+            error.message.includes('网络连接')
+          )
+        )) {
+          setIsRetrying(true);
+          setRetryCount(attempt + 1);
+          
+          // 等待2秒后重试
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          setIsRetrying(false);
+          setProgress(0);
+          
+          return attemptSubmit(attempt + 1);
+        } else {
+          // 最终失败
+          throw error;
+        }
       }
+    };
+    
+    try {
+      await attemptSubmit();
     } catch (error) {
-      console.error('提交失败:', error);
+      console.error('最终提交失败:', error);
+      alert('提交失败：' + (error instanceof Error ? error.message : '未知错误') + '\n请检查网络连接后重试。');
     } finally {
       setIsSubmitting(false);
       setProgress(0);
+      setRetryCount(0);
+      setIsRetrying(false);
+      
+      // 清理超时
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
     }
-  }, [userInput, startTime, onComplete, onSubmit, isSubmitting]);
+  }, [userInput, startTime, onComplete, onSubmit, isSubmitting, progress]);
 
 
 
@@ -146,7 +224,12 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
               {isSubmitting ? (
                 <>
                   <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
-                  <span>AI分析中...</span>
+                  <span>
+                    {isRetrying 
+                      ? `重试中 (${retryCount}/3)...` 
+                      : 'AI分析中...'
+                    }
+                  </span>
                 </>
               ) : (
                 <span>提交答案</span>
@@ -168,11 +251,17 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
                 ></div>
               </div>
               <div className="text-xs text-gray-500 mt-1 text-center">
-                {progress < 25 && "正在分析语法结构..."}
-                {progress >= 25 && progress < 50 && "正在检查语义准确性..."}
-                {progress >= 50 && progress < 75 && "正在生成改进建议..."}
-                {progress >= 75 && progress < 100 && "正在完成评估..."}
-                {progress >= 100 && "评估完成！"}
+                {isRetrying ? (
+                  <span className="text-yellow-600">⚠️ 网络异常，正在重试...</span>
+                ) : (
+                  <>
+                    {progress < 25 && "正在分析语法结构..."}
+                    {progress >= 25 && progress < 50 && "正在检查语义准确性..."}
+                    {progress >= 50 && progress < 75 && "正在生成改进建议..."}
+                    {progress >= 75 && progress < 100 && "正在完成评估..."}
+                    {progress >= 100 && "评估完成！"}
+                  </>
+                )}
               </div>
             </div>
           )}

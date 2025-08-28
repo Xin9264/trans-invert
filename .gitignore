@@ -72,3 +72,6 @@ backend/local_data/
 backend/*.json
 backend/practice_history.json
 backend/texts_data.json
+
+CLAUDE.md
+.claude
