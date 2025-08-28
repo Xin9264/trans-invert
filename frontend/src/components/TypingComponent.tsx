@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
-import { useAppStore } from '../store';
 
 interface TypingComponentProps {
   targetText: string;
@@ -29,7 +28,7 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
   const [retryCount, setRetryCount] = useState(0);
   const [isRetrying, setIsRetrying] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const timeoutRef = useRef<number | null>(null);
 
   // 调整文本框高度的函数
   const adjustTextareaHeight = useCallback(() => {

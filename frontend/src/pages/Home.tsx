@@ -47,6 +47,7 @@ const Home: React.FC = () => {
             content: '', // 不显示内容，保持挑战性
             difficultyLevel: item.difficulty || 0,
             wordCount: item.word_count,
+            createdBy: '', // 暂时设为空字符串，因为后端没有用户系统
             createdAt: item.created_at,
             lastOpened: item.last_opened
           }));

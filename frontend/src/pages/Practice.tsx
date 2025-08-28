@@ -13,7 +13,6 @@ const Practice: React.FC = () => {
   const [text, setText] = useState<Text | null>(null);
   const [analysis, setAnalysis] = useState<TextAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isCompleted, setIsCompleted] = useState(false);
   const [feedback, setFeedback] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [practiceMode, setPracticeMode] = useState<'study' | 'practice' | 'completed'>('study'); // 新增练习模式状态
@@ -156,7 +155,7 @@ const Practice: React.FC = () => {
     loadPracticeHistory();
   };
 
-  const handlePracticeComplete = async (userInput: string, stats: any) => {
+  const handlePracticeComplete = async (userInput: string) => {
     if (!id) return;
     
     try {
@@ -193,7 +192,7 @@ const Practice: React.FC = () => {
           user_input: userInput
         },
         // onProgress
-        (progress: number, content?: string) => {
+        (progress: number) => {
           onProgress(progress);
         },
         // onComplete
@@ -493,7 +492,7 @@ const Practice: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {practiceHistory.map((record, index) => (
+                  {practiceHistory.map((record) => (
                     <div key={record.id} className="border rounded-lg p-4 bg-gray-50">
                       <div className="flex justify-between items-start mb-3">
                         <div className="text-sm text-gray-600">
@@ -529,7 +528,7 @@ const Practice: React.FC = () => {
                           <div>
                             <h4 className="font-medium text-gray-900 mb-2">建议改进：</h4>
                             <div className="space-y-2">
-                              {record.ai_evaluation.corrections.map((correction, corrIndex) => (
+                              {record.ai_evaluation.corrections.map((correction: any, corrIndex: number) => (
                                 <div key={corrIndex} className="bg-yellow-50 p-2 rounded border">
                                   <div className="flex items-center space-x-2 text-sm">
                                     <span className="bg-red-100 text-red-700 px-2 py-1 rounded font-mono">

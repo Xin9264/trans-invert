@@ -21,19 +21,6 @@ declare global {
   interface CSS {
     highlights?: Map<string, Highlight>;
   }
-  
-  interface Highlight {
-    new(ranges: Range[]): Highlight;
-    add(range: Range): void;
-    clear(): void;
-    delete(range: Range): boolean;
-    size: number;
-  }
-  
-  var Highlight: {
-    prototype: Highlight;
-    new(ranges?: Range[]): Highlight;
-  };
 }
 
 const HIGHLIGHT_COLORS = [
@@ -55,7 +42,7 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
   const [activeHighlights, setActiveHighlights] = useState<HighlightData[]>(highlights);
   const [supportsCSSHighlights, setSupportsCSSHighlights] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
-  const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const selectionTimeoutRef = useRef<number | null>(null);
 
   // 检查 CSS Highlights API 支持
   useEffect(() => {
@@ -206,7 +193,6 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
     // 使用第一个矩形作为基准
     const rect = rects[0];
     const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
     
     // 计算理想位置（选中文本上方中央）
     let x = rect.left + rect.width / 2;

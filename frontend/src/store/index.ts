@@ -22,7 +22,7 @@ interface AppState {
   setUser: (user: User | null) => void;
   setCurrentText: (text: Text) => void;
   setTextAnalysis: (analysis: any) => void;
-  startPractice: (textId: string) => void;
+  startPractice: () => void;
   updateTypingState: (state: Partial<TypingState>) => void;
   submitAnswer: (answer: string) => void;
   setLoading: (loading: boolean) => void;
@@ -55,7 +55,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   
   setTextAnalysis: (analysis) => set({ textAnalysis: analysis }),
   
-  startPractice: (textId) => {
+  startPractice: () => {
     set({
       currentSession: null,
       typingState: {

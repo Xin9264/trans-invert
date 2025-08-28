@@ -6,7 +6,7 @@ import AIConfigModal from './AIConfigModal';
 
 const Layout: React.FC = () => {
   const [showAIConfig, setShowAIConfig] = useState(false);
-  const { status, loading, error, refresh, isConfigured } = useAIStatus();
+  const { loading, refresh, isConfigured } = useAIStatus();
 
   const handleConfigured = () => {
     refresh();
