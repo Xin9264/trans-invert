@@ -1,6 +1,8 @@
 import axios from 'axios';
 
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+// 在生产环境中使用相对路径，开发环境使用完整URL
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 
+  ((import.meta as any).env?.MODE === 'production' ? '' : 'http://localhost:8000');
 
 // 本地存储管理
 export const localStorageManager = {

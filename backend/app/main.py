@@ -1,7 +1,9 @@
 """Trans Invert 后端主应用"""
+import os
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
 from app.core.settings import settings
 from app.routers import texts
 from app.schemas.text import APIResponse
@@ -26,14 +28,21 @@ app.add_middleware(
 # 注册路由
 app.include_router(texts.router)
 
-@app.get("/", response_model=APIResponse)
-async def root():
-    """根路径"""
-    return APIResponse(
-        success=True,
-        data={"message": "Trans Invert API", "version": "1.0.0"},
-        message="API运行正常"
-    )
+# API根路径（仅在开发环境或没有静态文件时显示）
+static_dir = "/app/static"
+if not os.path.exists(static_dir):
+    @app.get("/", response_model=APIResponse)
+    async def root():
+        """根路径"""
+        return APIResponse(
+            success=True,
+            data={"message": "Trans Invert API", "version": "1.0.0"},
+            message="API运行正常"
+        )
+
+# 静态文件服务（生产环境）
+if os.path.exists(static_dir):
+    app.mount("/", StaticFiles(directory=static_dir, html=True), name="static")
 
 @app.get("/health", response_model=APIResponse)
 async def health_check():

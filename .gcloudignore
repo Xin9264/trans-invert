@@ -1,0 +1,51 @@
+# Git files
+.git
+.gitignore
+
+# Build artifacts
+backend/__pycache__/
+backend/app/__pycache__/
+frontend/node_modules/
+frontend/dist/
+
+# Development files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+*.md
+doc.md
+CLAUDE.md
+
+# Development scripts
+start.sh
+docker-compose.dev.yml
+
+# Frontend development files
+frontend/src/
+frontend/public/
+frontend/index.html
+frontend/package.json
+frontend/package-lock.json
+frontend/tsconfig.json
+frontend/tsconfig.node.json
+frontend/vite.config.ts
+frontend/tailwind.config.js
+frontend/postcss.config.js
+
+# Only include what's needed for production build
+!frontend/package.json
+!frontend/package-lock.json

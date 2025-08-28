@@ -1,0 +1,58 @@
+substitutions:
+  _REGION: 'asia-northeast1'
+  _AR_HOST: 'asia-northeast1-docker.pkg.dev'
+  _REPO: 'trans-invert'
+  _BACKEND_IMAGE: 'backend'
+  _FRONTEND_IMAGE: 'frontend'
+
+steps:
+  # Build frontend
+  - name: 'node:18'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        cd frontend
+        echo "📦 Installing frontend dependencies..."
+        npm ci --only=production
+        echo "🔨 Building frontend..."
+        npm run build
+        echo "✅ Frontend build completed"
+        ls -la dist/
+    
+  # Build backend image with frontend build included
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      [
+        'build',
+        '-f','Dockerfile.prod',
+        '-t','$_AR_HOST/$PROJECT_ID/$_REPO/$_BACKEND_IMAGE:$COMMIT_SHA',
+        '.'
+      ]
+
+  # Push image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push','$_AR_HOST/$PROJECT_ID/$_REPO/$_BACKEND_IMAGE:$COMMIT_SHA']
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      [
+        'run','deploy','trans-invert',
+        '--image','$_AR_HOST/$PROJECT_ID/$_REPO/$_BACKEND_IMAGE:$COMMIT_SHA',
+        '--region','$_REGION',
+        '--allow-unauthenticated',
+        '--port','8000',
+        '--memory','2Gi',
+        '--cpu','2',
+        '--min-instances','0',
+        '--max-instances','10',
+        '--concurrency','80',
+        '--timeout','3600',
+        '--execution-environment','gen2',
+        '--service-account','$PROJECT_NUMBER-compute@developer.gserviceaccount.com'
+      ]
+
+images:
+  - '$_AR_HOST/$PROJECT_ID/$_REPO/$_BACKEND_IMAGE:$COMMIT_SHA'
