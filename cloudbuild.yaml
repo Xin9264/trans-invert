@@ -40,8 +40,10 @@ steps:
       - '-c'
       - |
         echo "📂 Copy frontend dist into backend static folder..."
-        rm -rf backend/app/static && mkdir -p backend/app/static
-        cp -r frontend/dist/* backend/app/static/ || echo "⚠️ no dist found"
+        rm -rf backend/static && mkdir -p backend/static
+        cp -r frontend/dist/* backend/static/ || echo "⚠️ no dist found"
+        echo "✅ Frontend files copied to backend/static"
+        ls -la backend/static/
 
   # Build backend image (use backend/ as context)
   - name: 'gcr.io/cloud-builders/docker'
