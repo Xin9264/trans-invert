@@ -1,0 +1,48 @@
+# Git
+.git
+.gitignore
+
+# Node modules and build artifacts
+node_modules
+frontend/node_modules
+frontend/dist
+frontend/.vite
+
+# Python cache
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+backend/backend/
+
+# Environment files
+.env
+.env.local
+.env.production
+.env.development
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Documentation
+README.md
+doc.md
+CLAUDE.md
+
+# Docker files (except the main one we're using)
+backend/Dockerfile
+Dockerfile.prod
+Dockerfile.simple
+frontend/Dockerfile.dev
+
+# Development configs
+docker-compose.dev.yml
+start.sh

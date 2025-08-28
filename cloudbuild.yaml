@@ -45,15 +45,14 @@ steps:
         echo "✅ Frontend files copied to backend/static"
         ls -la backend/static/
 
-  # Build backend image (use backend/ as context)
+  # Build backend image (use root as context with optimized Dockerfile)
   - name: 'gcr.io/cloud-builders/docker'
     args:
       [
         'build',
-        '-f','backend/Dockerfile',
         '-t','$_AR_HOST/$PROJECT_ID/$_REPO/$_BACKEND_IMAGE:$COMMIT_SHA',
         '--no-cache',
-        'backend'
+        '.'
       ]
     env:
       - 'DOCKER_BUILDKIT=1'
