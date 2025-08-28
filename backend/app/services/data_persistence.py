@@ -122,6 +122,15 @@ class DataPersistenceService:
                 data = json.load(f)
             
             texts = data.get("texts", {})
+            
+            # 修复遗留的无效时间戳
+            from datetime import datetime
+            for text_id, text_info in texts.items():
+                if text_info.get("created_at") == "now":
+                    # 将无效的"now"替换为默认时间戳
+                    text_info["created_at"] = "2025-08-27T00:00:00.000000"
+                    print(f"🔧 修复文本 {text_id} 的时间戳")
+            
             print(f"✅ 成功加载 {len(texts)} 个文本数据")
             return texts
             
