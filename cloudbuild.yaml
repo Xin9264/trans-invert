@@ -14,7 +14,7 @@ steps:
       - |
         cd frontend
         echo "📦 Installing frontend dependencies..."
-        npm ci --only=production
+        npm ci
         echo "🔨 Building frontend..."
         npm run build
         echo "✅ Frontend build completed"
