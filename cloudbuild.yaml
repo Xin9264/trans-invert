@@ -44,14 +44,15 @@ steps:
         '--region','$_REGION',
         '--allow-unauthenticated',
         '--port','8000',
-        '--memory','2Gi',
-        '--cpu','2',
+        '--memory','1Gi',
+        '--cpu','1',
         '--min-instances','0',
         '--max-instances','10',
         '--concurrency','80',
         '--timeout','3600',
         '--execution-environment','gen2',
-        '--service-account','$PROJECT_NUMBER-compute@developer.gserviceaccount.com'
+        '--set-env-vars','APP_ENV=production,APP_HOST=0.0.0.0,APP_PORT=8000,DEBUG=false',
+        '--update-env-vars','ALLOWED_ORIGINS=*'
       ]
 
 images:

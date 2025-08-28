@@ -1,10 +1,10 @@
+# 使用精简的 Python 镜像
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install system dependencies
+# 只安装必要的系统依赖
 RUN apt-get update && apt-get install -y \
-    build-essential \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
@@ -31,5 +31,5 @@ HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Run the application with production settings
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--access-log"]
+# Run the application with production settings (去掉 --reload)
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]
