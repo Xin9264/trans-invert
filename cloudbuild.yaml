@@ -82,5 +82,10 @@ steps:
         '--update-env-vars','ALLOWED_ORIGINS=*'
       ]
 
+# Build options and logging configuration
+options:
+  defaultLogsBucketBehavior: REGIONAL_USER_OWNED_BUCKET
+  logging: CLOUD_LOGGING_ONLY
+
 images:
   - '$_AR_HOST/$PROJECT_ID/$_REPO/$_BACKEND_IMAGE:$COMMIT_SHA'
