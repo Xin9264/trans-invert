@@ -19,7 +19,7 @@ COPY backend/app ./app
 RUN mkdir -p ./static
 
 # Copy frontend static files if they exist
-COPY backend/static ./static 2>/dev/null || echo "No static files to copy"
+COPY backend/static ./static
 
 EXPOSE 8000
 
