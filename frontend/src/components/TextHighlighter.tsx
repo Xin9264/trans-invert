@@ -16,11 +16,31 @@ interface TextHighlighterProps {
   className?: string;
 }
 
+// CSS Highlights API 类型定义
+declare global {
+  interface CSS {
+    highlights?: Map<string, Highlight>;
+  }
+  
+  interface Highlight {
+    new(ranges: Range[]): Highlight;
+    add(range: Range): void;
+    clear(): void;
+    delete(range: Range): boolean;
+    size: number;
+  }
+  
+  var Highlight: {
+    prototype: Highlight;
+    new(ranges?: Range[]): Highlight;
+  };
+}
+
 const HIGHLIGHT_COLORS = [
-  { name: '红色', value: '#E57373', label: '柔和的浅红' },
-  { name: '黄色', value: '#FFF176', label: '温柔的浅黄' },
-  { name: '绿色', value: '#81C784', label: '清新的草绿' },
-  { name: '紫色', value: '#BA68C8', label: '淡雅的薰衣草紫' },
+  { name: '红色', value: '#E57373', label: '柔和的浅红', cssName: 'text-highlight-red' },
+  { name: '黄色', value: '#FFF176', label: '温柔的浅黄', cssName: 'text-highlight-yellow' },
+  { name: '绿色', value: '#81C784', label: '清新的草绿', cssName: 'text-highlight-green' },
+  { name: '紫色', value: '#BA68C8', label: '淡雅的薰衣草紫', cssName: 'text-highlight-purple' },
 ];
 
 const TextHighlighter: React.FC<TextHighlighterProps> = ({
@@ -33,12 +53,117 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
   const [selectedRange, setSelectedRange] = useState<{ start: number; end: number; text: string } | null>(null);
   const [colorPickerPosition, setColorPickerPosition] = useState({ x: 0, y: 0 });
   const [activeHighlights, setActiveHighlights] = useState<HighlightData[]>(highlights);
+  const [supportsCSSHighlights, setSupportsCSSHighlights] = useState(false);
   const textRef = useRef<HTMLDivElement>(null);
   const selectionTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // 检查 CSS Highlights API 支持
+  useEffect(() => {
+    const supported = 'highlights' in CSS && 'Highlight' in window;
+    setSupportsCSSHighlights(supported);
+    
+    if (supported) {
+      // 初始化 CSS Highlights API 样式
+      initializeHighlightStyles();
+    }
+    
+    console.log('CSS Highlights API support:', supported);
+  }, []);
+
   useEffect(() => {
     setActiveHighlights(highlights);
-  }, [highlights]);
+    if (supportsCSSHighlights) {
+      updateCSSHighlights(highlights);
+    }
+  }, [highlights, supportsCSSHighlights]);
+
+  // 初始化 CSS Highlights 样式
+  const initializeHighlightStyles = () => {
+    // 创建样式表
+    const style = document.createElement('style');
+    style.textContent = `
+      ::highlight(text-highlight-red) {
+        background-color: #E57373;
+        color: inherit;
+      }
+      ::highlight(text-highlight-yellow) {
+        background-color: #FFF176;
+        color: inherit;
+      }
+      ::highlight(text-highlight-green) {
+        background-color: #81C784;
+        color: inherit;
+      }
+      ::highlight(text-highlight-purple) {
+        background-color: #BA68C8;
+        color: inherit;
+      }
+    `;
+    document.head.appendChild(style);
+  };
+
+  // 更新 CSS Highlights
+  const updateCSSHighlights = (highlightData: HighlightData[]) => {
+    if (!CSS.highlights || !textRef.current) return;
+
+    // 清除所有现有高亮
+    CSS.highlights.clear();
+
+    // 按颜色分组高亮
+    const colorGroups = new Map<string, HighlightData[]>();
+    highlightData.forEach(highlight => {
+      const colorName = HIGHLIGHT_COLORS.find(c => c.value === highlight.color)?.cssName || 'text-highlight-red';
+      if (!colorGroups.has(colorName)) {
+        colorGroups.set(colorName, []);
+      }
+      colorGroups.get(colorName)!.push(highlight);
+    });
+
+    // 为每种颜色创建高亮
+    colorGroups.forEach((highlights, colorName) => {
+      const ranges: Range[] = [];
+      
+      highlights.forEach(highlight => {
+        const range = createTextRange(highlight.start, highlight.end);
+        if (range) {
+          ranges.push(range);
+        }
+      });
+
+      if (ranges.length > 0) {
+        const highlightInstance = new Highlight(...ranges);
+        CSS.highlights.set(colorName, highlightInstance);
+      }
+    });
+  };
+
+  // 创建文本范围
+  const createTextRange = (start: number, end: number): Range | null => {
+    if (!textRef.current) return null;
+
+    const textNode = getTextNode(textRef.current);
+    if (!textNode) return null;
+
+    try {
+      const range = document.createRange();
+      range.setStart(textNode, start);
+      range.setEnd(textNode, end);
+      return range;
+    } catch (error) {
+      console.warn('Failed to create range:', error);
+      return null;
+    }
+  };
+
+  // 获取文本节点
+  const getTextNode = (element: HTMLElement): Text | null => {
+    for (const child of element.childNodes) {
+      if (child.nodeType === Node.TEXT_NODE) {
+        return child as Text;
+      }
+    }
+    return null;
+  };
 
   const handleSelectionChange = () => {
     // 清除之前的延迟
@@ -161,6 +286,11 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
     setActiveHighlights(updatedHighlights);
     onHighlightChange?.(updatedHighlights);
     
+    // 如果支持 CSS Highlights API，立即更新
+    if (supportsCSSHighlights) {
+      updateCSSHighlights(updatedHighlights);
+    }
+    
     setShowColorPicker(false);
     setSelectedRange(null);
     
@@ -178,6 +308,11 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
     setActiveHighlights(updatedHighlights);
     onHighlightChange?.(updatedHighlights);
     
+    // 如果支持 CSS Highlights API，立即更新
+    if (supportsCSSHighlights) {
+      updateCSSHighlights(updatedHighlights);
+    }
+    
     setShowColorPicker(false);
     setSelectedRange(null);
     
@@ -186,6 +321,12 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
   };
 
   const renderHighlightedText = () => {
+    // 如果支持 CSS Highlights API，直接返回纯文本，由 CSS 处理高亮
+    if (supportsCSSHighlights) {
+      return text;
+    }
+
+    // 回退到旧的 DOM 操作方式
     if (activeHighlights.length === 0) {
       return text;
     }
@@ -303,6 +444,13 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
 
   return (
     <div className={`relative ${className}`}>
+      {/* CSS Highlights API 支持指示器 */}
+      {!supportsCSSHighlights && (
+        <div className="mb-2 text-sm text-amber-600 bg-amber-50 p-2 rounded border border-amber-200">
+          💡 您的浏览器不支持最新的 CSS Highlights API，使用兼容模式
+        </div>
+      )}
+      
       <div
         ref={textRef}
         className="select-text cursor-text leading-relaxed font-mono text-lg p-4 bg-white rounded-lg border-2 border-gray-200"
@@ -343,6 +491,7 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
                   onClick={() => addHighlight(color.value)}
                   className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors flex items-center justify-center"
                   style={{ backgroundColor: color.value }}
+                  title={`${color.name} - ${color.label}`}
                 >
                   <span className="sr-only">{color.name}</span>
                 </button>

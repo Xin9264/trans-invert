@@ -15,7 +15,7 @@ from app.schemas.text import (
     PracticeHistoryImportRequest,
     APIResponse
 )
-from app.services.deepseek_service import deepseek_service
+from app.services.ai_service import ai_service
 from app.services.data_persistence import data_persistence
 
 router = APIRouter(prefix="/api/texts", tags=["texts"])
@@ -50,6 +50,194 @@ def save_data():
 
 # 启动时自动加载数据
 initialize_data()
+
+@router.get("/ai/status", response_model=APIResponse)
+async def get_ai_status():
+    """获取AI服务配置状态"""
+    try:
+        if ai_service is None:
+            return APIResponse(
+                success=False,
+                data={
+                    "configured": False,
+                    "provider": "none",
+                    "error": "AI服务未配置"
+                },
+                message="AI服务需要配置"
+            )
+        
+        info = ai_service.get_provider_info()
+        return APIResponse(
+            success=True,
+            data={
+                "configured": info["api_key_configured"],
+                "provider": info["provider"],
+                "model": info["model"],
+                "api_key_preview": info["api_key_preview"]
+            },
+            message="AI服务状态获取成功"
+        )
+        
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            data={"configured": False, "error": str(e)},
+            message="获取AI服务状态失败"
+        )
+
+@router.post("/ai/configure", response_model=APIResponse)
+async def configure_ai(config_data: Dict[str, str]):
+    """配置AI服务"""
+    try:
+        global ai_service
+        
+        # 获取配置参数
+        provider = config_data.get("provider")
+        api_key = config_data.get("api_key")
+        base_url = config_data.get("base_url")
+        model = config_data.get("model")
+        
+        # 验证必要参数
+        if not provider:
+            raise ValueError("缺少provider参数")
+        if not api_key:
+            raise ValueError("缺少api_key参数")
+        
+        # 如果AI服务未初始化，尝试重新创建
+        if ai_service is None:
+            from app.services.ai_service import AIService
+            try:
+                # 临时设置环境变量
+                import os
+                os.environ["AI_PROVIDER"] = provider
+                if provider == "volcano":
+                    os.environ["ARK_API_KEY"] = api_key
+                    if base_url:
+                        os.environ["ARK_BASE_URL"] = base_url
+                    if model:
+                        os.environ["ARK_MODEL"] = model
+                elif provider == "openai":
+                    os.environ["OPENAI_API_KEY"] = api_key
+                    if base_url:
+                        os.environ["OPENAI_BASE_URL"] = base_url
+                    if model:
+                        os.environ["OPENAI_MODEL"] = model
+                else:  # deepseek
+                    os.environ["DEEPSEEK_API_KEY"] = api_key
+                    if base_url:
+                        os.environ["DEEPSEEK_BASE_URL"] = base_url
+                    if model:
+                        os.environ["DEEPSEEK_MODEL"] = model
+                
+                ai_service = AIService()
+                
+            except Exception as init_error:
+                return APIResponse(
+                    success=False,
+                    data={"error": str(init_error)},
+                    message=f"初始化AI服务失败: {str(init_error)}"
+                )
+        else:
+            # 重新配置现有服务
+            success = ai_service.reconfigure(
+                provider=provider,
+                api_key=api_key,
+                base_url=base_url,
+                model=model
+            )
+            
+            if not success:
+                return APIResponse(
+                    success=False,
+                    data={"error": "重新配置失败"},
+                    message="AI服务重新配置失败"
+                )
+        
+        # 返回配置成功信息
+        return APIResponse(
+            success=True,
+            data={
+                "configured": True,
+                "provider": ai_service.provider.value,
+                "model": ai_service.model,
+                "api_key_preview": f"{api_key[:8]}..." if api_key else "未配置"
+            },
+            message="AI服务配置成功"
+        )
+        
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            data={"error": str(e)},
+            message=f"配置失败: {str(e)}"
+        )
+
+@router.get("/ai/providers", response_model=APIResponse)
+async def get_all_providers():
+    """获取所有已配置的AI提供商"""
+    try:
+        if ai_service is None:
+            return APIResponse(
+                success=True,
+                data={},
+                message="暂无已配置的提供商"
+            )
+        
+        providers = ai_service.get_all_configured_providers()
+        return APIResponse(
+            success=True,
+            data=providers,
+            message="获取提供商列表成功"
+        )
+        
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            data={"error": str(e)},
+            message="获取提供商列表失败"
+        )
+
+@router.post("/ai/switch", response_model=APIResponse)
+async def switch_provider(switch_data: Dict[str, str]):
+    """切换到已配置的AI提供商"""
+    try:
+        global ai_service
+        
+        provider = switch_data.get("provider")
+        if not provider:
+            raise ValueError("缺少provider参数")
+        
+        if ai_service is None:
+            return APIResponse(
+                success=False,
+                data={"error": "AI服务未初始化"},
+                message="AI服务未初始化"
+            )
+        
+        success = ai_service.switch_to_provider(provider)
+        if not success:
+            return APIResponse(
+                success=False,
+                data={"error": "切换失败"},
+                message=f"切换到 {provider} 失败"
+            )
+        
+        return APIResponse(
+            success=True,
+            data={
+                "provider": ai_service.provider.value,
+                "model": ai_service.model,
+                "api_key_preview": "***已配置***"
+            },
+            message=f"成功切换到 {provider}"
+        )
+        
+    except Exception as e:
+        return APIResponse(
+            success=False,
+            data={"error": str(e)},
+            message=f"切换提供商失败: {str(e)}"
+        )
 
 def count_words(text: str) -> int:
     """计算单词数量"""
@@ -92,7 +280,7 @@ async def upload_text(request: TextUploadRequest, background_tasks: BackgroundTa
 async def analyze_text_background(text_id: str, content: str):
     """后台分析文本"""
     try:
-        analysis_result = await deepseek_service.analyze_text(content)
+        analysis_result = await ai_service.analyze_text(content)
         
         # 存储分析结果
         analyses_storage[text_id] = {
@@ -124,7 +312,7 @@ async def analyze_text_background(text_id: str, content: str):
 async def re_analyze_imported_text(text_id: str, content: str, existing_translation: str):
     """重新分析从历史记录导入的文本"""
     try:
-        analysis_result = await deepseek_service.analyze_text(content)
+        analysis_result = await ai_service.analyze_text(content)
         
         # 更新分析结果，但保留已有的翻译（来自历史记录）
         analyses_storage[text_id] = {
@@ -188,7 +376,7 @@ async def submit_practice(request: PracticeSubmitRequest):
         translation = analysis["translation"]
         
         # 调用AI评估
-        evaluation = await deepseek_service.evaluate_answer(
+        evaluation = await ai_service.evaluate_answer(
             original_text=original_text,
             translation=translation,
             user_input=request.user_input
@@ -316,7 +504,7 @@ async def submit_practice_stream(request: PracticeSubmitRequest):
             """生成流式响应"""
             evaluation_result = None
             try:
-                async for chunk in deepseek_service.evaluate_answer_stream(
+                async for chunk in ai_service.evaluate_answer_stream(
                     original_text=original_text,
                     translation=translation,
                     user_input=request.user_input

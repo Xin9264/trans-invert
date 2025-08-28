@@ -287,4 +287,44 @@ export const healthAPI = {
   }
 };
 
+export interface AIStatus {
+  configured: boolean;
+  provider: string;
+  model: string;
+  api_key_preview: string;
+}
+
+export interface AIConfigData {
+  provider: string;
+  api_key: string;
+  base_url?: string;
+  model?: string;
+}
+
+export const aiAPI = {
+  // 获取AI服务状态
+  getStatus: async (): Promise<APIResponse<AIStatus>> => {
+    const response = await api.get('/api/texts/ai/status');
+    return response;
+  },
+
+  // 配置AI服务
+  configure: async (config: AIConfigData): Promise<APIResponse<any>> => {
+    const response = await api.post('/api/texts/ai/configure', config);
+    return response;
+  },
+
+  // 获取所有已配置的提供商
+  getProviders: async (): Promise<APIResponse<any>> => {
+    const response = await api.get('/api/texts/ai/providers');
+    return response;
+  },
+
+  // 切换到已配置的提供商
+  switchProvider: async (provider: string): Promise<APIResponse<any>> => {
+    const response = await api.post('/api/texts/ai/switch', { provider });
+    return response;
+  }
+};
+
 export default api;

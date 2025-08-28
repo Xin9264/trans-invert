@@ -2,6 +2,63 @@
   "version": "1.0",
   "records": [
     {
+      "id": "95f321ce-026f-4245-ac5c-1edcf352159c",
+      "timestamp": "2025-08-28T16:48:26.405946",
+      "text_title": "aaa",
+      "text_content": "The old key lay forgotten in Mia’s drawer. One rainy afternoon, she tried it on the attic door. It clicked open, revealing a dusty trunk. Inside were letters her grandmother wrote to a secret love. Mia smiled—she had just unlocked more than a door; she had unlocked a story waiting to be remembered.",
+      "chinese_translation": "那把旧钥匙躺在米娅的抽屉里被遗忘。一个下雨的下午，她试着用它开阁楼的门。它咔哒一声开了，露出了一个布满灰尘的箱子。在里面有她祖母写给一个秘密爱人的信。米娅笑了——她不仅打开了一扇门；她还打开了一个等待被记起的故事。",
+      "user_input": "The old key lay forgotten in Mia’s drawer. One rainy afternoon, she tried it on the attic door. It clicked to open, revealing a dusty trunk. Inside it were letters her grandmother wrote to a secret love. Mia smiled—she had just unlocked more than a door; she had unlocked a story waiting to be remembered.",
+      "ai_evaluation": {
+        "score": 98,
+        "corrections": [
+          {
+            "original": "It clicked to open, revealing a dusty trunk.",
+            "suggestion": "It clicked open, revealing a dusty trunk.",
+            "reason": "原文中的'clicked open'更自然，'clicked to open'略显不地道。"
+          }
+        ],
+        "overall_feedback": "整体翻译非常优秀，语法基本无误，句意与原文完全对应。唯一的小瑕疵是'clicked to open'不如原文的表达自然。建议今后注意更地道的短语搭配。整体表达流畅，结构与原文几乎一致。",
+        "is_acceptable": true
+      },
+      "score": 98
+    },
+    {
+      "id": "94ea84d5-6ae7-43bc-84fa-9c0cac565fe2",
+      "timestamp": "2025-08-28T16:46:37.619986",
+      "text_title": "test",
+      "text_content": "The old key lay forgotten in Mia’s drawer. One rainy afternoon, she tried it on the attic door. It clicked open, revealing a dusty trunk. Inside were letters her grandmother wrote to a secret love. Mia smiled—she had just unlocked more than a door; she had unlocked a story waiting to be remembered.",
+      "chinese_translation": "那把旧钥匙被遗忘地躺在米娅的抽屉里。一个下雨的下午，她试着用它开阁楼的门。它咔哒一声开了，露出一个布满灰尘的箱子。里面是她祖母写给一个秘密恋人的信。米娅笑了——她刚刚打开的不只是一扇门；她打开了一个等待被记住的故事。",
+      "user_input": "The old key lay forgotten in Mia’s 抽屉. In a rainy afternoon, she tried it on the attic door. It clicked open, revealing a dusty trunk. Inside were letters her grandmother wrote to a secret love. Mia smiled and she had just unlocked more than one door; she had already unlocked a story waiting to be remembered.",
+      "ai_evaluation": {
+        "score": 70,
+        "corrections": [],
+        "overall_feedback": "评估服务暂时不可用，请稍后重试。错误: Error code: 401 - {'error': {'message': 'Incorrect API key provided: test-ope***-key. You can find your API key at https://platform.openai.com/account/api-keys.', 'type': 'invalid_request_error', 'param': None, 'code': 'invalid_api_key'}}",
+        "is_acceptable": true
+      },
+      "score": 70
+    },
+    {
+      "id": "d60947b9-922e-4ff4-b81a-43198a7e1d14",
+      "timestamp": "2025-08-28T16:31:18.980454",
+      "text_title": "test",
+      "text_content": "​\nWelcome to the OpenAI Developer Community, a forum for developers to meet and chat with other developers while building with OpenAI’s APIs and developer platform.\n\nThis is not a place for ChatGPT discussion (with the exception of ChatGPT developer tools, like Codex). ChatGPT discussion takes place in the OpenAI Discord community.",
+      "chinese_translation": "欢迎来到 OpenAI 开发者社区，一个论坛，供开发者在使用 OpenAI 的 API 和开发者平台进行构建时与其他开发者见面并聊天。 这里不是进行 ChatGPT 讨论的地方（ChatGPT 开发者工具，如 Codex，除外）。ChatGPT 的讨论发生在 OpenAI 的 Discord 社区。",
+      "user_input": "Welcome to the OpenAI Developer Community, a forum which is for developers to meet and chat with other developers while building with OpenAI’s APIs and developer plate. This is not a place for ChatGPT discussion (with the exception of ChatGPT developer tools, like Codex). ChatGPT discussion takes place in the OpenAI Discord community.",
+      "ai_evaluation": {
+        "score": 85,
+        "corrections": [
+          {
+            "original": "developer plate",
+            "suggestion": "developer platform",
+            "reason": "拼写错误导致语义偏差，“plate”意为“盘子”，此处应指“平台”（platform）"
+          }
+        ],
+        "overall_feedback": "整体翻译准确，语法正确，大部分内容忠实于原文。但存在一处拼写错误（“developer plate”应为“developer platform”），修正后将更完善。",
+        "is_acceptable": true
+      },
+      "score": 85
+    },
+    {
       "id": "aa77ca89-9fc9-464c-91d7-ab9f0e8d7959",
       "timestamp": "2025-08-28T13:26:06.615766",
       "text_title": "puma 2",

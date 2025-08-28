@@ -163,6 +163,64 @@
         "further into the jungle of human knowledge"
       ],
       "word_count": 120
+    },
+    "ab4d8f20-646f-4b42-99d0-d9dad25f5d19": {
+      "text_id": "ab4d8f20-646f-4b42-99d0-d9dad25f5d19",
+      "translation": "那把旧钥匙被遗忘地躺在米娅的抽屉里。一个下雨的下午，她试着用它开阁楼的门。它咔哒一声开了，露出一个布满灰尘的箱子。里面是她祖母写给一个秘密恋人的信。米娅笑了——她刚刚打开的不只是一扇门；她打开了一个等待被记住的故事。",
+      "difficult_words": [
+        {
+          "word": "attic",
+          "meaning": "阁楼，顶楼"
+        },
+        {
+          "word": "clicked",
+          "meaning": "发出咔哒声"
+        },
+        {
+          "word": "trunk",
+          "meaning": "（存放物品的）大箱子"
+        }
+      ],
+      "difficulty": 2,
+      "key_points": [
+        "lay forgotten",
+        "tried it on",
+        "secret love"
+      ],
+      "word_count": 53
+    },
+    "1507839b-7fc8-4d14-bd49-03a0d11e72f8": {
+      "text_id": "1507839b-7fc8-4d14-bd49-03a0d11e72f8",
+      "translation": "那把旧钥匙躺在米娅的抽屉里被遗忘。一个下雨的下午，她试着用它开阁楼的门。它咔哒一声开了，露出了一个布满灰尘的箱子。在里面有她祖母写给一个秘密爱人的信。米娅笑了——她不仅打开了一扇门；她还打开了一个等待被记起的故事。",
+      "difficult_words": [
+        {
+          "word": "forgotten",
+          "meaning": "被遗忘的"
+        },
+        {
+          "word": "attic",
+          "meaning": "阁楼"
+        },
+        {
+          "word": "trunk",
+          "meaning": "大箱子"
+        },
+        {
+          "word": "revealing",
+          "meaning": "揭示，显现出"
+        },
+        {
+          "word": "unlocked",
+          "meaning": "解锁，打开（抽象意思和具体意思）"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "lay forgotten",
+        "clicked open",
+        "unlock a story"
+      ],
+      "word_count": 53
     }
   }
 }
