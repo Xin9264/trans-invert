@@ -19,8 +19,8 @@ steps:
         npm run build
         echo "✅ Frontend build completed"
         ls -la dist/
-    
-  # Debug: Check build context
+
+  # Debug: check context + .dockerignore
   - name: 'gcr.io/cloud-builders/docker'
     entrypoint: 'bash'
     args:
@@ -29,21 +29,29 @@ steps:
         echo "🔍 Checking build context..."
         ls -la .
         echo "📁 Backend directory:"
-        ls -la backend/
-        echo "📄 Dockerfile.prod exists:"
-        ls -la Dockerfile.prod
-        echo "📄 Requirements.txt exists:"
-        ls -la backend/requirements.txt
-    
-  # Build backend image with frontend build included
+        ls -la backend/ || true
+        echo "📄 .dockerignore:"
+        cat .dockerignore || echo "(no .dockerignore)"
+
+  # (可选) 将前端构建产物复制到后端静态目录
+  - name: 'gcr.io/cloud-builders/gcloud'
+    entrypoint: bash
+    args:
+      - '-c'
+      - |
+        echo "📂 Copy frontend dist into backend static folder..."
+        rm -rf backend/app/static && mkdir -p backend/app/static
+        cp -r frontend/dist/* backend/app/static/ || echo "⚠️ no dist found"
+
+  # Build backend image (use backend/ as context)
   - name: 'gcr.io/cloud-builders/docker'
     args:
       [
         'build',
-        '-f','Dockerfile.prod',
+        '-f','backend/Dockerfile',
         '-t','$_AR_HOST/$PROJECT_ID/$_REPO/$_BACKEND_IMAGE:$COMMIT_SHA',
         '--no-cache',
-        '.'
+        'backend'
       ]
     env:
       - 'DOCKER_BUILDKIT=1'
