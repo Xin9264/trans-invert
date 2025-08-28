@@ -15,8 +15,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy app code
 COPY app ./app
 
-# Copy frontend static files
-COPY static ./static
 
 EXPOSE 8000
 
