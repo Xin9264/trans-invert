@@ -124,6 +124,12 @@ export const textAPI = {
       responseType: 'blob'
     });
     return response as unknown as Blob;
+  },
+
+  // 导入练习材料
+  importMaterials: async (data: any): Promise<APIResponse<any>> => {
+    const response = await api.post('/api/texts/materials/import', data);
+    return response;
   }
 };
 
@@ -137,6 +143,12 @@ export const practiceAPI = {
   // 获取练习历史
   getHistory: async (): Promise<APIResponse<PracticeHistoryRecord[]>> => {
     const response = await api.get('/api/texts/practice/history');
+    return response;
+  },
+
+  // 获取特定文本的练习历史
+  getTextHistory: async (textId: string): Promise<APIResponse<PracticeHistoryRecord[]>> => {
+    const response = await api.get(`/api/texts/${textId}/practice/history`);
     return response;
   },
 

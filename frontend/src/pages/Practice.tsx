@@ -4,7 +4,7 @@ import { textAPI, practiceAPI } from '../utils/api';
 import { Text, TextAnalysis } from '../types';
 import TypingComponent from '../components/TypingComponent';
 import TextHighlighter from '../components/TextHighlighter';
-import { ArrowLeft, Eye, EyeOff, RotateCcw } from 'lucide-react';
+import { ArrowLeft, RotateCcw, History } from 'lucide-react';
 
 const Practice: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -13,12 +13,13 @@ const Practice: React.FC = () => {
   const [text, setText] = useState<Text | null>(null);
   const [analysis, setAnalysis] = useState<TextAnalysis | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [showOriginal, setShowOriginal] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [feedback, setFeedback] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [practiceMode, setPracticeMode] = useState<'study' | 'practice' | 'completed'>('study'); // 新增练习模式状态
   const [highlights, setHighlights] = useState<any[]>([]); // 文本高亮数据
+  const [showHistoryModal, setShowHistoryModal] = useState(false); // 历史回译模态框
+  const [practiceHistory, setPracticeHistory] = useState<any[]>([]); // 练习历史记录
 
   // 高亮数据的存储键
   const getHighlightStorageKey = (textId: string) => `highlights_${textId}`;
@@ -107,6 +108,26 @@ const Practice: React.FC = () => {
     fetchData();
   }, [id]);
 
+  // 加载特定文本的练习历史
+  const loadPracticeHistory = async () => {
+    if (!id) return;
+    
+    try {
+      const response = await practiceAPI.getTextHistory(id);
+      if (response.success && response.data) {
+        setPracticeHistory(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to load practice history:', error);
+    }
+  };
+
+  // 显示历史回译模态框
+  const handleShowHistory = () => {
+    setShowHistoryModal(true);
+    loadPracticeHistory();
+  };
+
   const handlePracticeComplete = async (userInput: string, stats: any) => {
     if (!id) return;
     
@@ -172,13 +193,11 @@ const Practice: React.FC = () => {
 
   const handleStartPractice = () => {
     setPracticeMode('practice');
-    setShowOriginal(false);
   };
 
   const handleRestart = () => {
     setPracticeMode('study');
     setFeedback(null);
-    setShowOriginal(false);
   };
 
   if (isLoading) {
@@ -225,21 +244,6 @@ const Practice: React.FC = () => {
         </div>
         
         <div className="flex items-center space-x-2">
-          {/* 只在学习模式显示显示/隐藏原文按钮 */}
-          {practiceMode === 'study' && (
-            <button
-              onClick={() => setShowOriginal(!showOriginal)}
-              className={`flex items-center space-x-2 px-3 py-2 rounded-md transition-colors ${
-                showOriginal 
-                  ? 'bg-red-100 text-red-700 hover:bg-red-200' 
-                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-              }`}
-            >
-              {showOriginal ? <EyeOff size={18} /> : <Eye size={18} />}
-              <span>{showOriginal ? '隐藏原文' : '显示原文'}</span>
-            </button>
-          )}
-          
           {/* 练习完成后显示重新开始按钮 */}
           {practiceMode === 'completed' && (
             <button
@@ -261,6 +265,15 @@ const Practice: React.FC = () => {
               <span>返回学习</span>
             </button>
           )}
+
+          {/* 历史回译按钮 */}
+          <button
+            onClick={handleShowHistory}
+            className="flex items-center space-x-2 px-3 py-2 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors"
+          >
+            <History size={18} />
+            <span>历史回译</span>
+          </button>
         </div>
       </div>
 
@@ -302,20 +315,6 @@ const Practice: React.FC = () => {
             </div>
           )}
 
-          {/* 原文显示 */}
-          {showOriginal && (
-            <div className="card border-red-200 bg-red-50">
-              <h3 className="text-lg font-semibold text-red-900 mb-4">原文 (仅供参考)</h3>
-              <div className="prose prose-red max-w-none">
-                <TextHighlighter 
-                  text={text.content}
-                  highlights={highlights}
-                  onHighlightChange={handleHighlightChange}
-                  className="text-red-800"
-                />
-              </div>
-            </div>
-          )}
         </div>
 
         {/* 右侧：练习区域 */}
@@ -418,6 +417,90 @@ const Practice: React.FC = () => {
           )}
         </div>
       </div>
+
+      {/* 历史回译模态框 */}
+      {showHistoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
+            <div className="flex justify-between items-center p-6 border-b">
+              <h2 className="text-xl font-semibold text-gray-900">历史回译记录</h2>
+              <button
+                onClick={() => setShowHistoryModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {practiceHistory.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500">该文本还没有练习历史记录</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {practiceHistory.map((record, index) => (
+                    <div key={record.id} className="border rounded-lg p-4 bg-gray-50">
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="text-sm text-gray-600">
+                          练习时间: {new Date(record.timestamp).toLocaleString('zh-CN')}
+                        </div>
+                        <div className={`px-2 py-1 rounded text-sm font-medium ${
+                          record.score >= 80 ? 'bg-green-100 text-green-700' : 
+                          record.score >= 60 ? 'bg-yellow-100 text-yellow-700' : 
+                          'bg-red-100 text-red-700'
+                        }`}>
+                          {record.score}分
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div>
+                          <h4 className="font-medium text-gray-900 mb-1">您的回译：</h4>
+                          <p className="text-gray-700 bg-white p-3 rounded border">
+                            {record.user_input}
+                          </p>
+                        </div>
+                        
+                        {record.ai_evaluation.overall_feedback && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-1">AI评价：</h4>
+                            <p className="text-gray-700 bg-blue-50 p-3 rounded border">
+                              {record.ai_evaluation.overall_feedback}
+                            </p>
+                          </div>
+                        )}
+                        
+                        {record.ai_evaluation.corrections && record.ai_evaluation.corrections.length > 0 && (
+                          <div>
+                            <h4 className="font-medium text-gray-900 mb-2">建议改进：</h4>
+                            <div className="space-y-2">
+                              {record.ai_evaluation.corrections.map((correction, corrIndex) => (
+                                <div key={corrIndex} className="bg-yellow-50 p-2 rounded border">
+                                  <div className="flex items-center space-x-2 text-sm">
+                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded font-mono">
+                                      {correction.original}
+                                    </span>
+                                    <span>→</span>
+                                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded font-mono">
+                                      {correction.suggestion}
+                                    </span>
+                                  </div>
+                                  <p className="text-gray-600 text-sm mt-1">{correction.reason}</p>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

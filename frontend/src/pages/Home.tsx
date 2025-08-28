@@ -2,12 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { textAPI } from '../utils/api';
 import { Text } from '../types';
-import { BookOpen, Clock, TrendingUp, Download } from 'lucide-react';
+import { BookOpen, Clock, TrendingUp, Download, Upload } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [texts, setTexts] = useState<Text[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
 
   useEffect(() => {
     const fetchTexts = async () => {
@@ -65,6 +66,40 @@ const Home: React.FC = () => {
       alert('导出失败，请重试');
     } finally {
       setIsExporting(false);
+    }
+  };
+
+  // 导入练习材料
+  const handleImportMaterials = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const text = await file.text();
+      const importData = JSON.parse(text);
+
+      // 验证文件格式
+      if (!importData.materials || !Array.isArray(importData.materials)) {
+        throw new Error('文件格式错误：不是有效的练习材料文件');
+      }
+
+      const response = await textAPI.importMaterials(importData);
+
+      if (response.success) {
+        alert(response.message || '导入成功！');
+        // 刷新练习材料列表
+        window.location.reload();
+      } else {
+        throw new Error(response.error || '导入失败');
+      }
+    } catch (error) {
+      console.error('导入失败:', error);
+      alert('导入失败：' + (error instanceof Error ? error.message : '未知错误'));
+    } finally {
+      setIsImporting(false);
+      // 清空文件输入
+      event.target.value = '';
     }
   };
 
@@ -132,20 +167,40 @@ const Home: React.FC = () => {
       <div className="py-12">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">练习材料</h2>
-          {texts.length > 0 && (
-            <button
-              onClick={handleExportMaterials}
-              disabled={isExporting}
-              className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              {isExporting ? (
+          <div className="flex space-x-3">
+            {/* 导入材料按钮 */}
+            <label className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
+              <input
+                type="file"
+                accept=".json"
+                onChange={handleImportMaterials}
+                disabled={isImporting}
+                className="hidden"
+              />
+              {isImporting ? (
                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
               ) : (
-                <Download size={16} />
+                <Upload size={16} />
               )}
-              <span>{isExporting ? '导出中...' : '导出材料'}</span>
-            </button>
-          )}
+              <span>{isImporting ? '导入中...' : '导入材料'}</span>
+            </label>
+            
+            {/* 导出材料按钮 */}
+            {texts.length > 0 && (
+              <button
+                onClick={handleExportMaterials}
+                disabled={isExporting}
+                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {isExporting ? (
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                ) : (
+                  <Download size={16} />
+                )}
+                <span>{isExporting ? '导出中...' : '导出材料'}</span>
+              </button>
+            )}
+          </div>
         </div>
         {texts.length === 0 ? (
           <div className="text-center py-12">

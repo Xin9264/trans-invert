@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useAppStore } from '../store';
-import { practiceAPI } from '../utils/api';
 
 interface TypingComponentProps {
   targetText: string;
@@ -23,12 +22,19 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
   className = '',
   showTargetText = true // 默认显示目标文本，向后兼容
 }) => {
-  const { typingState, updateTypingState } = useAppStore();
   const [userInput, setUserInput] = useState('');
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [progress, setProgress] = useState(0);
-  const [streamContent, setStreamContent] = useState('');
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // 调整文本框高度的函数
+  const adjustTextareaHeight = useCallback(() => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = textareaRef.current.scrollHeight + 'px';
+    }
+  }, []);
 
   // 开始计时
   useEffect(() => {
@@ -36,6 +42,11 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
       setStartTime(new Date());
     }
   }, [userInput, startTime]);
+
+  // 初始化和内容变化时调整高度
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [userInput, adjustTextareaHeight]);
 
   // 处理输入
   const handleInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -116,11 +127,11 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
       {/* 输入区域 */}
       <div className="relative">
         <textarea
+          ref={textareaRef}
           value={userInput}
           onChange={handleInputChange}
           placeholder="开始输入英文..."
-          className="w-full p-4 border-2 border-gray-300 rounded-lg font-mono text-lg resize-none focus:border-primary-500 focus:outline-none"
-          rows={6}
+          className="w-full p-4 border-2 border-gray-300 rounded-lg font-mono text-lg resize-none focus:border-primary-500 focus:outline-none min-h-[120px] max-h-[400px] overflow-y-auto"
           disabled={isSubmitting}
         />
         

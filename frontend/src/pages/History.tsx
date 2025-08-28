@@ -276,7 +276,7 @@ const History: React.FC = () => {
                     <button
                       onClick={() => {
                         // 显示详细信息的模态框或跳转到详情页
-                        alert(`文章：${record.text_title}\n\n原文：${record.text_content.substring(0, 100)}...\n\n您的翻译：${record.user_input.substring(0, 100)}...\n\nAI评价：${record.ai_evaluation.overall_feedback}`);
+                        alert(`文章：${record.text_title}\n\n英文原文：${record.text_content.substring(0, 100)}...\n\n您的回译：${record.user_input.substring(0, 100)}...\n\nAI评价：${record.ai_evaluation.overall_feedback}`);
                       }}
                       className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                     >

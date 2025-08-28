@@ -342,6 +342,32 @@ async def get_practice_history():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取历史记录失败: {str(e)}")
 
+@router.get("/{text_id}/practice/history", response_model=APIResponse)
+async def get_text_practice_history(text_id: str):
+    """获取特定文本的练习历史记录"""
+    try:
+        if text_id not in texts_storage:
+            raise HTTPException(status_code=404, detail="文本不存在")
+        
+        # 筛选出该文本的练习记录
+        text_practice_records = [
+            record for record in practice_history 
+            if record.text_content.strip() == texts_storage[text_id]["content"].strip()
+        ]
+        
+        # 按时间倒序排列
+        text_practice_records.sort(key=lambda x: x.timestamp, reverse=True)
+        
+        return APIResponse(
+            success=True,
+            data=text_practice_records,
+            message=f"获取到该文本的 {len(text_practice_records)} 条练习记录"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取文本练习历史失败: {str(e)}")
+
 @router.get("/practice/history/export")
 async def export_practice_history():
     """导出练习历史为JSON文件"""
@@ -503,3 +529,105 @@ async def export_practice_materials():
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"导出练习材料失败: {str(e)}")
+
+@router.post("/materials/import", response_model=APIResponse)
+async def import_practice_materials(import_data: Dict[str, Any]):
+    """导入练习材料"""
+    try:
+        global texts_storage, analyses_storage
+        
+        # 验证导入数据格式
+        if "materials" not in import_data:
+            raise HTTPException(status_code=400, detail="导入数据格式错误：缺少materials字段")
+        
+        materials = import_data["materials"]
+        if not isinstance(materials, list):
+            raise HTTPException(status_code=400, detail="导入数据格式错误：materials必须是数组")
+        
+        imported_count = 0
+        skipped_count = 0
+        
+        for material in materials:
+            try:
+                # 验证必要字段
+                required_fields = ["title", "content"]
+                for field in required_fields:
+                    if field not in material:
+                        print(f"跳过材料，缺少字段: {field}")
+                        skipped_count += 1
+                        continue
+                
+                # 检查是否已存在相同内容的材料
+                content = material["content"].strip()
+                material_exists = False
+                for existing_text_id, existing_text in texts_storage.items():
+                    if existing_text["content"].strip() == content:
+                        material_exists = True
+                        break
+                
+                if material_exists:
+                    print(f"跳过重复材料: {material.get('title', '未命名')}")
+                    skipped_count += 1
+                    continue
+                
+                # 生成新的文本ID或使用原有ID
+                text_id = material.get("text_id", str(uuid.uuid4()))
+                
+                # 如果ID已存在，生成新ID
+                if text_id in texts_storage:
+                    text_id = str(uuid.uuid4())
+                
+                # 添加到练习材料库
+                texts_storage[text_id] = {
+                    "id": text_id,
+                    "title": material["title"],
+                    "content": content,
+                    "word_count": material.get("word_count", count_words(content)),
+                    "created_at": material.get("created_at", datetime.now().isoformat())
+                }
+                
+                # 添加分析结果（如果有）
+                analysis = material.get("analysis")
+                if analysis and isinstance(analysis, dict):
+                    # 确保分析结果包含必要字段
+                    analyses_storage[text_id] = {
+                        "text_id": text_id,
+                        "translation": analysis.get("translation", ""),
+                        "difficult_words": analysis.get("difficult_words", []),
+                        "difficulty": analysis.get("difficulty", 3),
+                        "key_points": analysis.get("key_points", []),
+                        "word_count": material.get("word_count", count_words(content))
+                    }
+                else:
+                    # 如果没有分析结果，创建默认的
+                    analyses_storage[text_id] = {
+                        "text_id": text_id,
+                        "translation": "需要重新分析",
+                        "difficult_words": [{"word": "导入", "meaning": "从材料库导入"}],
+                        "difficulty": 3,
+                        "key_points": ["从材料库导入"],
+                        "word_count": count_words(content)
+                    }
+                
+                imported_count += 1
+                print(f"✅ 成功导入练习材料: {material['title']} (ID: {text_id})")
+                
+            except Exception as e:
+                print(f"❌ 导入材料失败: {e}")
+                skipped_count += 1
+                continue
+        
+        return APIResponse(
+            success=True,
+            data={
+                "imported_count": imported_count,
+                "skipped_count": skipped_count,
+                "total_materials": len(texts_storage)
+            },
+            message=f"成功导入 {imported_count} 个练习材料，跳过 {skipped_count} 个重复或错误材料"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"导入练习材料失败: {str(e)}")
