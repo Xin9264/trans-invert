@@ -2,13 +2,39 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { textAPI } from '../utils/api';
 import { Text } from '../types';
-import { BookOpen, Clock, TrendingUp, Download, Upload } from 'lucide-react';
+import { BookOpen, Clock, TrendingUp, Download, Upload, Trash2 } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [texts, setTexts] = useState<Text[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+
+  // 删除练习材料
+  const handleDeleteMaterial = async (textId: string, title: string) => {
+    if (!confirm(`确定要删除练习材料"${title}"吗？此操作不可撤销。`)) {
+      return;
+    }
+
+    setIsDeletingId(textId);
+    try {
+      const response = await textAPI.deleteMaterial(textId);
+      
+      if (response.success) {
+        // 从列表中移除已删除的材料
+        setTexts(prev => prev.filter(text => text.id !== textId));
+        alert(response.message || '删除成功！');
+      } else {
+        throw new Error(response.error || '删除失败');
+      }
+    } catch (error) {
+      console.error('删除失败:', error);
+      alert('删除失败：' + (error instanceof Error ? error.message : '未知错误'));
+    } finally {
+      setIsDeletingId(null);
+    }
+  };
 
   useEffect(() => {
     const fetchTexts = async () => {
@@ -212,8 +238,22 @@ const Home: React.FC = () => {
         ) : (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {texts.map((text) => (
-              <div key={text.id} className="card hover:shadow-md transition-shadow">
-                <h3 className="font-semibold text-gray-900 mb-2">
+              <div key={text.id} className="card hover:shadow-md transition-shadow relative">
+                {/* 删除按钮 */}
+                <button
+                  onClick={() => handleDeleteMaterial(text.id, text.title || '未命名文本')}
+                  disabled={isDeletingId === text.id}
+                  className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="删除此材料"
+                >
+                  {isDeletingId === text.id ? (
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                  ) : (
+                    <Trash2 size={16} />
+                  )}
+                </button>
+
+                <h3 className="font-semibold text-gray-900 mb-2 pr-8">
                   {text.title || '未命名文本'}
                 </h3>
                 <p className="text-gray-600 text-sm mb-4 line-clamp-3">

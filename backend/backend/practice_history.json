@@ -1,0 +1,118 @@
+{
+  "version": "1.0",
+  "records": [
+    {
+      "id": "aa77ca89-9fc9-464c-91d7-ab9f0e8d7959",
+      "timestamp": "2025-08-28T13:26:06.615766",
+      "text_title": "puma 2",
+      "text_content": "The hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "chinese_translation": "对美洲狮的搜寻开始于一个小村庄，在那里一位采摘草莓的妇女看到‘一只大猫’仅离她五码远。当她看到它时它立即跑开了，而专家们确认一只美洲狮不会攻击人类除非它被逼入绝境。搜寻被证明是困难的，因为美洲狮经常在早上在一个地方被观察到而在晚上在二十英里外的另一个地方。无论它去哪里，它都在身后留下了一串死鹿和小动物如兔子。爪印在许多地方被看见并且美洲狮的皮毛被发现粘在灌木丛上。几个人抱怨在夜间有‘猫一样的噪音’并且一位商人钓鱼旅行时看到美洲狮在树上。专家们现在完全确信这动物是一只美洲狮，但它来自哪里？由于没有美洲狮被报告从这个国家的任何动物园失踪，这一只必定曾属于一位私人收藏家并且以某种方式设法逃脱了。搜寻持续了几个星期，但美洲狮没有被捕获。想到一只危险的野生动物仍然在安静的乡村逍遥法外是令人不安的。",
+      "user_input": "The hunt for the puma began in a small vallage where a woman picking black barries saw a large cat only five yards from her. When she saw it, it immediately ran away, and experts comfirmed that a puma will not attack a human being unless it is conered. The search proved difficult, as the puma was often obserbed at one place in the morning and at another place in the evening. Wherever it went, it left behind it a trail of dead dear and small animals like rabbits. Paw prints were seen in many places and puma fur was found clining to bushes. Several people complained of cat-like noises at night and a bussinessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas were reported missing from any zoo in the country, it must be in the possession of a private collector and somehow managed to escape. The search went on several weeks, but the pumas were not caught. It is disturbing to think that there is still a wild dangerous animal at large in a quite countryside.",
+      "ai_evaluation": {
+        "score": 85,
+        "corrections": [
+          {
+            "original": "vallage",
+            "suggestion": "village",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "black barries",
+            "suggestion": "strawberries",
+            "reason": "语义错误，原文是草莓而非黑莓"
+          },
+          {
+            "original": "conered",
+            "suggestion": "cornered",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "obserbed",
+            "suggestion": "observed",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "dear",
+            "suggestion": "deer",
+            "reason": "拼写错误（dear意为亲爱的，deer意为鹿）"
+          },
+          {
+            "original": "clining",
+            "suggestion": "clinging",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "bussinessman",
+            "suggestion": "businessman",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "it must be in the possession",
+            "suggestion": "it must have been in the possession",
+            "reason": "时态错误，应使用完成时表示过去状态"
+          },
+          {
+            "original": "the pumas were not caught",
+            "suggestion": "the puma was not caught",
+            "reason": "主谓不一致（单数puma对应was）"
+          },
+          {
+            "original": "a quite countryside",
+            "suggestion": "the quiet countryside",
+            "reason": "冠词错误（应用the）和拼写错误（quite应为quiet）"
+          }
+        ],
+        "overall_feedback": "整体意思传达准确，句式结构基本完整。主要问题在于拼写错误较多（vallage/barries/conered等）和少量语法错误（时态和主谓一致）。建议加强拼写检查，注意不规则动词的过去分词形式。",
+        "is_acceptable": true
+      },
+      "score": 85
+    },
+    {
+      "id": "2574dbf3-ad6f-4197-8f8d-4730e5363a1b",
+      "timestamp": "2025-08-28T13:04:59.922958",
+      "text_title": "puma 1",
+      "text_content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.",
+      "chinese_translation": "美洲狮是大型的，猫一样的动物，它们在美国被发现。当报告来到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到，它们没有被认真对待。然而，随着证据开始积累，动物园的专家感到有义务调查，因为声称看到美洲狮的人们给出的描述异常相似。",
+      "user_input": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma was spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.",
+      "ai_evaluation": {
+        "score": 95,
+        "corrections": [
+          {
+            "original": "for the descriptions given by people who claimed to have seen the puma were extraordinarily similar",
+            "suggestion": "for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.",
+            "reason": "缺少连接词'because'的引导，但语法结构完整且语义清晰，属于可接受的表达差异"
+          }
+        ],
+        "overall_feedback": "Excellent work! The translation accurately captures the meaning and structure of the original text. The only minor note is the slightly simplified connection between clauses, but it does not affect comprehension. Maintain this high level of accuracy and natural expression.",
+        "is_acceptable": true
+      },
+      "score": 95
+    },
+    {
+      "id": "9c4ac973-1234-4e9b-aaf4-a7af785082b2",
+      "timestamp": "2025-08-28T13:01:43.373552",
+      "text_title": "puma 1",
+      "text_content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.",
+      "chinese_translation": "美洲狮是大型的，猫一样的动物，它们在美国被发现。当报告来到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到，它们没有被认真对待。然而，随着证据开始积累，动物园的专家感到有义务调查，因为声称看到美洲狮的人们给出的描述异常相似。",
+      "user_input": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma was spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate for the descriptions given by people who accalims to have seen the puma were extraordinary similar.",
+      "ai_evaluation": {
+        "score": 85,
+        "corrections": [
+          {
+            "original": "accalims",
+            "suggestion": "claimed",
+            "reason": "拼写错误，应为claimed"
+          },
+          {
+            "original": "extraordinary similar",
+            "suggestion": "extraordinarily similar",
+            "reason": "副词形式错误，需要用副词extraordinarily修饰形容词similar"
+          }
+        ],
+        "overall_feedback": "整体翻译准确，基本保持了原文的结构和含义。主要问题是两处拼写和词性错误，但不影响整体理解。建议注意动词拼写和副词的正确使用。",
+        "is_acceptable": true
+      },
+      "score": 85
+    }
+  ]
+}

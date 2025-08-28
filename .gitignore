@@ -66,3 +66,9 @@ docker-compose.override.yml
 # Documentation files (ignore old docs)
 
 doc.md
+
+# Local data files (personal use only)
+backend/local_data/
+backend/*.json
+backend/practice_history.json
+backend/texts_data.json

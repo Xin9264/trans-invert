@@ -130,6 +130,12 @@ export const textAPI = {
   importMaterials: async (data: any): Promise<APIResponse<any>> => {
     const response = await api.post('/api/texts/materials/import', data);
     return response;
+  },
+
+  // 删除练习材料
+  deleteMaterial: async (textId: string): Promise<APIResponse<any>> => {
+    const response = await api.delete(`/api/texts/${textId}`);
+    return response;
   }
 };
 

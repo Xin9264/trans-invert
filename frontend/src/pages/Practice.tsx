@@ -20,6 +20,7 @@ const Practice: React.FC = () => {
   const [highlights, setHighlights] = useState<any[]>([]); // 文本高亮数据
   const [showHistoryModal, setShowHistoryModal] = useState(false); // 历史回译模态框
   const [practiceHistory, setPracticeHistory] = useState<any[]>([]); // 练习历史记录
+  const [countdown, setCountdown] = useState<number | null>(null); // 倒计时状态
 
   // 高亮数据的存储键
   const getHighlightStorageKey = (textId: string) => `highlights_${textId}`;
@@ -51,6 +52,27 @@ const Practice: React.FC = () => {
       saveHighlights(id, newHighlights);
     }
   };
+
+  // 启动倒计时
+  const startCountdown = () => {
+    setCountdown(5);
+  };
+
+  // 倒计时效果
+  useEffect(() => {
+    if (countdown === null) return;
+    
+    if (countdown === 0) {
+      navigate('/');
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      setCountdown(countdown - 1);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [countdown, navigate]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,7 +118,13 @@ const Practice: React.FC = () => {
           const savedHighlights = loadHighlights(id);
           setHighlights(savedHighlights);
         } else {
-          setError(analysisResponse.message || '文本分析尚未完成，请稍后重试');
+          const errorMessage = analysisResponse.message || '文本分析尚未完成，请稍后重试';
+          setError(errorMessage);
+          
+          // 如果是分析进行中的消息，启动倒计时
+          if (errorMessage.includes('分析正在进行中') || errorMessage.includes('稍安勿躁')) {
+            startCountdown();
+          }
         }
       } catch (error: any) {
         setError(error.response?.data?.error || error.message || '加载失败');
@@ -213,8 +241,34 @@ const Practice: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="text-center">
           <p className="text-red-600 mb-4">{error || '文本不存在'}</p>
-          <button onClick={() => navigate('/')} className="btn-primary">
-            返回首页
+          
+          {/* 倒计时显示 */}
+          {countdown !== null && (
+            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-yellow-800 mb-2">
+                {countdown > 0 
+                  ? `${countdown} 秒后自动返回首页...` 
+                  : '正在返回首页...'
+                }
+              </p>
+              <div className="w-full bg-yellow-200 rounded-full h-2">
+                <div 
+                  className="bg-yellow-600 h-2 rounded-full transition-all duration-1000 ease-linear"
+                  style={{ width: `${((5 - countdown) / 5) * 100}%` }}
+                ></div>
+              </div>
+            </div>
+          )}
+          
+          <button 
+            onClick={() => {
+              setCountdown(null); // 停止倒计时
+              navigate('/');
+            }} 
+            className="btn-primary"
+            disabled={countdown === 0}
+          >
+            {countdown !== null ? '立即返回首页' : '返回首页'}
           </button>
         </div>
       </div>

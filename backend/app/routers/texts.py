@@ -16,6 +16,7 @@ from app.schemas.text import (
     APIResponse
 )
 from app.services.deepseek_service import deepseek_service
+from app.services.data_persistence import data_persistence
 
 router = APIRouter(prefix="/api/texts", tags=["texts"])
 
@@ -23,6 +24,32 @@ router = APIRouter(prefix="/api/texts", tags=["texts"])
 texts_storage: Dict[str, Dict[str, Any]] = {}
 analyses_storage: Dict[str, Dict[str, Any]] = {}
 practice_history: List[PracticeHistoryRecord] = []
+
+def initialize_data():
+    """初始化数据，从本地文件加载"""
+    global practice_history, texts_storage, analyses_storage
+    try:
+        print("🔄 正在从本地文件加载数据...")
+        loaded_history, loaded_texts, loaded_analyses = data_persistence.load_all_data()
+        
+        practice_history = loaded_history
+        texts_storage = loaded_texts
+        analyses_storage = loaded_analyses
+        
+        print(f"✅ 数据加载完成: {len(practice_history)} 条历史记录, {len(texts_storage)} 个文本, {len(analyses_storage)} 个分析结果")
+    except Exception as e:
+        print(f"❌ 数据加载失败: {e}")
+
+def save_data():
+    """保存所有数据到本地文件"""
+    try:
+        data_persistence.save_all_data(practice_history, texts_storage, analyses_storage)
+        print("💾 数据已自动保存到本地文件")
+    except Exception as e:
+        print(f"❌ 数据保存失败: {e}")
+
+# 启动时自动加载数据
+initialize_data()
 
 def count_words(text: str) -> int:
     """计算单词数量"""
@@ -46,6 +73,9 @@ async def upload_text(request: TextUploadRequest, background_tasks: BackgroundTa
             "word_count": word_count,
             "created_at": "now"  # 简化时间处理
         }
+        
+        # 自动保存数据
+        save_data()
         
         # 后台异步分析文本
         background_tasks.add_task(analyze_text_background, text_id, request.content)
@@ -73,6 +103,9 @@ async def analyze_text_background(text_id: str, content: str):
             "key_points": analysis_result["key_points"],
             "word_count": count_words(content)
         }
+        
+        # 自动保存数据
+        save_data()
         
         print(f"✅ 文本 {text_id} 分析完成")
         
@@ -184,6 +217,9 @@ async def submit_practice(request: PracticeSubmitRequest):
         
         # 按时间倒序排列（最新的在前面）
         practice_history.sort(key=lambda x: x.timestamp, reverse=True)
+        
+        # 自动保存数据
+        save_data()
         
         return APIResponse(
             success=True,
@@ -299,6 +335,9 @@ async def submit_practice_stream(request: PracticeSubmitRequest):
                     
                     # 按时间倒序排列（最新的在前面）
                     practice_history.sort(key=lambda x: x.timestamp, reverse=True)
+                    
+                    # 自动保存数据
+                    save_data()
                     
                     print(f"✅ 流式练习记录已保存: {history_record.id}, 得分: {history_record.score}")
                 
@@ -418,6 +457,9 @@ async def import_practice_history(request: PracticeHistoryImportRequest, backgro
         
         # 按时间倒序排列
         practice_history.sort(key=lambda x: x.timestamp, reverse=True)
+        
+        # 自动保存数据
+        save_data()
         
         # 从历史记录中提取练习材料并添加到材料库
         new_materials_count = 0
@@ -617,6 +659,9 @@ async def import_practice_materials(import_data: Dict[str, Any]):
                 skipped_count += 1
                 continue
         
+        # 自动保存数据
+        save_data()
+        
         return APIResponse(
             success=True,
             data={
@@ -631,3 +676,35 @@ async def import_practice_materials(import_data: Dict[str, Any]):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"导入练习材料失败: {str(e)}")
+
+@router.delete("/{text_id}", response_model=APIResponse)
+async def delete_text(text_id: str):
+    """删除指定的练习材料"""
+    try:
+        if text_id not in texts_storage:
+            raise HTTPException(status_code=404, detail="练习材料不存在")
+        
+        # 获取要删除的材料信息
+        text_info = texts_storage[text_id]
+        material_title = text_info.get("title", "未命名材料")
+        
+        # 删除文本数据
+        del texts_storage[text_id]
+        
+        # 删除对应的分析数据（如果存在）
+        if text_id in analyses_storage:
+            del analyses_storage[text_id]
+        
+        # 自动保存数据
+        save_data()
+        
+        return APIResponse(
+            success=True,
+            data={"text_id": text_id, "title": material_title},
+            message=f"练习材料 '{material_title}' 已成功删除"
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"删除练习材料失败: {str(e)}")
