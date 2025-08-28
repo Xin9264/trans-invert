@@ -128,38 +128,63 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
 
   const renderHighlightedText = () => {
     if (activeHighlights.length === 0) {
-      return <span>{text}</span>;
+      return text;
     }
 
-    // 按位置排序高亮
+    // 按位置排序高亮，避免重叠问题
     const sortedHighlights = [...activeHighlights].sort((a, b) => a.start - b.start);
+    
+    // 合并重叠的高亮区域
+    const mergedHighlights = [];
+    for (const highlight of sortedHighlights) {
+      const lastMerged = mergedHighlights[mergedHighlights.length - 1];
+      if (lastMerged && highlight.start <= lastMerged.end) {
+        // 有重叠，扩展现有高亮区域
+        lastMerged.end = Math.max(lastMerged.end, highlight.end);
+        lastMerged.colors = lastMerged.colors || [lastMerged.color];
+        if (!lastMerged.colors.includes(highlight.color)) {
+          lastMerged.colors.push(highlight.color);
+        }
+      } else {
+        // 无重叠，添加新的高亮区域
+        mergedHighlights.push({ ...highlight });
+      }
+    }
+
+    // 使用 React.Fragment 避免额外的包装元素
     const parts = [];
     let lastIndex = 0;
 
-    sortedHighlights.forEach((highlight, index) => {
-      // 添加高亮前的文本
+    mergedHighlights.forEach((highlight, index) => {
+      // 添加高亮前的普通文本
       if (highlight.start > lastIndex) {
-        parts.push(
-          <span key={`text_${index}`}>
-            {text.slice(lastIndex, highlight.start)}
-          </span>
-        );
+        parts.push(text.slice(lastIndex, highlight.start));
       }
 
-      // 添加高亮文本
+      // 添加高亮文本，使用mark元素提供更好的语义
+      const backgroundColor = highlight.colors && highlight.colors.length > 1
+        ? highlight.colors[0] // 如果有多个颜色，使用第一个作为主色
+        : highlight.color;
+      
+      const highlightStyle = {
+        backgroundColor,
+        padding: '1px 2px',
+        borderRadius: '2px',
+        border: 'none',
+        color: 'inherit',
+        boxShadow: highlight.colors && highlight.colors.length > 1 
+          ? `inset 0 0 0 1px ${highlight.colors[1]}` // 第二个颜色作为边框
+          : 'none'
+      };
+
       parts.push(
-        <span
-          key={highlight.id}
-          style={{ 
-            backgroundColor: highlight.color,
-            padding: '2px 4px',
-            borderRadius: '3px',
-            cursor: 'pointer'
-          }}
-          title={`点击取消高亮`}
+        <mark
+          key={`highlight_${index}`}
+          style={highlightStyle}
+          data-highlight-id={highlight.id}
         >
           {text.slice(highlight.start, highlight.end)}
-        </span>
+        </mark>
       );
 
       lastIndex = highlight.end;
@@ -167,11 +192,7 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
 
     // 添加最后剩余的文本
     if (lastIndex < text.length) {
-      parts.push(
-        <span key="text_end">
-          {text.slice(lastIndex)}
-        </span>
-      );
+      parts.push(text.slice(lastIndex));
     }
 
     return parts;
@@ -239,7 +260,6 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
                   onClick={() => addHighlight(color.value)}
                   className="w-8 h-8 rounded-full border-2 border-gray-300 hover:border-gray-400 transition-colors flex items-center justify-center"
                   style={{ backgroundColor: color.value }}
-                  title={`${color.name} - ${color.label}`}
                 >
                   <span className="sr-only">{color.name}</span>
                 </button>

@@ -71,7 +71,7 @@ async def upload_text(request: TextUploadRequest, background_tasks: BackgroundTa
             "title": request.title or f"文本_{text_id[:8]}",
             "content": request.content,
             "word_count": word_count,
-            "created_at": "now"  # 简化时间处理
+            "created_at": datetime.now().isoformat()
         }
         
         # 自动保存数据
@@ -148,6 +148,10 @@ async def get_text_analysis(text_id: str):
     try:
         if text_id not in texts_storage:
             raise HTTPException(status_code=404, detail="文本不存在")
+        
+        # 更新最后打开时间
+        texts_storage[text_id]["last_opened"] = datetime.now().isoformat()
+        save_data()
         
         if text_id not in analyses_storage:
             return APIResponse(
@@ -276,8 +280,13 @@ async def list_texts():
                 "title": text_info["title"],
                 "word_count": text_info["word_count"],
                 "has_analysis": has_analysis,
-                "difficulty": analyses_storage.get(text_id, {}).get("difficulty", 0) if has_analysis else 0
+                "difficulty": analyses_storage.get(text_id, {}).get("difficulty", 0) if has_analysis else 0,
+                "last_opened": text_info.get("last_opened"),
+                "created_at": text_info.get("created_at", datetime.now().isoformat())
             })
+        
+        # 按创建时间倒序排列（最新的在前面）
+        texts_list.sort(key=lambda x: x["created_at"], reverse=True)
         
         return APIResponse(
             success=True,

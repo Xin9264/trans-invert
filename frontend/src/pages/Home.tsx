@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { textAPI } from '../utils/api';
 import { Text } from '../types';
-import { BookOpen, Clock, TrendingUp, Download, Upload, Trash2 } from 'lucide-react';
+import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [texts, setTexts] = useState<Text[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isExporting, setIsExporting] = useState(false);
-  const [isImporting, setIsImporting] = useState(false);
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'card' | 'list'>('card');
 
   // 删除练习材料
   const handleDeleteMaterial = async (textId: string, title: string) => {
@@ -48,7 +47,8 @@ const Home: React.FC = () => {
             content: '', // 不显示内容，保持挑战性
             difficultyLevel: item.difficulty || 0,
             wordCount: item.word_count,
-            createdAt: new Date().toISOString()
+            createdAt: item.created_at,
+            lastOpened: item.last_opened
           }));
           setTexts(formattedTexts);
         }
@@ -62,72 +62,6 @@ const Home: React.FC = () => {
     fetchTexts();
   }, []);
 
-  const handleExportMaterials = async () => {
-    if (texts.length === 0) {
-      alert('没有练习材料可以导出');
-      return;
-    }
-
-    setIsExporting(true);
-    try {
-      const blob = await textAPI.exportMaterials();
-      
-      // 创建下载链接
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      
-      // 生成文件名
-      const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-      link.download = `practice_materials_${timestamp}.json`;
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      alert('练习材料导出成功！');
-    } catch (error) {
-      console.error('导出失败:', error);
-      alert('导出失败，请重试');
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
-  // 导入练习材料
-  const handleImportMaterials = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    setIsImporting(true);
-    try {
-      const text = await file.text();
-      const importData = JSON.parse(text);
-
-      // 验证文件格式
-      if (!importData.materials || !Array.isArray(importData.materials)) {
-        throw new Error('文件格式错误：不是有效的练习材料文件');
-      }
-
-      const response = await textAPI.importMaterials(importData);
-
-      if (response.success) {
-        alert(response.message || '导入成功！');
-        // 刷新练习材料列表
-        window.location.reload();
-      } else {
-        throw new Error(response.error || '导入失败');
-      }
-    } catch (error) {
-      console.error('导入失败:', error);
-      alert('导入失败：' + (error instanceof Error ? error.message : '未知错误'));
-    } finally {
-      setIsImporting(false);
-      // 清空文件输入
-      event.target.value = '';
-    }
-  };
 
   if (isLoading) {
     return (
@@ -193,38 +127,33 @@ const Home: React.FC = () => {
       <div className="py-12">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-900">练习材料</h2>
-          <div className="flex space-x-3">
-            {/* 导入材料按钮 */}
-            <label className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors cursor-pointer">
-              <input
-                type="file"
-                accept=".json"
-                onChange={handleImportMaterials}
-                disabled={isImporting}
-                className="hidden"
-              />
-              {isImporting ? (
-                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-              ) : (
-                <Upload size={16} />
-              )}
-              <span>{isImporting ? '导入中...' : '导入材料'}</span>
-            </label>
-            
-            {/* 导出材料按钮 */}
+          <div className="flex items-center space-x-3">
+            {/* 视图切换按钮 */}
             {texts.length > 0 && (
-              <button
-                onClick={handleExportMaterials}
-                disabled={isExporting}
-                className="flex items-center space-x-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {isExporting ? (
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                ) : (
-                  <Download size={16} />
-                )}
-                <span>{isExporting ? '导出中...' : '导出材料'}</span>
-              </button>
+              <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
+                <button
+                  onClick={() => setViewMode('card')}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-md transition-colors ${
+                    viewMode === 'card' 
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <Grid3X3 size={16} />
+                  <span>卡片</span>
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`flex items-center space-x-1 px-3 py-2 rounded-md transition-colors ${
+                    viewMode === 'list' 
+                      ? 'bg-white text-gray-900 shadow-sm' 
+                      : 'text-gray-600 hover:text-gray-900'
+                  }`}
+                >
+                  <List size={16} />
+                  <span>列表</span>
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -236,41 +165,117 @@ const Home: React.FC = () => {
             </Link>
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {texts.map((text) => (
-              <div key={text.id} className="card hover:shadow-md transition-shadow relative">
-                {/* 删除按钮 */}
-                <button
-                  onClick={() => handleDeleteMaterial(text.id, text.title || '未命名文本')}
-                  disabled={isDeletingId === text.id}
-                  className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  title="删除此材料"
-                >
-                  {isDeletingId === text.id ? (
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                  ) : (
-                    <Trash2 size={16} />
-                  )}
-                </button>
+          <div>
+            {viewMode === 'card' ? (
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {texts.map((text) => (
+                  <div key={text.id} className="card hover:shadow-md transition-shadow relative">
+                    {/* 删除按钮 */}
+                    <button
+                      onClick={() => handleDeleteMaterial(text.id, text.title || '未命名文本')}
+                      disabled={isDeletingId === text.id}
+                      className="absolute top-2 right-2 p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      title="删除此材料"
+                    >
+                      {isDeletingId === text.id ? (
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                      ) : (
+                        <Trash2 size={16} />
+                      )}
+                    </button>
 
-                <h3 className="font-semibold text-gray-900 mb-2 pr-8">
-                  {text.title || '未命名文本'}
-                </h3>
-                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                  {text.content.substring(0, 100)}...
-                </p>
-                <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                  <span>难度: {text.difficultyLevel}/5</span>
-                  <span>{text.wordCount} 词</span>
-                </div>
-                <Link
-                  to={`/practice/${text.id}`}
-                  className="btn-primary w-full text-center"
-                >
-                  开始练习
-                </Link>
+                    <h3 className="font-semibold text-gray-900 mb-2 pr-8">
+                      {text.title || '未命名文本'}
+                    </h3>
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                      {text.content.substring(0, 100)}...
+                    </p>
+                    <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
+                      <span>难度: {text.difficultyLevel}/5</span>
+                      <span>{text.wordCount} 词</span>
+                    </div>
+                    {text.lastOpened && (
+                      <p className="text-xs text-gray-400 mb-2">
+                        上次打开: {new Date(text.lastOpened).toLocaleDateString('zh-CN')}
+                      </p>
+                    )}
+                    <Link
+                      to={`/practice/${text.id}`}
+                      className="btn-primary w-full text-center"
+                    >
+                      开始练习
+                    </Link>
+                  </div>
+                ))}
               </div>
-            ))}
+            ) : (
+              <div className="bg-white rounded-lg shadow overflow-hidden">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        标题
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        难度
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        词数
+                      </th>
+                      <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        上次打开
+                      </th>
+                      <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        操作
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {texts.map((text) => (
+                      <tr key={text.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {text.title || '未命名文本'}
+                          </div>
+                          <div className="text-sm text-gray-500 truncate max-w-xs">
+                            {text.content.substring(0, 50)}...
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {text.difficultyLevel}/5
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {text.wordCount} 词
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {text.lastOpened 
+                            ? new Date(text.lastOpened).toLocaleDateString('zh-CN')
+                            : '未打开'
+                          }
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium space-x-2">
+                          <Link
+                            to={`/practice/${text.id}`}
+                            className="text-indigo-600 hover:text-indigo-900"
+                          >
+                            开始练习
+                          </Link>
+                          <button
+                            onClick={() => handleDeleteMaterial(text.id, text.title || '未命名文本')}
+                            disabled={isDeletingId === text.id}
+                            className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                          >
+                            {isDeletingId === text.id ? '删除中...' : '删除'}
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
       </div>

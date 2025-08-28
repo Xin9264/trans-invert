@@ -179,6 +179,17 @@ export const practiceAPI = {
     onComplete: (result: PracticeEvaluation) => void,
     onError: (error: string) => void
   ): Promise<void> => {
+    let lastProgress = 0;
+    let lastProgressTime = Date.now();
+    let stuckCheckTimer: NodeJS.Timeout | null = null;
+
+    const cleanupTimer = () => {
+      if (stuckCheckTimer) {
+        clearTimeout(stuckCheckTimer);
+        stuckCheckTimer = null;
+      }
+    };
+
     try {
       const response = await fetch(`${API_BASE_URL}/api/texts/practice/submit-stream`, {
         method: 'POST',
@@ -212,6 +223,7 @@ export const practiceAPI = {
             const data = line.slice(6); // 移除 'data: ' 前缀
             
             if (data.trim() === '[DONE]') {
+              cleanupTimer();
               return;
             }
 
@@ -219,11 +231,37 @@ export const practiceAPI = {
               const parsed = JSON.parse(data);
               
               if (parsed.type === 'progress') {
-                onProgress(parsed.progress, parsed.content);
+                const currentProgress = parsed.progress || 0;
+                const currentTime = Date.now();
+                
+                // 检测进度是否卡住 - 进度大于90%且超过15秒没有变化
+                if (currentProgress >= 90 && currentProgress === lastProgress) {
+                  if (currentTime - lastProgressTime > 15000) {
+                    cleanupTimer();
+                    onError('AI评估进度卡住，请重试');
+                    return;
+                  }
+                } else {
+                  // 进度有变化，更新记录
+                  lastProgress = currentProgress;
+                  lastProgressTime = currentTime;
+                }
+                
+                // 设置卡住检测定时器
+                if (currentProgress >= 90 && !stuckCheckTimer) {
+                  stuckCheckTimer = setTimeout(() => {
+                    console.warn('检测到进度可能卡住，触发超时');
+                    onError('AI评估响应超时，请重试');
+                  }, 20000); // 20秒超时
+                }
+                
+                onProgress(currentProgress, parsed.content);
               } else if (parsed.type === 'complete') {
+                cleanupTimer();
                 onComplete(parsed.result);
                 return;
               } else if (parsed.type === 'error') {
+                cleanupTimer();
                 onError(parsed.error);
                 return;
               }
@@ -234,6 +272,7 @@ export const practiceAPI = {
         }
       }
     } catch (error) {
+      cleanupTimer();
       console.error('流式请求失败:', error);
       onError(error instanceof Error ? error.message : '未知错误');
     }
