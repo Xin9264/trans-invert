@@ -3,50 +3,34 @@ substitutions:
   _AR_HOST: 'asia-northeast1-docker.pkg.dev'
   _REPO: 'trans-invert'
   _BACKEND_IMAGE: 'backend'
-  _FRONTEND_IMAGE: 'frontend'
 
 steps:
-  # Build frontend
+  # Build frontend first
   - name: 'node:18'
     entrypoint: 'bash'
     args:
       - '-c'
       - |
-        cd frontend
         echo "📦 Installing frontend dependencies..."
-        npm ci --only=production
+        cd frontend
+        npm ci
         echo "🔨 Building frontend..."
         npm run build
         echo "✅ Frontend build completed"
         ls -la dist/
+        echo "📂 Moving dist to root for Docker context..."
+        mv dist ../frontend-dist
+        ls -la ../frontend-dist/
     
-  # Debug: Check build context
-  - name: 'gcr.io/cloud-builders/docker'
-    entrypoint: 'bash'
-    args:
-      - '-c'
-      - |
-        echo "🔍 Checking build context..."
-        ls -la .
-        echo "📁 Backend directory:"
-        ls -la backend/
-        echo "📄 Dockerfile.prod exists:"
-        ls -la Dockerfile.prod
-        echo "📄 Requirements.txt exists:"
-        ls -la backend/requirements.txt
-    
-  # Build backend image with frontend build included
+  # Build Docker image
   - name: 'gcr.io/cloud-builders/docker'
     args:
       [
         'build',
-        '-f','Dockerfile.prod',
+        '-f','Dockerfile.simple',
         '-t','$_AR_HOST/$PROJECT_ID/$_REPO/$_BACKEND_IMAGE:$COMMIT_SHA',
-        '--no-cache',
         '.'
       ]
-    env:
-      - 'DOCKER_BUILDKIT=1'
 
   # Push image
   - name: 'gcr.io/cloud-builders/docker'
@@ -66,11 +50,7 @@ steps:
         '--cpu','1',
         '--min-instances','0',
         '--max-instances','10',
-        '--concurrency','80',
-        '--timeout','3600',
-        '--execution-environment','gen2',
-        '--set-env-vars','APP_ENV=production,APP_HOST=0.0.0.0,APP_PORT=8000,DEBUG=false',
-        '--update-env-vars','ALLOWED_ORIGINS=*'
+        '--set-env-vars','APP_ENV=production,DEBUG=false'
       ]
 
 images:
