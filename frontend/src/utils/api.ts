@@ -1,6 +1,29 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 'http://localhost:8000';
+
+// 本地存储管理
+export const localStorageManager = {
+  // API配置相关
+  getAIConfig: (): AIConfigData | null => {
+    const config = localStorage.getItem('ai_config');
+    return config ? JSON.parse(config) : null;
+  },
+  
+  setAIConfig: (config: AIConfigData): void => {
+    localStorage.setItem('ai_config', JSON.stringify(config));
+  },
+  
+  removeAIConfig: (): void => {
+    localStorage.removeItem('ai_config');
+  },
+  
+  // 检查是否已配置API
+  hasAIConfig: (): boolean => {
+    const config = localStorageManager.getAIConfig();
+    return config !== null && !!config.api_key;
+  }
+};
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -8,6 +31,28 @@ const api = axios.create({
     'Content-Type': 'application/json',
   },
 });
+
+// 请求拦截器：自动添加用户的API配置到请求头
+api.interceptors.request.use(
+  (config) => {
+    const aiConfig = localStorageManager.getAIConfig();
+    if (aiConfig) {
+      // 将用户的AI配置添加到请求头
+      config.headers['X-AI-Provider'] = aiConfig.provider;
+      config.headers['X-AI-Key'] = aiConfig.api_key;
+      if (aiConfig.base_url) {
+        config.headers['X-AI-Base-URL'] = aiConfig.base_url;
+      }
+      if (aiConfig.model) {
+        config.headers['X-AI-Model'] = aiConfig.model;
+      }
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
 
 // 响应拦截器处理统一的API响应格式
 api.interceptors.response.use(
@@ -181,7 +226,7 @@ export const practiceAPI = {
   ): Promise<void> => {
     let lastProgress = 0;
     let lastProgressTime = Date.now();
-    let stuckCheckTimer: NodeJS.Timeout | null = null;
+    let stuckCheckTimer: number | null = null;
 
     const cleanupTimer = () => {
       if (stuckCheckTimer) {
@@ -191,11 +236,27 @@ export const practiceAPI = {
     };
 
     try {
+      // 获取用户的AI配置
+      const aiConfig = localStorageManager.getAIConfig();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+      
+      // 添加AI配置到请求头
+      if (aiConfig) {
+        headers['X-AI-Provider'] = aiConfig.provider;
+        headers['X-AI-Key'] = aiConfig.api_key;
+        if (aiConfig.base_url) {
+          headers['X-AI-Base-URL'] = aiConfig.base_url;
+        }
+        if (aiConfig.model) {
+          headers['X-AI-Model'] = aiConfig.model;
+        }
+      }
+
       const response = await fetch(`${API_BASE_URL}/api/texts/practice/submit-stream`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers,
         body: JSON.stringify(request),
       });
 
@@ -302,28 +363,112 @@ export interface AIConfigData {
 }
 
 export const aiAPI = {
-  // 获取AI服务状态
+  // 获取当前浏览器中的AI配置状态
   getStatus: async (): Promise<APIResponse<AIStatus>> => {
-    const response = await api.get('/api/texts/ai/status');
-    return response;
+    const config = localStorageManager.getAIConfig();
+    if (config) {
+      return {
+        success: true,
+        data: {
+          configured: true,
+          provider: config.provider,
+          model: config.model || '',
+          api_key_preview: '***已在浏览器中配置***'
+        }
+      };
+    } else {
+      return {
+        success: true,
+        data: {
+          configured: false,
+          provider: '',
+          model: '',
+          api_key_preview: '未配置'
+        }
+      };
+    }
   },
 
-  // 配置AI服务
+  // 配置AI服务（保存到浏览器本地存储）
   configure: async (config: AIConfigData): Promise<APIResponse<any>> => {
-    const response = await api.post('/api/texts/ai/configure', config);
-    return response;
+    try {
+      // 验证配置
+      if (!config.provider || !config.api_key) {
+        return {
+          success: false,
+          message: '提供商和API密钥不能为空'
+        };
+      }
+
+      // 保存到本地存储
+      localStorageManager.setAIConfig(config);
+      
+      return {
+        success: true,
+        message: 'AI配置已保存到浏览器本地存储'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '保存配置失败: ' + (error instanceof Error ? error.message : '未知错误')
+      };
+    }
   },
 
-  // 获取所有已配置的提供商
+  // 获取浏览器中已配置的提供商
   getProviders: async (): Promise<APIResponse<any>> => {
-    const response = await api.get('/api/texts/ai/providers');
-    return response;
+    const config = localStorageManager.getAIConfig();
+    if (config) {
+      return {
+        success: true,
+        data: {
+          [config.provider]: {
+            provider: config.provider,
+            model: config.model || '',
+            base_url: config.base_url || '',
+            api_key_configured: true,
+            api_key_preview: '***浏览器本地存储***'
+          }
+        }
+      };
+    } else {
+      return {
+        success: true,
+        data: {}
+      };
+    }
   },
 
-  // 切换到已配置的提供商
+  // 切换提供商（从本地存储中的配置）
   switchProvider: async (provider: string): Promise<APIResponse<any>> => {
-    const response = await api.post('/api/texts/ai/switch', { provider });
-    return response;
+    const config = localStorageManager.getAIConfig();
+    if (config && config.provider === provider) {
+      return {
+        success: true,
+        message: `已使用 ${provider} 提供商`
+      };
+    } else {
+      return {
+        success: false,
+        message: '提供商配置不存在'
+      };
+    }
+  },
+
+  // 清除本地AI配置
+  clearConfig: async (): Promise<APIResponse<any>> => {
+    try {
+      localStorageManager.removeAIConfig();
+      return {
+        success: true,
+        message: '已清除本地AI配置'
+      };
+    } catch (error) {
+      return {
+        success: false,
+        message: '清除配置失败'
+      };
+    }
   }
 };
 

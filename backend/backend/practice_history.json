@@ -2,6 +2,52 @@
   "version": "1.0",
   "records": [
     {
+      "id": "a39b2cdd-6446-4620-ab66-517e882fc176",
+      "timestamp": "2025-08-28T17:24:28.740566",
+      "text_title": "AI dopamine1",
+      "text_content": "There is a dopamine cycle in doing AI research that is pretty interesting.\n\nEvery day you wake up and you think about what experiment to run. You think thing X matters so you decide to improve it or ablate it. Then you write the code and pay some compute to find out the answer. Then you get dopamine or confusion depending on whether the result matched expectations.",
+      "chinese_translation": "有一个在做AI研究中的多巴胺循环是相当有趣的。每天你醒来并且你思考要运行什么实验。你认为事物X重要所以你决定改进它或消融它。然后你写代码并支付一些计算来找出答案。然后你得到多巴胺或困惑取决于结果是否匹配期望。",
+      "user_input": "There is a dopamine cycle in doing AI research that is pretty interesting. Every day you wake up and think about what experiments to run. You think thing X matters so you decide to improve or ablate it. Then you write code and pay some compute to find the answer. Then you get dopamine or confision which depened on whether the result matches the expection.",
+      "ai_evaluation": {
+        "score": 82,
+        "corrections": [
+          {
+            "original": "confision",
+            "suggestion": "confusion",
+            "reason": "拼写错误，正确的拼写应该是'confusion'"
+          },
+          {
+            "original": "depened",
+            "suggestion": "depends",
+            "reason": "拼写错误，正确的拼写应该是'depends'"
+          },
+          {
+            "original": "expection",
+            "suggestion": "expectation",
+            "reason": "拼写错误，正确的拼写应该是'expectation'"
+          }
+        ],
+        "overall_feedback": "整体表现良好，基本准确地传达了原文的意思，语法大部分正确。不过存在几个拼写错误，如'confision'、'depened'和'expection'，需要注意仔细检查拼写，避免此类小错误。",
+        "is_acceptable": true
+      },
+      "score": 82
+    },
+    {
+      "id": "d091a6c2-7f31-4389-a5ef-44ee5938833e",
+      "timestamp": "2025-08-28T17:01:25.582172",
+      "text_title": "puma 1",
+      "text_content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.",
+      "chinese_translation": "美洲狮是大型的，猫一样的动物，它们在美国被发现。当报告来到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到，它们没有被认真对待。然而，随着证据开始积累，动物园的专家感到有义务调查，因为声称看到美洲狮的人们给出的描述异常相似。",
+      "user_input": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma was spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.",
+      "ai_evaluation": {
+        "score": 95,
+        "corrections": [],
+        "overall_feedback": "你的回译非常优秀，语法正确，表达自然，意思准确，与原文的语法复杂度也很接近。继续保持！",
+        "is_acceptable": true
+      },
+      "score": 95
+    },
+    {
       "id": "10fa0921-9a76-4c7d-b427-7cec325b027a",
       "timestamp": "2025-08-28T16:59:42.261559",
       "text_title": "joke",

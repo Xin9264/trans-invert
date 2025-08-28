@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { aiAPI, AIStatus } from '../utils/api';
+import { aiAPI, AIStatus, localStorageManager } from '../utils/api';
 
 export const useAIStatus = () => {
   const [status, setStatus] = useState<AIStatus | null>(null);
@@ -28,6 +28,16 @@ export const useAIStatus = () => {
 
   useEffect(() => {
     checkStatus();
+    
+    // 监听本地存储变化
+    const handleStorageChange = () => {
+      checkStatus();
+    };
+    
+    window.addEventListener('storage', handleStorageChange);
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+    };
   }, []);
 
   return {
@@ -35,6 +45,6 @@ export const useAIStatus = () => {
     loading,
     error,
     refresh: checkStatus,
-    isConfigured: status?.configured || false
+    isConfigured: localStorageManager.hasAIConfig()
   };
 };

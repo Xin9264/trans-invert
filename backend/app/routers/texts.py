@@ -2,8 +2,8 @@
 import uuid
 import json
 from datetime import datetime
-from typing import Dict, Any, List
-from fastapi import APIRouter, HTTPException, BackgroundTasks
+from typing import Dict, Any, List, Optional
+from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
 from fastapi.responses import StreamingResponse, Response
 from app.schemas.text import (
     TextUploadRequest, 
@@ -15,13 +15,79 @@ from app.schemas.text import (
     PracticeHistoryImportRequest,
     APIResponse
 )
-from app.services.ai_service import ai_service
+from app.services.ai_service import ai_service, AIService
 from app.services.data_persistence import data_persistence
 
 router = APIRouter(prefix="/api/texts", tags=["texts"])
 
 # 内存存储（简化版，生产环境应使用数据库）
 texts_storage: Dict[str, Dict[str, Any]] = {}
+
+def get_user_ai_config(request: Request) -> Optional[Dict[str, str]]:
+    """从请求头中获取用户的AI配置"""
+    headers = request.headers
+    
+    provider = headers.get('x-ai-provider')
+    api_key = headers.get('x-ai-key')
+    base_url = headers.get('x-ai-base-url')
+    model = headers.get('x-ai-model')
+    
+    if not provider or not api_key:
+        return None
+        
+    return {
+        'provider': provider,
+        'api_key': api_key,
+        'base_url': base_url,
+        'model': model
+    }
+
+def create_user_ai_service(user_config: Dict[str, str]) -> AIService:
+    """为用户创建临时的AI服务实例"""
+    from app.services.ai_service import AIProvider
+    
+    # 创建一个新的AI服务实例，使用用户的配置
+    temp_service = AIService.__new__(AIService)  # 不调用__init__
+    temp_service.config_file = None  # 不使用配置文件
+    
+    # 设置提供商
+    provider_str = user_config['provider'].lower()
+    if provider_str == "volcano":
+        temp_service.provider = AIProvider.VOLCANO
+    elif provider_str == "openai":
+        temp_service.provider = AIProvider.OPENAI
+    else:
+        temp_service.provider = AIProvider.DEEPSEEK
+    
+    # 设置配置
+    temp_service.api_key = user_config['api_key']
+    
+    # 设置默认URL和模型
+    if user_config.get('base_url'):
+        temp_service.base_url = user_config['base_url']
+    else:
+        if temp_service.provider == AIProvider.VOLCANO:
+            temp_service.base_url = "https://ark.cn-beijing.volces.com/api/v3"
+        elif temp_service.provider == AIProvider.OPENAI:
+            temp_service.base_url = "https://api.openai.com/v1"
+        else:
+            temp_service.base_url = "https://api.deepseek.com"
+    
+    if user_config.get('model'):
+        temp_service.model = user_config['model']
+    else:
+        if temp_service.provider == AIProvider.VOLCANO:
+            temp_service.model = "doubao-1-5-pro-32k-250115"
+        elif temp_service.provider == AIProvider.OPENAI:
+            temp_service.model = "gpt-4.1"
+        else:
+            temp_service.model = "deepseek-chat"
+    
+    # 初始化客户端
+    temp_service.client = temp_service._init_client()
+    temp_service.async_client = temp_service._init_async_client()
+    
+    return temp_service
 analyses_storage: Dict[str, Dict[str, Any]] = {}
 practice_history: List[PracticeHistoryRecord] = []
 
@@ -51,202 +117,27 @@ def save_data():
 # 启动时自动加载数据
 initialize_data()
 
-@router.get("/ai/status", response_model=APIResponse)
-async def get_ai_status():
-    """获取AI服务配置状态"""
-    try:
-        if ai_service is None:
-            return APIResponse(
-                success=False,
-                data={
-                    "configured": False,
-                    "provider": "none",
-                    "error": "AI服务未配置"
-                },
-                message="AI服务需要配置"
-            )
-        
-        info = ai_service.get_provider_info()
-        return APIResponse(
-            success=True,
-            data={
-                "configured": info["api_key_configured"],
-                "provider": info["provider"],
-                "model": info["model"],
-                "api_key_preview": info["api_key_preview"]
-            },
-            message="AI服务状态获取成功"
-        )
-        
-    except Exception as e:
-        return APIResponse(
-            success=False,
-            data={"configured": False, "error": str(e)},
-            message="获取AI服务状态失败"
-        )
+# AI配置路由已移除 - 现在使用浏览器本地存储管理API key
 
-@router.post("/ai/configure", response_model=APIResponse)
-async def configure_ai(config_data: Dict[str, str]):
-    """配置AI服务"""
-    try:
-        global ai_service
-        
-        # 获取配置参数
-        provider = config_data.get("provider")
-        api_key = config_data.get("api_key")
-        base_url = config_data.get("base_url")
-        model = config_data.get("model")
-        
-        # 验证必要参数
-        if not provider:
-            raise ValueError("缺少provider参数")
-        if not api_key:
-            raise ValueError("缺少api_key参数")
-        
-        # 如果AI服务未初始化，尝试重新创建
-        if ai_service is None:
-            from app.services.ai_service import AIService
-            try:
-                # 临时设置环境变量
-                import os
-                os.environ["AI_PROVIDER"] = provider
-                if provider == "volcano":
-                    os.environ["ARK_API_KEY"] = api_key
-                    if base_url:
-                        os.environ["ARK_BASE_URL"] = base_url
-                    if model:
-                        os.environ["ARK_MODEL"] = model
-                elif provider == "openai":
-                    os.environ["OPENAI_API_KEY"] = api_key
-                    if base_url:
-                        os.environ["OPENAI_BASE_URL"] = base_url
-                    if model:
-                        os.environ["OPENAI_MODEL"] = model
-                else:  # deepseek
-                    os.environ["DEEPSEEK_API_KEY"] = api_key
-                    if base_url:
-                        os.environ["DEEPSEEK_BASE_URL"] = base_url
-                    if model:
-                        os.environ["DEEPSEEK_MODEL"] = model
-                
-                ai_service = AIService()
-                
-            except Exception as init_error:
-                return APIResponse(
-                    success=False,
-                    data={"error": str(init_error)},
-                    message=f"初始化AI服务失败: {str(init_error)}"
-                )
-        else:
-            # 重新配置现有服务
-            success = ai_service.reconfigure(
-                provider=provider,
-                api_key=api_key,
-                base_url=base_url,
-                model=model
-            )
-            
-            if not success:
-                return APIResponse(
-                    success=False,
-                    data={"error": "重新配置失败"},
-                    message="AI服务重新配置失败"
-                )
-        
-        # 返回配置成功信息
-        return APIResponse(
-            success=True,
-            data={
-                "configured": True,
-                "provider": ai_service.provider.value,
-                "model": ai_service.model,
-                "api_key_preview": f"{api_key[:8]}..." if api_key else "未配置"
-            },
-            message="AI服务配置成功"
-        )
-        
-    except Exception as e:
-        return APIResponse(
-            success=False,
-            data={"error": str(e)},
-            message=f"配置失败: {str(e)}"
-        )
-
-@router.get("/ai/providers", response_model=APIResponse)
-async def get_all_providers():
-    """获取所有已配置的AI提供商"""
-    try:
-        if ai_service is None:
-            return APIResponse(
-                success=True,
-                data={},
-                message="暂无已配置的提供商"
-            )
-        
-        providers = ai_service.get_all_configured_providers()
-        return APIResponse(
-            success=True,
-            data=providers,
-            message="获取提供商列表成功"
-        )
-        
-    except Exception as e:
-        return APIResponse(
-            success=False,
-            data={"error": str(e)},
-            message="获取提供商列表失败"
-        )
-
-@router.post("/ai/switch", response_model=APIResponse)
-async def switch_provider(switch_data: Dict[str, str]):
-    """切换到已配置的AI提供商"""
-    try:
-        global ai_service
-        
-        provider = switch_data.get("provider")
-        if not provider:
-            raise ValueError("缺少provider参数")
-        
-        if ai_service is None:
-            return APIResponse(
-                success=False,
-                data={"error": "AI服务未初始化"},
-                message="AI服务未初始化"
-            )
-        
-        success = ai_service.switch_to_provider(provider)
-        if not success:
-            return APIResponse(
-                success=False,
-                data={"error": "切换失败"},
-                message=f"切换到 {provider} 失败"
-            )
-        
-        return APIResponse(
-            success=True,
-            data={
-                "provider": ai_service.provider.value,
-                "model": ai_service.model,
-                "api_key_preview": "***已配置***"
-            },
-            message=f"成功切换到 {provider}"
-        )
-        
-    except Exception as e:
-        return APIResponse(
-            success=False,
-            data={"error": str(e)},
-            message=f"切换提供商失败: {str(e)}"
-        )
+# 注意：原有的AI配置路由（/ai/status, /ai/configure, /ai/providers, /ai/switch）
+# 已被移除，因为现在使用浏览器本地存储来管理用户的API key配置
 
 def count_words(text: str) -> int:
     """计算单词数量"""
     return len(text.strip().split())
 
 @router.post("/upload", response_model=APIResponse)
-async def upload_text(request: TextUploadRequest, background_tasks: BackgroundTasks):
+async def upload_text(request: TextUploadRequest, http_request: Request, background_tasks: BackgroundTasks):
     """上传英文文本并触发AI分析"""
     try:
+        # 获取用户的AI配置
+        user_config = get_user_ai_config(http_request)
+        if not user_config:
+            raise HTTPException(
+                status_code=400, 
+                detail="请先在浏览器中配置AI服务（提供商和API密钥）"
+            )
+        
         # 生成唯一ID
         text_id = str(uuid.uuid4())
         
@@ -265,8 +156,8 @@ async def upload_text(request: TextUploadRequest, background_tasks: BackgroundTa
         # 自动保存数据
         save_data()
         
-        # 后台异步分析文本
-        background_tasks.add_task(analyze_text_background, text_id, request.content)
+        # 后台异步分析文本，传递用户配置
+        background_tasks.add_task(analyze_text_background, text_id, request.content, user_config)
         
         return APIResponse(
             success=True,
@@ -277,10 +168,12 @@ async def upload_text(request: TextUploadRequest, background_tasks: BackgroundTa
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"文本上传失败: {str(e)}")
 
-async def analyze_text_background(text_id: str, content: str):
+async def analyze_text_background(text_id: str, content: str, user_config: Dict[str, str]):
     """后台分析文本"""
     try:
-        analysis_result = await ai_service.analyze_text(content)
+        # 使用用户的AI配置创建临时服务
+        user_ai_service = create_user_ai_service(user_config)
+        analysis_result = await user_ai_service.analyze_text(content)
         
         # 存储分析结果
         analyses_storage[text_id] = {
@@ -361,9 +254,17 @@ async def get_text_analysis(text_id: str):
         raise HTTPException(status_code=500, detail=f"获取分析结果失败: {str(e)}")
 
 @router.post("/practice/submit", response_model=APIResponse)
-async def submit_practice(request: PracticeSubmitRequest):
+async def submit_practice(request: PracticeSubmitRequest, http_request: Request):
     """提交练习答案并获得评估"""
     try:
+        # 获取用户的AI配置
+        user_config = get_user_ai_config(http_request)
+        if not user_config:
+            raise HTTPException(
+                status_code=400, 
+                detail="请先在浏览器中配置AI服务（提供商和API密钥）"
+            )
+        
         if request.text_id not in texts_storage:
             raise HTTPException(status_code=404, detail="文本不存在")
         
@@ -375,8 +276,11 @@ async def submit_practice(request: PracticeSubmitRequest):
         analysis = analyses_storage[request.text_id]
         translation = analysis["translation"]
         
+        # 使用用户的AI配置创建临时服务
+        user_ai_service = create_user_ai_service(user_config)
+        
         # 调用AI评估
-        evaluation = await ai_service.evaluate_answer(
+        evaluation = await user_ai_service.evaluate_answer(
             original_text=original_text,
             translation=translation,
             user_input=request.user_input
@@ -486,9 +390,17 @@ async def list_texts():
         raise HTTPException(status_code=500, detail=f"获取文本列表失败: {str(e)}")
 
 @router.post("/practice/submit-stream")
-async def submit_practice_stream(request: PracticeSubmitRequest):
+async def submit_practice_stream(request: PracticeSubmitRequest, http_request: Request):
     """流式提交练习答案并获得评估"""
     try:
+        # 获取用户的AI配置
+        user_config = get_user_ai_config(http_request)
+        if not user_config:
+            raise HTTPException(
+                status_code=400, 
+                detail="请先在浏览器中配置AI服务（提供商和API密钥）"
+            )
+        
         if request.text_id not in texts_storage:
             raise HTTPException(status_code=404, detail="文本不存在")
         
@@ -504,7 +416,10 @@ async def submit_practice_stream(request: PracticeSubmitRequest):
             """生成流式响应"""
             evaluation_result = None
             try:
-                async for chunk in ai_service.evaluate_answer_stream(
+                # 使用用户的AI配置创建临时服务
+                user_ai_service = create_user_ai_service(user_config)
+                
+                async for chunk in user_ai_service.evaluate_answer_stream(
                     original_text=original_text,
                     translation=translation,
                     user_input=request.user_input

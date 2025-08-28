@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { aiAPI, AIStatus } from '../utils/api';
+import { aiAPI, AIStatus, localStorageManager } from '../utils/api';
 
 interface AIConfigModalProps {
   isOpen: boolean;
@@ -43,12 +43,21 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, onConfig
     if (isOpen) {
       loadAIStatus();
       loadConfiguredProviders();
-      // 设置默认值
-      const config = providerConfigs[provider as keyof typeof providerConfigs];
-      setBaseUrl(config.defaultBaseUrl);
-      setModel(config.defaultModel);
+      // 从本地存储加载现有配置
+      const savedConfig = localStorageManager.getAIConfig();
+      if (savedConfig) {
+        setProvider(savedConfig.provider);
+        setApiKey(savedConfig.api_key);
+        setBaseUrl(savedConfig.base_url || providerConfigs[savedConfig.provider as keyof typeof providerConfigs].defaultBaseUrl);
+        setModel(savedConfig.model || providerConfigs[savedConfig.provider as keyof typeof providerConfigs].defaultModel);
+      } else {
+        // 设置默认值
+        const config = providerConfigs[provider as keyof typeof providerConfigs];
+        setBaseUrl(config.defaultBaseUrl);
+        setModel(config.defaultModel);
+      }
     }
-  }, [isOpen, provider]);
+  }, [isOpen]);
 
   const loadAIStatus = async () => {
     try {
@@ -114,12 +123,18 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, onConfig
   };
 
   const handleReset = () => {
+    // 清除本地存储
+    localStorageManager.removeAIConfig();
+    // 重置表单
     setApiKey('');
     setProvider('deepseek');
     const config = providerConfigs.deepseek;
     setBaseUrl(config.defaultBaseUrl);
     setModel(config.defaultModel);
     setShowNewConfig(true);
+    // 刷新状态
+    loadAIStatus();
+    loadConfiguredProviders();
   };
 
   const handleSwitchProvider = async (providerName: string) => {
@@ -305,9 +320,10 @@ const AIConfigModal: React.FC<AIConfigModalProps> = ({ isOpen, onClose, onConfig
               💡 提示：
             </p>
             <ul className="text-xs text-green-700 mt-1 ml-4 list-disc">
+              <li>API密钥仅保存在您的浏览器中，服务器不会存储</li>
               <li>配置将立即生效，无需重启服务</li>
-              <li>可以随时切换不同的AI提供商</li>
-              <li>新配置会覆盖环境变量中的设置</li>
+              <li>每次使用时都会使用您自己的API密钥</li>
+              <li>清除浏览器数据会删除API配置</li>
             </ul>
           </div>
 

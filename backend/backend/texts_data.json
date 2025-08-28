@@ -7,7 +7,7 @@
       "content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.",
       "word_count": 64,
       "created_at": "2025-08-27T00:00:00.000000",
-      "last_opened": "2025-08-28T06:43:08.228350"
+      "last_opened": "2025-08-28T17:01:11.064149"
     },
     "f19bc656-6302-4e72-87b5-66ced6fbe7a9": {
       "id": "f19bc656-6302-4e72-87b5-66ced6fbe7a9",
@@ -22,7 +22,8 @@
       "title": "AI dopamine1",
       "content": "There is a dopamine cycle in doing AI research that is pretty interesting.\n\nEvery day you wake up and you think about what experiment to run. You think thing X matters so you decide to improve it or ablate it. Then you write the code and pay some compute to find out the answer. Then you get dopamine or confusion depending on whether the result matched expectations.",
       "word_count": 67,
-      "created_at": "2025-08-27T00:00:00.000000"
+      "created_at": "2025-08-27T00:00:00.000000",
+      "last_opened": "2025-08-28T17:23:51.629251"
     },
     "8d189f86-b836-4af6-88c1-7a2488d30450": {
       "id": "8d189f86-b836-4af6-88c1-7a2488d30450",
@@ -62,7 +63,7 @@
       "content": "A man walks into a library and whispers, “Excuse me, can I have a burger, fries, and a soda?”\n\nThe librarian looks shocked and says, “Sir, this is a library!”\n\nThe man nods, lowers his voice even more, and whispers, “Sorry… can I have a burger, fries, and a soda?”\n\nThe librarian sighs and replies, “Sir, we don’t serve food here.”\n\nThe man frowns. “Then why do you call it a library? Every time I come here, you people shush me like it’s a five-star restaurant!”\n\nThe librarian whispers back, “Because the menu is books.”",
       "word_count": 95,
       "created_at": "2025-08-28T16:56:42.916505",
-      "last_opened": "2025-08-28T16:59:18.607785"
+      "last_opened": "2025-08-28T17:23:44.522224"
     }
   }
 }
