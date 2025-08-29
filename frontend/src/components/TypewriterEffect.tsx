@@ -16,9 +16,9 @@ const TypewriterEffect: React.FC<TypewriterEffectProps> = ({
   showCursor = true
 }) => {
   const [displayedText, setDisplayedText] = useState('');
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [, setCurrentIndex] = useState(0);
   const [isCompleted, setIsCompleted] = useState(false);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     // 重置状态

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { textAPI, practiceAPI } from '../utils/api';
 import { Text } from '../types';
-import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List, FileText, Edit3 } from 'lucide-react';
+import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [texts, setTexts] = useState<Text[]>([]);
@@ -57,7 +57,7 @@ const Home: React.FC = () => {
             createdBy: '', // 暂时设为空字符串，因为后端没有用户系统
             createdAt: item.created_at,
             lastOpened: item.last_opened,
-            type: 'translation' // 标记为回译材料
+            type: 'translation' as const // 标记为回译材料
           }));
           allTexts.push(...formattedTexts);
         }
@@ -75,7 +75,7 @@ const Home: React.FC = () => {
               createdBy: 'AI生成',
               createdAt: record.timestamp,
               lastOpened: record.timestamp,
-              type: 'essay' // 标记为作文材料
+              type: 'essay' as const // 标记为作文材料
             }));
           allTexts.push(...essayMaterials);
         }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { practiceAPI, PracticeHistoryRecord, PracticeHistoryExport, essayAPI, EssayHistoryRecord } from '../utils/api';
-import { Calendar, TrendingUp, Target, Clock, Download, Upload, FileText, Edit3 } from 'lucide-react';
+import { Calendar, TrendingUp, Target, Clock, Download, Upload } from 'lucide-react';
 
 // 统一的历史记录类型
 interface UnifiedHistoryRecord {
@@ -185,9 +185,28 @@ const History: React.FC = () => {
       if (response.success) {
         // 重新获取历史记录
         const historyResponse = await practiceAPI.getHistory();
-        if (historyResponse.success) {
-          setRecords(historyResponse.data || []);
-          calculateStats(historyResponse.data || []);
+        if (historyResponse.success && historyResponse.data) {
+          // 转换为统一格式
+          const unifiedRecords: UnifiedHistoryRecord[] = [];
+          historyResponse.data.forEach(record => {
+            const practiceType = (record as any).practice_type || 'translation';
+            const recordType = practiceType === 'essay' ? 'essay-study' : 'practice';
+            
+            unifiedRecords.push({
+              id: record.id,
+              type: recordType,
+              title: record.text_title || '未命名文本',
+              content: record.text_content,
+              score: record.score,
+              timestamp: record.timestamp,
+              userInput: record.user_input,
+              feedback: record.ai_evaluation.overall_feedback,
+              originalRecord: record
+            });
+          });
+          
+          setRecords(unifiedRecords);
+          calculateStats(unifiedRecords);
         }
         
         alert(response.message || '导入成功！');
