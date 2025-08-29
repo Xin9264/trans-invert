@@ -43,11 +43,11 @@ const Essay: React.FC = () => {
   const [requirements, setRequirements] = useState('');
   const [session, setSession] = useState<EssaySession | null>(null);
   const [evaluation, setEvaluation] = useState<EssayEvaluation | null>(null);
-  const [userEssay, setUserEssay] = useState('');
+  const [_userEssay, setUserEssay] = useState('');
   
   // 流式响应状态（仅用于生成阶段）
   const [streamProgress, setStreamProgress] = useState(0);
-  const [streamMessage, setStreamMessage] = useState('');
+  const [_streamMessage, setStreamMessage] = useState('');
   const [streamContent, setStreamContent] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
 
