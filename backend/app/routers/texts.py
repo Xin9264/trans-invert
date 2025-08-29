@@ -227,8 +227,48 @@ async def re_analyze_imported_text(text_id: str, content: str, existing_translat
 async def get_text_analysis(text_id: str):
     """获取文本分析结果"""
     try:
+        # 首先检查是否在texts_storage中
         if text_id not in texts_storage:
-            raise HTTPException(status_code=404, detail="文本不存在")
+            # 如果不在texts_storage中，检查是否是作文样本ID（在practice_history中）
+            essay_record = None
+            for record in practice_history:
+                if hasattr(record, 'practice_type') and getattr(record, 'practice_type') == 'essay':
+                    # 检查是否有匹配的ID模式（可能是从记录ID生成的）
+                    if text_id in record.text_content or record.id == text_id:
+                        essay_record = record
+                        break
+            
+            if not essay_record:
+                # 检查是否是作文范文的文本内容ID
+                for record in practice_history:
+                    if hasattr(record, 'practice_type') and getattr(record, 'practice_type') == 'essay':
+                        # 为作文范文创建虚拟的分析结果
+                        if len(record.text_content) > 0:  # 确保有内容
+                            # 使用文本内容的哈希作为可能的ID匹配
+                            content_hash = str(hash(record.text_content))
+                            if text_id in content_hash or text_id == record.id:
+                                essay_record = record
+                                break
+                
+                if not essay_record:
+                    raise HTTPException(status_code=404, detail="文本不存在")
+            
+            # 为作文样本创建虚拟的分析结果
+            word_count = len(essay_record.text_content.split())
+            analysis = {
+                "text_id": text_id,
+                "translation": essay_record.chinese_translation,
+                "difficult_words": [{"word": "作文", "meaning": "essay writing"}],
+                "difficulty": 4,  # 作文默认中等偏上难度
+                "key_points": ["作文范文", "学习参考"],
+                "word_count": word_count
+            }
+            
+            return APIResponse(
+                success=True,
+                data=TextAnalysisResponse(**analysis),
+                message="获取作文分析结果成功"
+            )
         
         # 更新最后打开时间
         texts_storage[text_id]["last_opened"] = datetime.now().isoformat()
@@ -332,8 +372,48 @@ async def submit_practice(request: PracticeSubmitRequest, http_request: Request)
 async def get_text(text_id: str, include_content: bool = False):
     """获取文本信息"""
     try:
+        # 首先检查是否在texts_storage中
         if text_id not in texts_storage:
-            raise HTTPException(status_code=404, detail="文本不存在")
+            # 如果不在texts_storage中，检查是否是作文样本ID（在practice_history中）
+            essay_record = None
+            for record in practice_history:
+                if hasattr(record, 'practice_type') and getattr(record, 'practice_type') == 'essay':
+                    # 检查是否有匹配的ID模式
+                    if record.id == text_id or text_id in record.text_content:
+                        essay_record = record
+                        break
+            
+            if not essay_record:
+                # 第二次尝试：检查是否是作文范文的任何相关ID
+                for record in practice_history:
+                    if hasattr(record, 'practice_type') and getattr(record, 'practice_type') == 'essay':
+                        if len(record.text_content) > 0:
+                            # 使用更宽松的匹配条件
+                            content_hash = str(hash(record.text_content))
+                            if text_id in content_hash or text_id == record.id:
+                                essay_record = record
+                                break
+                
+                if not essay_record:
+                    raise HTTPException(status_code=404, detail="文本不存在")
+            
+            # 为作文样本创建虚拟的文本信息
+            word_count = len(essay_record.text_content.split())
+            data = {
+                "text_id": text_id,
+                "title": essay_record.text_title,
+                "word_count": word_count,
+            }
+            
+            # 只有明确要求时才返回原文内容
+            if include_content:
+                data["content"] = essay_record.text_content
+            
+            return APIResponse(
+                success=True,
+                data=data,
+                message="获取作文文本信息成功"
+            )
         
         text_info = texts_storage[text_id]
         
