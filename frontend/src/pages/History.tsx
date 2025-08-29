@@ -6,7 +6,7 @@ import { Calendar, TrendingUp, Target, Clock, Download, Upload, FileText, Edit3 
 // 统一的历史记录类型
 interface UnifiedHistoryRecord {
   id: string;
-  type: 'practice' | 'essay';
+  type: 'practice' | 'essay' | 'essay-study'; // 添加作文范文学习类型
   title: string;
   content: string;
   score: number;
@@ -44,9 +44,13 @@ const History: React.FC = () => {
         // 处理回译练习记录
         if (practiceResponse.success && practiceResponse.data) {
           practiceResponse.data.forEach(record => {
+            // 根据 practice_type 字段判断类型
+            const practiceType = (record as any).practice_type || 'translation';
+            const recordType = practiceType === 'essay' ? 'essay-study' : 'practice';
+            
             unifiedRecords.push({
               id: record.id,
-              type: 'practice',
+              type: recordType,
               title: record.text_title || '未命名文本',
               content: record.text_content,
               score: record.score,
@@ -95,7 +99,7 @@ const History: React.FC = () => {
 
     const totalSessions = records.length;
     const practiceCount = records.filter(r => r.type === 'practice').length;
-    const essayCount = records.filter(r => r.type === 'essay').length;
+    const essayCount = records.filter(r => r.type === 'essay' || r.type === 'essay-study').length;
     const averageScore = Math.round(records.reduce((sum, record) => sum + record.score, 0) / totalSessions);
     const totalTimeSpent = 0; // 简化处理
     const bestScore = Math.max(...records.map(record => record.score));
@@ -319,10 +323,12 @@ const History: React.FC = () => {
                       </h3>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
                         record.type === 'essay' 
-                          ? 'bg-purple-100 text-purple-700' 
+                          ? 'bg-purple-100 text-purple-700'
+                          : record.type === 'essay-study'
+                          ? 'bg-green-100 text-green-700'
                           : 'bg-blue-100 text-blue-700'
                       }`}>
-                        {record.type === 'essay' ? '作文' : '回译'}
+                        {record.type === 'essay' ? '作文' : record.type === 'essay-study' ? '作文' : '回译'}
                       </span>
                     </div>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -342,6 +348,8 @@ const History: React.FC = () => {
                       onClick={() => {
                         if (record.type === 'essay') {
                           alert(`作文题目：${record.title}\n\n范文：${record.content.substring(0, 100)}...\n\n您的作文：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
+                        } else if (record.type === 'essay-study') {
+                          alert(`作文范文：${record.title}\n\n英文范文：${record.content.substring(0, 200)}...\n\n中文思路：${(record.originalRecord as PracticeHistoryRecord).chinese_translation.substring(0, 200)}...\n\n说明：这是AI生成的作文范文，供学习参考。`);
                         } else {
                           alert(`文章：${record.title}\n\n英文原文：${record.content.substring(0, 100)}...\n\n您的回译：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
                         }

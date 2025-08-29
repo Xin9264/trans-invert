@@ -802,9 +802,8 @@ ALLOWED_ORIGINS=http://localhost:3000
                     if field not in result:
                         raise Exception(f"AI响应缺少必要字段: {field}")
                 
-                # 确保数据类型正确
-                result["overall_score"] = int(result["overall_score"])
-                result["overall_score"] = max(0, min(100, result["overall_score"]))
+                # 根据考试类型验证和调整分数
+                result = self._validate_essay_scores(result, exam_type)
                 
                 if not isinstance(result["strengths"], list):
                     result["strengths"] = []
@@ -848,6 +847,51 @@ ALLOWED_ORIGINS=http://localhost:3000
                 progress += weight
         
         return min(100, progress)
+
+    def _validate_essay_scores(self, result: Dict[str, Any], exam_type: str) -> Dict[str, Any]:
+        """根据考试类型验证和调整分数"""
+        # 考试类型对应的分数范围
+        score_ranges = {
+            'ielts': {'min': 0, 'max': 9, 'step': 0.5},  # 雅思：0-9分，0.5分制
+            'toefl': {'min': 0, 'max': 30, 'step': 1},   # 托福：0-30分，整数
+            'cet4': {'min': 0, 'max': 100, 'step': 1},   # 四级：0-100分，整数
+            'cet6': {'min': 0, 'max': 100, 'step': 1},   # 六级：0-100分，整数
+            'gre': {'min': 0, 'max': 6, 'step': 0.5}     # GRE：0-6分，0.5分制
+        }
+        
+        # 获取当前考试类型的分数范围，默认使用100分制
+        score_config = score_ranges.get(exam_type, {'min': 0, 'max': 100, 'step': 1})
+        min_score = score_config['min']
+        max_score = score_config['max']
+        step = score_config['step']
+        
+        # 验证总分
+        overall_score = float(result.get("overall_score", 0))
+        overall_score = max(min_score, min(max_score, overall_score))
+        
+        # 根据step调整分数（四舍五入到最近的有效分数）
+        if step == 0.5:
+            overall_score = round(overall_score * 2) / 2
+        else:
+            overall_score = round(overall_score)
+        
+        result["overall_score"] = overall_score
+        
+        # 验证分项得分
+        if "detailed_scores" in result and isinstance(result["detailed_scores"], dict):
+            for key, score in result["detailed_scores"].items():
+                score = float(score)
+                score = max(min_score, min(max_score, score))
+                
+                # 根据step调整分数
+                if step == 0.5:
+                    score = round(score * 2) / 2
+                else:
+                    score = round(score)
+                
+                result["detailed_scores"][key] = score
+        
+        return result
 
 # 创建全局AI服务实例
 try:

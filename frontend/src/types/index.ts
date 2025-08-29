@@ -14,6 +14,7 @@ export interface Text {
   createdBy: string;
   createdAt: string;
   lastOpened?: string;
+  type?: 'translation' | 'essay'; // 添加类型字段
 }
 
 export interface DifficultWord {

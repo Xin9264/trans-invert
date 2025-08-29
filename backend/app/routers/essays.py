@@ -18,6 +18,9 @@ from app.schemas.text import APIResponse
 from app.services.ai_service import ai_service, AIService
 from app.services.data_persistence import data_persistence
 
+# 导入texts.py中的全局变量和函数
+from app.routers.texts import practice_history, save_data
+
 router = APIRouter(prefix="/api/essays", tags=["essays"])
 
 # 内存存储（简化版，生产环境应使用数据库）
@@ -210,6 +213,39 @@ async def create_essay_session(request: EssayGenerationRequest, http_request: Re
                         
                         # 保存会话
                         essay_sessions[session_id] = session
+                        
+                        # 将生成的范文保存为练习历史记录（作为学习材料）
+                        try:
+                            from app.schemas.text import PracticeHistoryRecord
+                            
+                            # 创建一个特殊的练习历史记录，标记为"作文"类型
+                            essay_study_record = PracticeHistoryRecord(
+                                id=str(uuid.uuid4()),
+                                timestamp=datetime.now().isoformat(),
+                                text_title=f"作文范文：{request.topic[:50]}{'...' if len(request.topic) > 50 else ''}",
+                                text_content=english_essay,
+                                chinese_translation=chinese_translation,
+                                user_input="",  # 范文阶段没有用户输入
+                                ai_evaluation={
+                                    "score": 100,  # 范文默认满分
+                                    "corrections": [],
+                                    "overall_feedback": "这是AI生成的作文范文，供学习参考。",
+                                    "is_acceptable": True
+                                },
+                                score=100,
+                                practice_type="essay"  # 添加练习类型标识
+                            )
+                            
+                            # 添加到练习历史中
+                            practice_history.append(essay_study_record)
+                            practice_history.sort(key=lambda x: x.timestamp, reverse=True)
+                            
+                            # 保存数据
+                            save_data()
+                            
+                            print(f"✅ 作文范文已保存为学习材料: {essay_study_record.id}")
+                        except Exception as e:
+                            print(f"⚠️ 保存作文范文失败: {e}")
                         
                         # 发送完成信息
                         complete_chunk = {

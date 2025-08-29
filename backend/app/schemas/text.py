@@ -38,6 +38,7 @@ class PracticeHistoryRecord(BaseModel):
     user_input: str = Field(..., description="用户输入")
     ai_evaluation: Dict[str, Any] = Field(..., description="AI评价")
     score: int = Field(..., ge=0, le=100, description="得分")
+    practice_type: Optional[str] = Field(default="translation", description="练习类型：translation(回译), essay(作文)")
 
 class PracticeHistoryExport(BaseModel):
     """练习历史导出格式"""

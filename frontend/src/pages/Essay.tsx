@@ -276,10 +276,23 @@ const Essay: React.FC = () => {
     setStreamContent('');
   };
 
-  // 获取分数颜色
-  const getScoreColor = (score: number) => {
-    if (score >= 80) return 'text-green-600';
-    if (score >= 60) return 'text-yellow-600';
+  // 获取考试类型的分数范围
+  const getScoreRange = (examType: string) => {
+    const ranges: Record<string, { max: number, good: number, fair: number }> = {
+      'ielts': { max: 9, good: 7, fair: 5.5 },
+      'toefl': { max: 30, good: 24, fair: 18 },
+      'cet4': { max: 100, good: 80, fair: 60 },
+      'cet6': { max: 100, good: 80, fair: 60 },
+      'gre': { max: 6, good: 4.5, fair: 3 }
+    };
+    return ranges[examType] || { max: 100, good: 80, fair: 60 };
+  };
+
+  // 获取分数颜色（根据考试类型调整）
+  const getScoreColor = (score: number, examType: string = session?.exam_type || 'ielts') => {
+    const range = getScoreRange(examType);
+    if (score >= range.good) return 'text-green-600';
+    if (score >= range.fair) return 'text-yellow-600';
     return 'text-red-600';
   };
 
@@ -540,10 +553,10 @@ const Essay: React.FC = () => {
               {/* 总分 */}
               <div className="text-center p-6 bg-gray-50 rounded-lg">
                 <div className="text-3xl font-bold mb-2">
-                  <span className={getScoreColor(evaluation.overall_score)}>
+                  <span className={getScoreColor(evaluation.overall_score, session.exam_type)}>
                     {evaluation.overall_score}
                   </span>
-                  <span className="text-gray-500 text-lg">/100</span>
+                  <span className="text-gray-500 text-lg">/{getScoreRange(session.exam_type).max}</span>
                 </div>
                 <p className="text-gray-600">总分</p>
               </div>
@@ -561,8 +574,8 @@ const Essay: React.FC = () => {
                   return (
                     <div key={key} className="flex justify-between items-center">
                       <span className="text-gray-600">{labels[key]}</span>
-                      <span className={`font-medium ${getScoreColor(score)}`}>
-                        {score}/100
+                      <span className={`font-medium ${getScoreColor(score, session.exam_type)}`}>
+                        {score}/{getScoreRange(session.exam_type).max}
                       </span>
                     </div>
                   );

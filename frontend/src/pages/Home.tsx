@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { textAPI } from '../utils/api';
+import { textAPI, practiceAPI } from '../utils/api';
 import { Text } from '../types';
-import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List } from 'lucide-react';
+import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List, FileText, Edit3 } from 'lucide-react';
 
 const Home: React.FC = () => {
   const [texts, setTexts] = useState<Text[]>([]);
@@ -38,10 +38,17 @@ const Home: React.FC = () => {
   useEffect(() => {
     const fetchTexts = async () => {
       try {
-        const response = await textAPI.getAll();
-        if (response.success && response.data) {
-          // 转换数据格式以适配前端组件
-          const formattedTexts = response.data.map((item: any) => ({
+        // 并行获取文本材料和练习历史
+        const [textsResponse, historyResponse] = await Promise.all([
+          textAPI.getAll(),
+          practiceAPI.getHistory()
+        ]);
+        
+        const allTexts: Text[] = [];
+        
+        // 处理上传的文本材料
+        if (textsResponse.success && textsResponse.data) {
+          const formattedTexts = textsResponse.data.map((item: any) => ({
             id: item.text_id,
             title: item.title,
             content: '', // 不显示内容，保持挑战性
@@ -49,10 +56,34 @@ const Home: React.FC = () => {
             wordCount: item.word_count,
             createdBy: '', // 暂时设为空字符串，因为后端没有用户系统
             createdAt: item.created_at,
-            lastOpened: item.last_opened
+            lastOpened: item.last_opened,
+            type: 'translation' // 标记为回译材料
           }));
-          setTexts(formattedTexts);
+          allTexts.push(...formattedTexts);
         }
+        
+        // 处理作文范文材料
+        if (historyResponse.success && historyResponse.data) {
+          const essayMaterials = historyResponse.data
+            .filter((record: any) => record.practice_type === 'essay')
+            .map((record: any) => ({
+              id: record.id,
+              title: record.text_title,
+              content: '', // 不显示内容，保持挑战性
+              difficultyLevel: 5, // 作文材料默认难度5
+              wordCount: record.text_content.split(' ').length,
+              createdBy: 'AI生成',
+              createdAt: record.timestamp,
+              lastOpened: record.timestamp,
+              type: 'essay' // 标记为作文材料
+            }));
+          allTexts.push(...essayMaterials);
+        }
+        
+        // 按创建时间排序（最新的在前）
+        allTexts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        
+        setTexts(allTexts);
       } catch (error) {
         console.error('Failed to fetch texts:', error);
       } finally {
@@ -192,7 +223,14 @@ const Home: React.FC = () => {
                       {text.content.substring(0, 100)}...
                     </p>
                     <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                      <span>难度: {text.difficultyLevel}/5</span>
+                      <div className="flex items-center space-x-2">
+                        <span>难度: {text.difficultyLevel}/5</span>
+                        {text.type === 'essay' && (
+                          <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                            作文
+                          </span>
+                        )}
+                      </div>
                       <span>{text.wordCount} 词</span>
                     </div>
                     {text.lastOpened && (
@@ -235,11 +273,20 @@ const Home: React.FC = () => {
                     {texts.map((text) => (
                       <tr key={text.id} className="hover:bg-gray-50">
                         <td className="px-6 py-4 whitespace-nowrap">
-                          <div className="text-sm font-medium text-gray-900">
-                            {text.title || '未命名文本'}
-                          </div>
-                          <div className="text-sm text-gray-500 truncate max-w-xs">
-                            {text.content.substring(0, 50)}...
+                          <div className="flex items-center space-x-2">
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                {text.title || '未命名文本'}
+                              </div>
+                              <div className="text-sm text-gray-500 truncate max-w-xs">
+                                {text.content.substring(0, 50)}...
+                              </div>
+                            </div>
+                            {text.type === 'essay' && (
+                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
+                                作文
+                              </span>
+                            )}
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
