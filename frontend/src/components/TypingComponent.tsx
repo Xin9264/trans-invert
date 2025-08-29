@@ -208,7 +208,11 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
           value={userInput}
           onChange={handleInputChange}
           placeholder="开始输入英文..."
-          className="w-full p-4 border-2 border-gray-300 rounded-lg font-mono text-lg resize-none focus:border-primary-500 focus:outline-none min-h-[120px] max-h-[400px] overflow-y-auto"
+          className="w-full p-4 border-2 border-gray-300 rounded-lg font-mono text-base resize-none focus:border-primary-500 focus:outline-none min-h-[200px] max-h-[500px] overflow-y-auto leading-loose"
+          style={{ 
+            lineHeight: '1.8',
+            fontSize: '16px'
+          }}
           disabled={isSubmitting}
         />
         

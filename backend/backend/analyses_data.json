@@ -256,6 +256,21 @@
         "five-star restaurant"
       ],
       "word_count": 95
+    },
+    "a5b28cec-6614-4ef8-ba16-12e57898ea2b": {
+      "text_id": "a5b28cec-6614-4ef8-ba16-12e57898ea2b",
+      "translation": "文本分析失败: deepseek API请求失败: Error code: 401 - {'error': {'message': 'Authentication Fails, Your api key: test is invalid', 'type': 'authentication_error', 'param': None, 'code': 'invalid_request_error'}}",
+      "difficult_words": [
+        {
+          "word": "分析失败",
+          "meaning": "请稍后重试"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "分析失败"
+      ],
+      "word_count": 59
     }
   }
 }

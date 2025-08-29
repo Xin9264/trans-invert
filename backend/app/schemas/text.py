@@ -6,6 +6,8 @@ class TextUploadRequest(BaseModel):
     """文本上传请求"""
     content: str = Field(..., min_length=10, max_length=10000, description="英文文本内容")
     title: Optional[str] = Field(None, max_length=200, description="文本标题（可选）")
+    practice_type: Optional[str] = Field(default="translation", description="练习类型：translation(回译), essay(作文)")
+    topic: Optional[str] = Field(default=None, max_length=500, description="作文原始题目（仅作文类型使用）")
 
 class TextAnalysisResponse(BaseModel):
     """AI文本分析响应"""
@@ -39,6 +41,7 @@ class PracticeHistoryRecord(BaseModel):
     ai_evaluation: Dict[str, Any] = Field(..., description="AI评价")
     score: int = Field(..., ge=0, le=100, description="得分")
     practice_type: Optional[str] = Field(default="translation", description="练习类型：translation(回译), essay(作文)")
+    topic: Optional[str] = Field(default=None, description="作文原始题目（仅作文类型使用）")
 
 class PracticeHistoryExport(BaseModel):
     """练习历史导出格式"""

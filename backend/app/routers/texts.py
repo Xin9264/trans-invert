@@ -150,7 +150,9 @@ async def upload_text(request: TextUploadRequest, http_request: Request, backgro
             "title": request.title or f"文本_{text_id[:8]}",
             "content": request.content,
             "word_count": word_count,
-            "created_at": datetime.now().isoformat()
+            "created_at": datetime.now().isoformat(),
+            "practice_type": request.practice_type or "translation",
+            "topic": request.topic
         }
         
         # 自动保存数据
@@ -403,6 +405,8 @@ async def get_text(text_id: str, include_content: bool = False):
                 "text_id": text_id,
                 "title": essay_record.text_title,
                 "word_count": word_count,
+                "practice_type": getattr(essay_record, 'practice_type', 'essay'),
+                "topic": getattr(essay_record, 'topic', None)
             }
             
             # 只有明确要求时才返回原文内容
@@ -421,6 +425,8 @@ async def get_text(text_id: str, include_content: bool = False):
             "text_id": text_info["id"],
             "title": text_info["title"],
             "word_count": text_info["word_count"],
+            "practice_type": text_info.get("practice_type", "translation"),
+            "topic": text_info.get("topic")
         }
         
         # 只有明确要求时才返回原文内容
@@ -454,7 +460,9 @@ async def list_texts():
                 "has_analysis": has_analysis,
                 "difficulty": analyses_storage.get(text_id, {}).get("difficulty", 0) if has_analysis else 0,
                 "last_opened": text_info.get("last_opened"),
-                "created_at": text_info.get("created_at", datetime.now().isoformat())
+                "created_at": text_info.get("created_at", datetime.now().isoformat()),
+                "practice_type": text_info.get("practice_type", "translation"),
+                "topic": text_info.get("topic")
             })
         
         # 按创建时间倒序排列（最新的在前面）

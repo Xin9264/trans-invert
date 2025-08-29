@@ -439,7 +439,8 @@ const TextHighlighter: React.FC<TextHighlighterProps> = ({
       
       <div
         ref={textRef}
-        className="select-text cursor-text leading-relaxed font-mono text-lg p-4 bg-white rounded-lg border-2 border-gray-200"
+        className="select-text cursor-text leading-loose font-mono text-base p-6 bg-white rounded-lg border-2 border-gray-200 whitespace-pre-wrap"
+        style={{ lineHeight: '1.8', minHeight: '200px' }}
       >
         {renderHighlightedText()}
       </div>

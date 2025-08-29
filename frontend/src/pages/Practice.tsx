@@ -102,15 +102,18 @@ const Practice: React.FC = () => {
           
           // 设置文本信息（包含原文用于练习）
           if (textResponse.success && textResponse.data) {
-            setText({
+            const textData = {
               id: analysisData.text_id,
               title: textResponse.data.title || `练习文本`,
               content: textResponse.data.content || '', // 用于TypingComponent
               difficultyLevel: analysisData.difficulty,
               wordCount: analysisData.word_count,
               createdAt: new Date().toISOString(),
-              createdBy: ''
-            });
+              createdBy: '',
+              type: textResponse.data.practice_type === 'essay' ? 'essay' as const : 'translation' as const, // 设置类型
+              topic: textResponse.data.topic // 保存题目信息
+            };
+            setText(textData);
           }
 
           // 加载保存的高亮数据
@@ -330,11 +333,28 @@ const Practice: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-2 gap-8">
+      <div className="grid lg:grid-cols-5 gap-8">
         {/* 左侧：中文翻译 */}
-        <div className="space-y-6">
+        <div className="lg:col-span-2 space-y-6">
+          {/* 作文题目显示框 - 仅当类型为作文且有题目时显示 */}
+          {text?.type === 'essay' && text?.topic && (
+            <div className="card">
+              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
+                <span className="text-purple-600">📝</span>
+                <span>作文题目</span>
+              </h2>
+              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                <p className="text-purple-900 font-medium leading-relaxed">
+                  {text.topic}
+                </p>
+              </div>
+            </div>
+          )}
+          
           <div className="card">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">中文翻译</h2>
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">
+              {text?.type === 'essay' ? '中文思路' : '中文翻译'}
+            </h2>
             <div className="prose prose-gray max-w-none">
               <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
                 {analysis.translation}
@@ -371,19 +391,21 @@ const Practice: React.FC = () => {
         </div>
 
         {/* 右侧：练习区域 */}
-        <div className="space-y-6">
+        <div className="lg:col-span-3 space-y-6">
           {practiceMode === 'study' && (
             // 学习模式：显示原文和开始练习按钮
             <div className="space-y-6">
               <div className="card">
                 <h2 className="text-lg font-semibold text-gray-900 mb-4">英文原文</h2>
                 <div className="mb-6">
-                  <TextHighlighter 
-                    text={text.content}
-                    highlights={highlights}
-                    onHighlightChange={handleHighlightChange}
-                    className="mb-4"
-                  />
+                  <div className="w-full max-w-none prose prose-lg prose-gray leading-relaxed">
+                    <TextHighlighter 
+                      text={text.content}
+                      highlights={highlights}
+                      onHighlightChange={handleHighlightChange}
+                      className="mb-4 text-base leading-loose whitespace-pre-wrap"
+                    />
+                  </div>
                 </div>
                 <div className="border-t pt-4">
                   <p className="text-sm text-gray-600 mb-4">

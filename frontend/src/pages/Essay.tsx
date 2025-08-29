@@ -424,9 +424,9 @@ const Essay: React.FC = () => {
 
       {/* 学习阶段 */}
       {currentMode === 'study' && session && (
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-5 gap-8">
           {/* 左侧：中文翻译和题目 */}
-          <div className="space-y-6">
+          <div className="lg:col-span-2 space-y-6">
             {/* 作文题目 */}
             <div className="card">
               <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
@@ -453,16 +453,18 @@ const Essay: React.FC = () => {
           </div>
 
           {/* 右侧：英文范文和开始按钮 */}
-          <div className="space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             <div className="card">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">英文范文</h2>
               <div className="mb-6">
-                <TextHighlighter 
-                  text={session.sample_essay}
-                  highlights={[]}
-                  onHighlightChange={() => {}}
-                  className="mb-4"
-                />
+                <div className="w-full max-w-none prose prose-lg prose-gray leading-relaxed">
+                  <TextHighlighter 
+                    text={session.sample_essay}
+                    highlights={[]}
+                    onHighlightChange={() => {}}
+                    className="mb-4 text-base leading-loose whitespace-pre-wrap"
+                  />
+                </div>
               </div>
               <div className="border-t pt-4">
                 <p className="text-sm text-gray-600 mb-4">
@@ -483,9 +485,9 @@ const Essay: React.FC = () => {
 
       {/* 写作阶段 */}
       {currentMode === 'writing' && session && (
-        <div className="grid lg:grid-cols-2 gap-8">
+        <div className="grid lg:grid-cols-5 gap-8">
           {/* 左侧：题目和中文思路 */}
-          <div className="space-y-6">
+          <div className="lg:col-span-2 space-y-6">
             {/* 作文题目 */}
             <div className="card">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">作文题目</h2>
@@ -520,7 +522,7 @@ const Essay: React.FC = () => {
           </div>
 
           {/* 右侧：写作区域 */}
-          <div className="space-y-6">
+          <div className="lg:col-span-3 space-y-6">
             <div className="card">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">回译练习</h2>
               <div className="mb-4 p-4 bg-blue-50 rounded-lg">
@@ -528,12 +530,15 @@ const Essay: React.FC = () => {
                   💡 现在请根据左侧的中文思路，尝试写出对应的英文表达。重点是语法正确、逻辑清楚。
                 </p>
               </div>
-              <TypingComponent
-                targetText={session.sample_essay}
-                onComplete={() => {}}
-                onSubmit={handleStreamSubmitEssay}
-                showTargetText={false}
-              />
+              <div className="w-full max-w-none prose prose-lg prose-gray leading-relaxed">
+                <TypingComponent
+                  targetText={session.sample_essay}
+                  onComplete={() => {}}
+                  onSubmit={handleStreamSubmitEssay}
+                  showTargetText={false}
+                  className="text-base leading-loose"
+                />
+              </div>
             </div>
           </div>
         </div>

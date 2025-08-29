@@ -222,7 +222,7 @@ async def create_essay_session(request: EssayGenerationRequest, http_request: Re
                             essay_study_record = PracticeHistoryRecord(
                                 id=str(uuid.uuid4()),
                                 timestamp=datetime.now().isoformat(),
-                                text_title=f"作文范文：{request.topic[:50]}{'...' if len(request.topic) > 50 else ''}",
+                                text_title=f"{request.topic[:50]}{'...' if len(request.topic) > 50 else ''}",
                                 text_content=english_essay,
                                 chinese_translation=chinese_translation,
                                 user_input="",  # 范文阶段没有用户输入
@@ -233,7 +233,8 @@ async def create_essay_session(request: EssayGenerationRequest, http_request: Re
                                     "is_acceptable": True
                                 },
                                 score=100,
-                                practice_type="essay"  # 添加练习类型标识
+                                practice_type="essay",  # 添加练习类型标识
+                                topic=request.topic  # 保存完整的原始题目
                             )
                             
                             # 添加到练习历史中

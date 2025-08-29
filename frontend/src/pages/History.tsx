@@ -51,7 +51,9 @@ const History: React.FC = () => {
             unifiedRecords.push({
               id: record.id,
               type: recordType,
-              title: record.text_title || '未命名文本',
+              title: recordType === 'essay-study' 
+                ? `作文范文：${record.text_title || '未命名文本'}`  // 在列表中显示前缀
+                : record.text_title || '未命名文本',
               content: record.text_content,
               score: record.score,
               timestamp: record.timestamp,
@@ -195,7 +197,9 @@ const History: React.FC = () => {
             unifiedRecords.push({
               id: record.id,
               type: recordType,
-              title: record.text_title || '未命名文本',
+              title: recordType === 'essay-study' 
+                ? `作文范文：${record.text_title || '未命名文本'}`  // 在列表中显示前缀
+                : record.text_title || '未命名文本',
               content: record.text_content,
               score: record.score,
               timestamp: record.timestamp,
@@ -337,7 +341,7 @@ const History: React.FC = () => {
                 <div key={record.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex-1">
                     <div className="flex items-center space-x-2 mb-1">
-                      <h3 className="font-medium text-gray-900">
+                      <h3 className="font-medium text-gray-900 text-sm leading-relaxed break-words" title={record.title}>
                         {record.title}
                       </h3>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -368,7 +372,9 @@ const History: React.FC = () => {
                         if (record.type === 'essay') {
                           alert(`作文题目：${record.title}\n\n范文：${record.content.substring(0, 100)}...\n\n您的作文：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
                         } else if (record.type === 'essay-study') {
-                          alert(`作文范文：${record.title}\n\n英文范文：${record.content.substring(0, 200)}...\n\n中文思路：${(record.originalRecord as PracticeHistoryRecord).chinese_translation.substring(0, 200)}...\n\n说明：这是AI生成的作文范文，供学习参考。`);
+                          // 直接使用原始记录中的题目
+                          const actualTopic = (record.originalRecord as PracticeHistoryRecord).text_title;image.png
+                          alert(`作文题目：${actualTopic}\n\n英文范文：${record.content.substring(0, 200)}...\n\n中文思路：${(record.originalRecord as PracticeHistoryRecord).chinese_translation.substring(0, 200)}...\n\n说明：这是AI生成的作文范文，供学习参考。`);
                         } else {
                           alert(`文章：${record.title}\n\n英文原文：${record.content.substring(0, 100)}...\n\n您的回译：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
                         }
