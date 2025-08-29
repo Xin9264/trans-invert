@@ -373,7 +373,7 @@ const History: React.FC = () => {
                           alert(`作文题目：${record.title}\n\n范文：${record.content.substring(0, 100)}...\n\n您的作文：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
                         } else if (record.type === 'essay-study') {
                           // 直接使用原始记录中的题目
-                          const actualTopic = (record.originalRecord as PracticeHistoryRecord).text_title;image.png
+                          const actualTopic = (record.originalRecord as PracticeHistoryRecord).text_title;
                           alert(`作文题目：${actualTopic}\n\n英文范文：${record.content.substring(0, 200)}...\n\n中文思路：${(record.originalRecord as PracticeHistoryRecord).chinese_translation.substring(0, 200)}...\n\n说明：这是AI生成的作文范文，供学习参考。`);
                         } else {
                           alert(`文章：${record.title}\n\n英文原文：${record.content.substring(0, 100)}...\n\n您的回译：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
