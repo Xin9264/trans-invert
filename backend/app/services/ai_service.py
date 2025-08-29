@@ -588,6 +588,267 @@ ALLOWED_ORIGINS=http://localhost:3000
                 "is_acceptable": True
             }
 
+    async def generate_essay(
+        self, 
+        topic: str, 
+        exam_type: str, 
+        requirements: str = None
+    ) -> Dict[str, Any]:
+        """生成作文范文"""
+        try:
+            # 使用模板渲染提示词
+            prompt = template_service.render_generate_essay_prompt(
+                topic=topic,
+                exam_type=exam_type,
+                requirements=requirements
+            )
+            
+            # 调用API
+            response = await self._call_api(prompt)
+            
+            # 解析JSON响应
+            result = self._extract_json_from_response(response)
+            
+            # 验证必要字段
+            required_fields = ["english_essay", "chinese_translation"]
+            for field in required_fields:
+                if field not in result:
+                    raise Exception(f"AI响应缺少必要字段: {field}")
+            
+            return result
+            
+        except Exception as e:
+            # 返回默认结果
+            return {
+                "english_essay": f"作文生成失败: {str(e)}",
+                "chinese_translation": f"作文生成失败: {str(e)}"
+            }
+
+    async def generate_essay_stream(
+        self, 
+        topic: str, 
+        exam_type: str, 
+        requirements: str = None
+    ):
+        """流式生成作文范文"""
+        try:
+            # 使用模板渲染提示词
+            prompt = template_service.render_generate_essay_prompt(
+                topic=topic,
+                exam_type=exam_type,
+                requirements=requirements
+            )
+            
+            yield {
+                "type": "progress",
+                "progress": 10,
+                "content": "开始生成作文范文..."
+            }
+            
+            # 流式生成
+            stream_params = {
+                "model": self.model,
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": True
+            }
+            
+            # OpenAI 使用 max_completion_tokens，其他提供商使用 max_tokens
+            if self.provider == AIProvider.OPENAI:
+                stream_params["max_completion_tokens"] = 3000
+            else:
+                stream_params["max_tokens"] = 3000
+                
+            response = await self.async_client.chat.completions.create(**stream_params)
+            
+            collected_content = ""
+            chunk_count = 0
+            
+            async for chunk in response:
+                if chunk.choices[0].delta.content is not None:
+                    content = chunk.choices[0].delta.content
+                    collected_content += content
+                    chunk_count += 1
+                    
+                    # 计算进度
+                    progress = self._calculate_essay_progress(collected_content)
+                    yield {
+                        "type": "progress",
+                        "content": content,
+                        "progress": min(90, progress),
+                        "full_content": collected_content
+                    }
+            
+            # 验证响应内容
+            if len(collected_content.strip()) < 10:
+                raise Exception("AI响应内容为空或过短")
+            
+            # 处理完整响应
+            try:
+                result = self._extract_json_from_response(collected_content)
+                
+                # 验证必要字段
+                required_fields = ["english_essay", "chinese_translation"]
+                for field in required_fields:
+                    if field not in result:
+                        raise Exception(f"AI响应缺少必要字段: {field}")
+                
+                yield {
+                    "type": "complete",
+                    "result": result,
+                    "progress": 100
+                }
+                
+            except Exception as e:
+                raise Exception(f"解析AI响应失败: {str(e)}")
+                
+        except Exception as e:
+            yield {
+                "type": "error",
+                "error": str(e),
+                "progress": 0
+            }
+
+    def _calculate_essay_progress(self, content: str) -> int:
+        """根据作文生成的进度计算百分比"""
+        progress = 0
+        
+        # 定义关键字段及其权重
+        key_fields = {
+            '"english_essay"': 50,
+            '"chinese_translation"': 50
+        }
+        
+        for field, weight in key_fields.items():
+            if field in content:
+                progress += weight
+        
+        # 根据内容长度增加进度
+        if len(content) > 100:
+            progress += 10
+        if len(content) > 500:
+            progress += 10
+        if len(content) > 1000:
+            progress += 10
+        
+        return min(100, progress)
+
+    async def evaluate_essay_stream(
+        self, 
+        topic: str,
+        exam_type: str,
+        sample_essay: str,
+        user_essay: str
+    ):
+        """流式评估用户作文"""
+        try:
+            # 使用模板渲染提示词
+            prompt = template_service.render_evaluate_essay_prompt(
+                topic=topic,
+                exam_type=exam_type,
+                sample_essay=sample_essay,
+                user_essay=user_essay
+            )
+            
+            yield {
+                "type": "progress",
+                "progress": 10,
+                "content": "开始AI作文评估..."
+            }
+            
+            # 流式评估
+            stream_params = {
+                "model": self.model,
+                "messages": [{"role": "user", "content": prompt}],
+                "stream": True
+            }
+            
+            # OpenAI 使用 max_completion_tokens，其他提供商使用 max_tokens
+            if self.provider == AIProvider.OPENAI:
+                stream_params["max_completion_tokens"] = 2500
+            else:
+                stream_params["max_tokens"] = 2500
+                
+            response = await self.async_client.chat.completions.create(**stream_params)
+            
+            collected_content = ""
+            chunk_count = 0
+            
+            async for chunk in response:
+                if chunk.choices[0].delta.content is not None:
+                    content = chunk.choices[0].delta.content
+                    collected_content += content
+                    chunk_count += 1
+                    
+                    # 计算进度
+                    progress = self._calculate_essay_evaluation_progress(collected_content)
+                    yield {
+                        "type": "progress",
+                        "content": content,
+                        "progress": min(90, progress),
+                        "full_content": collected_content
+                    }
+            
+            # 验证响应内容
+            if len(collected_content.strip()) < 10:
+                raise Exception("AI响应内容为空或过短")
+            
+            # 处理完整响应
+            try:
+                result = self._extract_json_from_response(collected_content)
+                
+                # 验证必要字段
+                required_fields = ["overall_score", "detailed_scores", "strengths", "improvements", "specific_corrections", "overall_feedback"]
+                for field in required_fields:
+                    if field not in result:
+                        raise Exception(f"AI响应缺少必要字段: {field}")
+                
+                # 确保数据类型正确
+                result["overall_score"] = int(result["overall_score"])
+                result["overall_score"] = max(0, min(100, result["overall_score"]))
+                
+                if not isinstance(result["strengths"], list):
+                    result["strengths"] = []
+                if not isinstance(result["improvements"], list):
+                    result["improvements"] = []
+                if not isinstance(result["specific_corrections"], list):
+                    result["specific_corrections"] = []
+                
+                yield {
+                    "type": "complete",
+                    "result": result,
+                    "progress": 100
+                }
+                
+            except Exception as e:
+                raise Exception(f"解析AI响应失败: {str(e)}")
+                
+        except Exception as e:
+            yield {
+                "type": "error",
+                "error": str(e),
+                "progress": 0
+            }
+
+    def _calculate_essay_evaluation_progress(self, content: str) -> int:
+        """根据作文评估的进度计算百分比"""
+        progress = 0
+        
+        # 定义关键字段及其权重
+        key_fields = {
+            '"overall_score"': 20,
+            '"detailed_scores"': 20,
+            '"strengths"': 15,
+            '"improvements"': 15,
+            '"specific_corrections"': 15,
+            '"overall_feedback"': 15
+        }
+        
+        for field, weight in key_fields.items():
+            if field in content:
+                progress += weight
+        
+        return min(100, progress)
+
 # 创建全局AI服务实例
 try:
     ai_service = AIService()

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import { Home, Upload, History, Settings, AlertTriangle } from 'lucide-react';
+import { Home, Upload, History, Settings, AlertTriangle, FileText } from 'lucide-react';
 import { useAIStatus } from '../hooks/useAIStatus';
 import AIConfigModal from './AIConfigModal';
 
@@ -35,6 +35,13 @@ const Layout: React.FC = () => {
                 >
                   <Upload size={18} />
                   <span>上传文本</span>
+                </Link>
+                <Link
+                  to="/essay"
+                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors"
+                >
+                  <FileText size={18} />
+                  <span>作文练习</span>
                 </Link>
                 <Link
                   to="/history"

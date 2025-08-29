@@ -1,13 +1,23 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { practiceAPI, PracticeHistoryRecord, PracticeHistoryExport } from '../utils/api';
-import { Calendar, TrendingUp, Target, Clock, Download, Upload } from 'lucide-react';
+import { practiceAPI, PracticeHistoryRecord, PracticeHistoryExport, essayAPI, EssayHistoryRecord } from '../utils/api';
+import { Calendar, TrendingUp, Target, Clock, Download, Upload, FileText, Edit3 } from 'lucide-react';
 
-// 使用从API导入的类型，但保持兼容性
-type PracticeRecord = PracticeHistoryRecord;
+// 统一的历史记录类型
+interface UnifiedHistoryRecord {
+  id: string;
+  type: 'practice' | 'essay';
+  title: string;
+  content: string;
+  score: number;
+  timestamp: string;
+  userInput: string;
+  feedback: string;
+  originalRecord: PracticeHistoryRecord | EssayHistoryRecord;
+}
 
 const History: React.FC = () => {
-  const [records, setRecords] = useState<PracticeRecord[]>([]);
+  const [records, setRecords] = useState<UnifiedHistoryRecord[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
@@ -16,17 +26,60 @@ const History: React.FC = () => {
     totalSessions: 0,
     averageScore: 0,
     totalTimeSpent: 0,
-    bestScore: 0
+    bestScore: 0,
+    practiceCount: 0,
+    essayCount: 0
   });
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const response = await practiceAPI.getHistory();
-        if (response.success) {
-          setRecords(response.data || []);
-          calculateStats(response.data || []);
+        const [practiceResponse, essayResponse] = await Promise.all([
+          practiceAPI.getHistory(),
+          essayAPI.getHistory()
+        ]);
+        
+        const unifiedRecords: UnifiedHistoryRecord[] = [];
+        
+        // 处理回译练习记录
+        if (practiceResponse.success && practiceResponse.data) {
+          practiceResponse.data.forEach(record => {
+            unifiedRecords.push({
+              id: record.id,
+              type: 'practice',
+              title: record.text_title || '未命名文本',
+              content: record.text_content,
+              score: record.score,
+              timestamp: record.timestamp,
+              userInput: record.user_input,
+              feedback: record.ai_evaluation.overall_feedback,
+              originalRecord: record
+            });
+          });
         }
+        
+        // 处理作文练习记录
+        if (essayResponse.success && essayResponse.data) {
+          essayResponse.data.forEach(record => {
+            unifiedRecords.push({
+              id: record.id,
+              type: 'essay',
+              title: record.topic,
+              content: record.sample_essay,
+              score: record.overall_score,
+              timestamp: record.timestamp,
+              userInput: record.user_essay,
+              feedback: record.evaluation.overall_feedback,
+              originalRecord: record
+            });
+          });
+        }
+        
+        // 按时间排序
+        unifiedRecords.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+        
+        setRecords(unifiedRecords);
+        calculateStats(unifiedRecords);
       } catch (error) {
         console.error('Failed to fetch history:', error);
       } finally {
@@ -37,20 +90,23 @@ const History: React.FC = () => {
     fetchHistory();
   }, []);
 
-  const calculateStats = (records: PracticeRecord[]) => {
+  const calculateStats = (records: UnifiedHistoryRecord[]) => {
     if (records.length === 0) return;
 
     const totalSessions = records.length;
+    const practiceCount = records.filter(r => r.type === 'practice').length;
+    const essayCount = records.filter(r => r.type === 'essay').length;
     const averageScore = Math.round(records.reduce((sum, record) => sum + record.score, 0) / totalSessions);
-    // 由于新的数据结构中没有timeSpent，我们设置为0或根据其他逻辑计算
-    const totalTimeSpent = 0; // 简化处理，后续可根据需要调整
+    const totalTimeSpent = 0; // 简化处理
     const bestScore = Math.max(...records.map(record => record.score));
 
     setStats({
       totalSessions,
       averageScore,
       totalTimeSpent,
-      bestScore
+      bestScore,
+      practiceCount,
+      essayCount
     });
   };
 
@@ -257,15 +313,24 @@ const History: React.FC = () => {
               {records.map((record) => (
                 <div key={record.id} className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
                   <div className="flex-1">
-                    <h3 className="font-medium text-gray-900 mb-1">
-                      {record.text_title || '未命名文本'}
-                    </h3>
+                    <div className="flex items-center space-x-2 mb-1">
+                      <h3 className="font-medium text-gray-900">
+                        {record.title}
+                      </h3>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                        record.type === 'essay' 
+                          ? 'bg-purple-100 text-purple-700' 
+                          : 'bg-blue-100 text-blue-700'
+                      }`}>
+                        {record.type === 'essay' ? '作文' : '回译'}
+                      </span>
+                    </div>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
                       <span>{formatDate(record.timestamp)}</span>
                       <span>•</span>
-                      <span>字数: {record.text_content.split(' ').length}词</span>
+                      <span>字数: {record.content.split(' ').length}词</span>
                       <span>•</span>
-                      <span>评价: {record.ai_evaluation.is_acceptable ? '通过' : '需改进'}</span>
+                      <span>评价: {record.type === 'essay' ? '已完成' : (record.originalRecord as PracticeHistoryRecord).ai_evaluation?.is_acceptable ? '通过' : '需改进'}</span>
                     </div>
                   </div>
                   
@@ -275,8 +340,11 @@ const History: React.FC = () => {
                     </div>
                     <button
                       onClick={() => {
-                        // 显示详细信息的模态框或跳转到详情页
-                        alert(`文章：${record.text_title}\n\n英文原文：${record.text_content.substring(0, 100)}...\n\n您的回译：${record.user_input.substring(0, 100)}...\n\nAI评价：${record.ai_evaluation.overall_feedback}`);
+                        if (record.type === 'essay') {
+                          alert(`作文题目：${record.title}\n\n范文：${record.content.substring(0, 100)}...\n\n您的作文：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
+                        } else {
+                          alert(`文章：${record.title}\n\n英文原文：${record.content.substring(0, 100)}...\n\n您的回译：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
+                        }
                       }}
                       className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                     >
@@ -315,6 +383,21 @@ const History: React.FC = () => {
                   <span className="w-2 h-2 bg-blue-500 rounded-full mt-2"></span>
                   <p>建议每天练习15-30分钟，保持学习连续性</p>
                 </div>
+                
+                {/* 练习类型统计 */}
+                <div className="mt-4 pt-4 border-t">
+                  <h4 className="font-medium text-gray-900 mb-2">练习统计</h4>
+                  <div className="space-y-1 text-xs">
+                    <div className="flex justify-between">
+                      <span>回译练习：</span>
+                      <span className="text-blue-600">{stats.practiceCount} 次</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span>作文练习：</span>
+                      <span className="text-purple-600">{stats.essayCount} 次</span>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             
@@ -323,6 +406,9 @@ const History: React.FC = () => {
               <div className="space-y-4">
                 <Link to="/upload" className="block w-full btn-primary text-center">
                   上传新文本练习
+                </Link>
+                <Link to="/essay" className="block w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-center transition-colors">
+                  开始作文练习
                 </Link>
                 <Link to="/" className="block w-full btn-secondary text-center">
                   浏览练习材料

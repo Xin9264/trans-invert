@@ -2,6 +2,36 @@
   "version": "1.0",
   "records": [
     {
+      "id": "d9128d29-3e9e-4496-ad58-283941083370",
+      "timestamp": "2025-08-29T15:52:28.277723",
+      "text_title": "joke",
+      "text_content": "A man walks into a library and whispers, “Excuse me, can I have a burger, fries, and a soda?”\n\nThe librarian looks shocked and says, “Sir, this is a library!”\n\nThe man nods, lowers his voice even more, and whispers, “Sorry… can I have a burger, fries, and a soda?”\n\nThe librarian sighs and replies, “Sir, we don’t serve food here.”\n\nThe man frowns. “Then why do you call it a library? Every time I come here, you people shush me like it’s a five-star restaurant!”\n\nThe librarian whispers back, “Because the menu is books.”",
+      "chinese_translation": "一个男人走进一个图书馆并低声说：“打扰一下，我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员看起来很震惊并说：“先生，这是图书馆！” 那个男人点点头，把声音压得更低，并低声说：“对不起……我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员叹了口气并回答：“先生，我们这里不提供食物。” 那个男人皱起眉头。“那为什么你们叫这里图书馆？每次我来这儿，你们这些人都像五星级餐厅一样让我安静！” 图书管理员低声回答：“因为菜单是书。”",
+      "user_input": "A man walks into a library and whispers, “Excuse me, can I have a burger, fries, and a soda?” The librarian looks shocked and says, “Sir, this is a library!” The man nods, lowers his voice even more, and whispers, “Sorry… can I have a burger, fries, and a soda?” The librarian sighs and replies, “Sir, we don’t serve food here.” The man frowns. “Then why do you call it a library? Every time I come here, you people shush me like it’s a five-star restaurant!” The librarian whispers back, “Because the menu is books.”",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "你的回译答案非常优秀，语法正确，表达自然，与原文内容完全一致，准确传达了原文的意思。继续保持！",
+        "is_acceptable": true
+      },
+      "score": 100
+    },
+    {
+      "id": "df43d8ea-52af-4d04-8291-f90c3d7c2926",
+      "timestamp": "2025-08-29T15:27:30.768240",
+      "text_title": "joke",
+      "text_content": "A man walks into a library and whispers, “Excuse me, can I have a burger, fries, and a soda?”\n\nThe librarian looks shocked and says, “Sir, this is a library!”\n\nThe man nods, lowers his voice even more, and whispers, “Sorry… can I have a burger, fries, and a soda?”\n\nThe librarian sighs and replies, “Sir, we don’t serve food here.”\n\nThe man frowns. “Then why do you call it a library? Every time I come here, you people shush me like it’s a five-star restaurant!”\n\nThe librarian whispers back, “Because the menu is books.”",
+      "chinese_translation": "一个男人走进一个图书馆并低声说：“打扰一下，我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员看起来很震惊并说：“先生，这是图书馆！” 那个男人点点头，把声音压得更低，并低声说：“对不起……我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员叹了口气并回答：“先生，我们这里不提供食物。” 那个男人皱起眉头。“那为什么你们叫这里图书馆？每次我来这儿，你们这些人都像五星级餐厅一样让我安静！” 图书管理员低声回答：“因为菜单是书。”",
+      "user_input": "A man walks into a library and whispers, “Excuse me, can I have a burger, fries, and a soda?” The librarian looks shocked and says, “Sir, this is a library!” The man nods, lowers his voice even more, and whispers, “Sorry… can I have a burger, fries, and a soda?” The librarian sighs and replies, “Sir, we don’t serve food here.” The man frowns. “Then why do you call it a library? Every time I come here, you people shush me like it’s a five-star restaurant!” The librarian whispers back, “Because the menu is books.”",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "Excellent work! Your translation is perfectly accurate, maintaining the original humor, tone, and grammatical structures. The dialogue flows naturally and all meanings are preserved.",
+        "is_acceptable": true
+      },
+      "score": 100
+    },
+    {
       "id": "ecddbe98-43d2-4f20-b7b5-8fd10f7feb33",
       "timestamp": "2025-08-28T19:51:31.641047",
       "text_title": "joke",
