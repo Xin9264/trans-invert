@@ -45,13 +45,25 @@ class AIService:
             return AIProvider.DEEPSEEK  # 默认使用DeepSeek
     
     def _get_api_key(self) -> str:
-        """获取API密钥"""
+        """获取API密钥 - 扫描多种可能的环境变量"""
+        possible_keys = []
+        
         if self.provider == AIProvider.VOLCANO:
-            return os.getenv("ARK_API_KEY", "")
+            possible_keys = ["ARK_API_KEY", "VOLCANO_API_KEY", "DOUBAO_API_KEY"]
         elif self.provider == AIProvider.OPENAI:
-            return os.getenv("OPENAI_API_KEY", "")
-        else:
-            return os.getenv("DEEPSEEK_API_KEY", "")
+            possible_keys = ["OPENAI_API_KEY", "OPENAI_KEY", "GPT_API_KEY"]
+        else:  # DEEPSEEK
+            possible_keys = ["DEEPSEEK_API_KEY", "DEEPSEEK_KEY"]
+        
+        # 扫描所有可能的环境变量
+        for key_name in possible_keys:
+            api_key = os.getenv(key_name, "").strip()
+            if api_key and api_key != "your_deepseek_api_key_here" and api_key != "your_openai_api_key_here" and api_key != "your_ark_api_key_here":
+                print(f"✅ 找到有效的API密钥: {key_name}")
+                return api_key
+        
+        print(f"⚠️ 未找到有效的API密钥，扫描的变量: {possible_keys}")
+        return ""
     
     def _get_base_url(self) -> str:
         """获取API基础URL"""
@@ -262,6 +274,48 @@ ALLOWED_ORIGINS=http://localhost:3000
             "base_url": self.base_url,
             "api_key_configured": bool(self.api_key),
             "api_key_preview": "***已配置***" if self.api_key else "未配置"  # 完全隐藏API密钥
+        }
+    
+    @staticmethod
+    def scan_environment_keys() -> Dict[str, Any]:
+        """扫描环境变量中的API密钥配置"""
+        scan_result = {
+            "deepseek": {"found": False, "keys": [], "valid_key": None},
+            "openai": {"found": False, "keys": [], "valid_key": None},
+            "volcano": {"found": False, "keys": [], "valid_key": None}
+        }
+        
+        # 定义所有可能的环境变量名
+        all_possible_keys = {
+            "deepseek": ["DEEPSEEK_API_KEY", "DEEPSEEK_KEY"],
+            "openai": ["OPENAI_API_KEY", "OPENAI_KEY", "GPT_API_KEY"],
+            "volcano": ["ARK_API_KEY", "VOLCANO_API_KEY", "DOUBAO_API_KEY"]
+        }
+        
+        # 扫描所有环境变量
+        for provider, key_names in all_possible_keys.items():
+            for key_name in key_names:
+                api_key = os.getenv(key_name, "").strip()
+                if api_key:
+                    scan_result[provider]["keys"].append({
+                        "name": key_name,
+                        "preview": f"{api_key[:8]}..." if len(api_key) > 8 else "短密钥",
+                        "is_placeholder": api_key in ["your_deepseek_api_key_here", "your_openai_api_key_here", "your_ark_api_key_here"]
+                    })
+                    
+                    # 检查是否是有效密钥（非占位符）
+                    if api_key not in ["your_deepseek_api_key_here", "your_openai_api_key_here", "your_ark_api_key_here"]:
+                        scan_result[provider]["found"] = True
+                        if not scan_result[provider]["valid_key"]:
+                            scan_result[provider]["valid_key"] = key_name
+        
+        return {
+            "scan_result": scan_result,
+            "summary": {
+                "total_providers_configured": sum(1 for p in scan_result.values() if p["found"]),
+                "recommended_provider": next((k for k, v in scan_result.items() if v["found"]), "deepseek"),
+                "needs_configuration": not any(p["found"] for p in scan_result.values())
+            }
         }
     
     async def _call_api(self, prompt: str) -> str:

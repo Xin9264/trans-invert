@@ -1,276 +1,38 @@
 {
   "version": "1.0",
   "analyses": {
-    "74e4b74a-384a-4051-a196-421ffaa0b43c": {
-      "text_id": "74e4b74a-384a-4051-a196-421ffaa0b43c",
-      "translation": "美洲狮是大型的，猫一样的动物，它们在美国被发现。当报告来到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到，它们没有被认真对待。然而，随着证据开始积累，动物园的专家感到有义务调查，因为声称看到美洲狮的人们给出的描述异常相似。",
+    "fc6ea744-8828-4afa-8892-a28c73179e32": {
+      "text_id": "fc6ea744-8828-4afa-8892-a28c73179e32",
+      "translation": "迈克尔认识一位医生，他有三个儿子在医院工作。",
       "difficult_words": [
         {
-          "word": "pumas",
-          "meaning": "美洲狮"
+          "word": "knows",
+          "meaning": "认识，知道"
         },
         {
-          "word": "obliged",
-          "meaning": "有义务的"
+          "word": "doctor",
+          "meaning": "医生"
         },
         {
-          "word": "accumulate",
-          "meaning": "积累"
+          "word": "sons",
+          "meaning": "儿子"
         },
         {
-          "word": "extraordinarily",
-          "meaning": "异常地"
-        }
-      ],
-      "difficulty": 3,
-      "key_points": [
-        "cat-like animals",
-        "taken seriously",
-        "felt obliged to",
-        "claimed to have seen"
-      ],
-      "word_count": 64
-    },
-    "f19bc656-6302-4e72-87b5-66ced6fbe7a9": {
-      "text_id": "f19bc656-6302-4e72-87b5-66ced6fbe7a9",
-      "translation": "对美洲狮的搜寻开始于一个小村庄，在那里一位采摘草莓的妇女看到‘一只大猫’仅离她五码远。当她看到它时它立即跑开了，而专家们确认一只美洲狮不会攻击人类除非它被逼入绝境。搜寻被证明是困难的，因为美洲狮经常在早上在一个地方被观察到而在晚上在二十英里外的另一个地方。无论它去哪里，它都在身后留下了一串死鹿和小动物如兔子。爪印在许多地方被看见并且美洲狮的皮毛被发现粘在灌木丛上。几个人抱怨在夜间有‘猫一样的噪音’并且一位商人钓鱼旅行时看到美洲狮在树上。专家们现在完全确信这动物是一只美洲狮，但它来自哪里？由于没有美洲狮被报告从这个国家的任何动物园失踪，这一只必定曾属于一位私人收藏家并且以某种方式设法逃脱了。搜寻持续了几个星期，但美洲狮没有被捕获。想到一只危险的野生动物仍然在安静的乡村逍遥法外是令人不安的。",
-      "difficult_words": [
-        {
-          "word": "puma",
-          "meaning": "美洲狮"
+          "word": "working",
+          "meaning": "工作"
         },
         {
-          "word": "cornered",
-          "meaning": "被逼入绝境的"
-        },
-        {
-          "word": "trail",
-          "meaning": "踪迹；一串"
-        },
-        {
-          "word": "clinging",
-          "meaning": "粘着的；紧贴的"
-        },
-        {
-          "word": "at large",
-          "meaning": "逍遥法外；未被捕获的"
-        }
-      ],
-      "difficulty": 3,
-      "key_points": [
-        "picking strawberries",
-        "run away",
-        "attack a human being",
-        "left behind",
-        "complained of",
-        "managed to escape"
-      ],
-      "word_count": 209
-    },
-    "de43a07d-0826-44df-ac2b-29602a0b93a5": {
-      "text_id": "de43a07d-0826-44df-ac2b-29602a0b93a5",
-      "translation": "有一个在做AI研究中的多巴胺循环是相当有趣的。每天你醒来并且你思考要运行什么实验。你认为事物X重要所以你决定改进它或消融它。然后你写代码并支付一些计算来找出答案。然后你得到多巴胺或困惑取决于结果是否匹配期望。",
-      "difficult_words": [
-        {
-          "word": "dopamine",
-          "meaning": "多巴胺"
-        },
-        {
-          "word": "ablate",
-          "meaning": "消融，切除"
-        },
-        {
-          "word": "compute",
-          "meaning": "计算（这里指计算资源）"
-        },
-        {
-          "word": "expectations",
-          "meaning": "期望"
-        }
-      ],
-      "difficulty": 3,
-      "key_points": [
-        "dopamine cycle",
-        "run experiment",
-        "match expectations"
-      ],
-      "word_count": 67
-    },
-    "8d189f86-b836-4af6-88c1-7a2488d30450": {
-      "text_id": "8d189f86-b836-4af6-88c1-7a2488d30450",
-      "translation": "对于是小规模的实验你可以快速获得几个奖励信号并发展你的直觉。其他时候你下一个大的赌注那是非显而易见或有争议的并经历一段时期的努力工作、多巴胺饥饿和不确定性去做它。如果它成功它是一个巨大的高涨但如果失败被无助感消耗是自然的。",
-      "difficult_words": [
-        {
-          "word": "dopamine",
-          "meaning": "多巴胺"
-        },
-        {
-          "word": "starvation",
-          "meaning": "饥饿，匮乏"
-        },
-        {
-          "word": "immense",
-          "meaning": "巨大的"
-        },
-        {
-          "word": "consumed",
-          "meaning": "被消耗，被吞噬"
-        }
-      ],
-      "difficulty": 3,
-      "key_points": [
-        "small scale",
-        "reward signals",
-        "big bet",
-        "non-obvious",
-        "works out"
-      ],
-      "word_count": 63
-    },
-    "831fbf7f-f0ce-4926-afa1-f6ad2e10ab76": {
-      "text_id": "831fbf7f-f0ce-4926-afa1-f6ad2e10ab76",
-      "translation": "有时有一个自负的元素。你可能相信X或不相信，并继续工作以找到证据来支持它或借口为什么它不适用于那个实验。可能有一个潜在的冲动要么证明你的能力要么显示你仍然在快速变化的领域中相关。科学据称是客观的但现实是它有一个巨大的社交方面，而同行的尊重是一个有价值的奖励信号去寻求。那是我对它的感觉，至少。每一天是一个小旅程进一步进入人类知识的丛林。不是一个坏的生活完全——一个我愿意做很长时间的生活。",
-      "difficult_words": [
-        {
-          "word": "ego",
-          "meaning": "自负，自我"
-        },
-        {
-          "word": "underlying",
-          "meaning": "潜在的，根本的"
-        },
-        {
-          "word": "landscape",
-          "meaning": "领域，景观"
-        },
-        {
-          "word": "objective",
-          "meaning": "客观的"
-        },
-        {
-          "word": "peers",
-          "meaning": "同行，同辈"
-        }
-      ],
-      "difficulty": 4,
-      "key_points": [
-        "element of ego",
-        "keep working to find",
-        "underlying urge",
-        "prove your abilities",
-        "quickly changing landscape",
-        "valuable reward signal",
-        "further into the jungle of human knowledge"
-      ],
-      "word_count": 120
-    },
-    "ab4d8f20-646f-4b42-99d0-d9dad25f5d19": {
-      "text_id": "ab4d8f20-646f-4b42-99d0-d9dad25f5d19",
-      "translation": "那把旧钥匙被遗忘地躺在米娅的抽屉里。一个下雨的下午，她试着用它开阁楼的门。它咔哒一声开了，露出一个布满灰尘的箱子。里面是她祖母写给一个秘密恋人的信。米娅笑了——她刚刚打开的不只是一扇门；她打开了一个等待被记住的故事。",
-      "difficult_words": [
-        {
-          "word": "attic",
-          "meaning": "阁楼，顶楼"
-        },
-        {
-          "word": "clicked",
-          "meaning": "发出咔哒声"
-        },
-        {
-          "word": "trunk",
-          "meaning": "（存放物品的）大箱子"
+          "word": "hospital",
+          "meaning": "医院"
         }
       ],
       "difficulty": 2,
       "key_points": [
-        "lay forgotten",
-        "tried it on",
-        "secret love"
+        "knows a doctor",
+        "has three sons",
+        "working in the hospital"
       ],
-      "word_count": 53
-    },
-    "1507839b-7fc8-4d14-bd49-03a0d11e72f8": {
-      "text_id": "1507839b-7fc8-4d14-bd49-03a0d11e72f8",
-      "translation": "那把旧钥匙躺在米娅的抽屉里被遗忘。一个下雨的下午，她试着用它开阁楼的门。它咔哒一声开了，露出了一个布满灰尘的箱子。在里面有她祖母写给一个秘密爱人的信。米娅笑了——她不仅打开了一扇门；她还打开了一个等待被记起的故事。",
-      "difficult_words": [
-        {
-          "word": "forgotten",
-          "meaning": "被遗忘的"
-        },
-        {
-          "word": "attic",
-          "meaning": "阁楼"
-        },
-        {
-          "word": "trunk",
-          "meaning": "大箱子"
-        },
-        {
-          "word": "revealing",
-          "meaning": "揭示，显现出"
-        },
-        {
-          "word": "unlocked",
-          "meaning": "解锁，打开（抽象意思和具体意思）"
-        }
-      ],
-      "difficulty": 3,
-      "key_points": [
-        "lay forgotten",
-        "clicked open",
-        "unlock a story"
-      ],
-      "word_count": 53
-    },
-    "d7429098-85a3-40ec-b5e4-a41f43aef8b3": {
-      "text_id": "d7429098-85a3-40ec-b5e4-a41f43aef8b3",
-      "translation": "一个男人走进一个图书馆并低声说：“打扰一下，我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员看起来很震惊并说：“先生，这是图书馆！” 那个男人点点头，把声音压得更低，并低声说：“对不起……我可以点一个汉堡、薯条和一杯汽水吗？” 图书管理员叹了口气并回答：“先生，我们这里不提供食物。” 那个男人皱起眉头。“那为什么你们叫这里图书馆？每次我来这儿，你们这些人都像五星级餐厅一样让我安静！” 图书管理员低声回答：“因为菜单是书。”",
-      "difficult_words": [
-        {
-          "word": "whispers",
-          "meaning": "低声说，耳语"
-        },
-        {
-          "word": "librarian",
-          "meaning": "图书管理员"
-        },
-        {
-          "word": "shocked",
-          "meaning": "震惊的，吃惊的"
-        },
-        {
-          "word": "serve",
-          "meaning": "供应（食物、饮料等）"
-        },
-        {
-          "word": "menu",
-          "meaning": "菜单"
-        }
-      ],
-      "difficulty": 2,
-      "key_points": [
-        "walks into",
-        "Excuse me",
-        "can I have",
-        "serve food",
-        "five-star restaurant"
-      ],
-      "word_count": 95
-    },
-    "a5b28cec-6614-4ef8-ba16-12e57898ea2b": {
-      "text_id": "a5b28cec-6614-4ef8-ba16-12e57898ea2b",
-      "translation": "文本分析失败: deepseek API请求失败: Error code: 401 - {'error': {'message': 'Authentication Fails, Your api key: test is invalid', 'type': 'authentication_error', 'param': None, 'code': 'invalid_request_error'}}",
-      "difficult_words": [
-        {
-          "word": "分析失败",
-          "meaning": "请稍后重试"
-        }
-      ],
-      "difficulty": 3,
-      "key_points": [
-        "分析失败"
-      ],
-      "word_count": 59
+      "word_count": 12
     }
   }
 }

@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from app.core.settings import settings
-from app.routers import texts, essays
+from app.routers import texts, essays, config
 from app.schemas.text import APIResponse
 
 # 创建FastAPI应用
@@ -28,6 +28,7 @@ app.add_middleware(
 # 注册路由
 app.include_router(texts.router)
 app.include_router(essays.router)
+app.include_router(config.router)
 
 # API根路径（仅在开发环境或没有静态文件时显示）
 static_dir = "/app/static"
