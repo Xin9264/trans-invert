@@ -137,7 +137,7 @@ const Upload: React.FC = () => {
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   rows={12}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent font-mono"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent english-text"
                   placeholder={practiceType === 'essay' 
                     ? "粘贴或输入优秀的英文作文范文..."
                     : "粘贴或输入您想要练习的英文文本..."

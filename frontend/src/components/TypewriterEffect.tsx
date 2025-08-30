@@ -62,7 +62,7 @@ const TypewriterEffect: React.FC<TypewriterEffectProps> = ({
   }, [isCompleted]);
 
   return (
-    <div className={`font-mono ${className}`}>
+    <div className={`english-text ${className}`}>
       <span>{displayedText}</span>
       {showCursor && (
         <span 

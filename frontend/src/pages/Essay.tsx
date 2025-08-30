@@ -633,11 +633,11 @@ const Essay: React.FC = () => {
                     {evaluation.specific_corrections.map((correction, index) => (
                       <div key={index} className="border-l-4 border-red-300 pl-4">
                         <div className="flex items-center space-x-2 text-sm mb-1">
-                          <span className="bg-red-100 text-red-700 px-2 py-1 rounded font-mono">
+                          <span className="bg-red-100 text-red-700 px-2 py-1 rounded english-text">
                             {correction.original}
                           </span>
                           <span className="text-gray-500">→</span>
-                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded font-mono">
+                          <span className="bg-green-100 text-green-700 px-2 py-1 rounded english-text">
                             {correction.suggestion}
                           </span>
                         </div>

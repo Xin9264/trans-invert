@@ -2,6 +2,23 @@
   "version": "1.0",
   "records": [
     {
+      "id": "8eb0bf60-b18b-4a16-b1f3-781fe0bb642d",
+      "timestamp": "2025-08-30T01:53:37.720306",
+      "text_title": "In many countries, environmental problems are beco...",
+      "text_content": "Environmental degradation has become a pressing global issue, sparking debates about who should bear the primary responsibility for addressing it. While some argue that individuals must lead the effort, others contend that governments and large corporations are more accountable and should take decisive action. This essay will discuss both perspectives before presenting a balanced opinion.\n\nOn the one hand, proponents of individual responsibility emphasize the power of collective action. They argue that if each person adopts eco-friendly habits, such as reducing plastic use, conserving water, and using public transportation, the cumulative effect would be substantial. Furthermore, public demand can drive market changes; for example, when consumers choose sustainable products, companies are incentivized to adopt greener practices. Thus, individual actions not only directly reduce environmental harm but also create bottom-up pressure for broader change.\n\nOn the other hand, many believe that governments and corporations play a more critical role. Large industries are major contributors to pollution and resource depletion due to industrial emissions, deforestation, and waste production. Without strict regulations and corporate accountability, individual efforts may have limited impact. Governments, through policies and legislation, can enforce environmental standards, invest in renewable energy, and impose penalties on polluters. For instance, carbon taxes and subsidies for green technology are effective measures that only authorities can implement.\n\nIn my view, while individual actions are valuable and morally imperative, they are insufficient without systemic support. Governments must establish and enforce environmental laws, while corporations should adopt sustainable practices and innovate eco-friendly technologies. Simultaneously, individuals ought to remain conscientious and support these efforts through daily choices. Ultimately, a collaborative approach involving all stakeholders—individuals, governments, and businesses—is essential for meaningful and lasting environmental protection.\n\nIn conclusion, although individuals contribute significantly to environmental conservation, the primary responsibility lies with governments and large corporations due to their scale and influence. Only through coordinated efforts can we effectively mitigate environmental problems and ensure a sustainable future.",
+      "chinese_translation": "环境恶化已成为一个紧迫的全球问题，引发了关于谁应承担解决它的主要责任的辩论。虽然一些人认为个人必须带头努力，但其他人认为政府和大型企业更应负责并应采取果断行动。本文将在提出平衡观点之前讨论双方观点。\n\n一方面，支持个人责任的人强调集体行动的力量。他们认为，如果每个人都采用环保习惯，例如减少塑料使用、节约用水和使用公共交通，累积效应将是巨大的。此外，公众需求可以推动市场变化；例如，当消费者选择可持续产品时，公司就有动力采用更环保的做法。因此，个人行动不仅直接减少环境危害，还创造自下而上的压力以促成更广泛的变革。\n\n另一方面，许多人认为政府和公司扮演更关键的角色。大型工业由于工业排放、森林砍伐和废物生产是污染和资源枯竭的主要贡献者。没有严格的法规和企业问责制，个人努力可能影响有限。政府可以通过政策和立法执行环境标准，投资可再生能源，并对污染者实施处罚。例如，碳税和对绿色技术的补贴是只有当局才能实施的有效措施。\n\n在我看来，虽然个人行动是有价值的且在道德上必要，但没有系统支持是不够的。政府必须建立和执行环境法律，而公司应采用可持续做法并创新环保技术。同时，个人应保持自觉并通过日常选择支持这些努力。最终，涉及所有利益相关者——个人、政府和企业——的合作方法对于有意义和持久的环境保护至关重要。\n\n总之，虽然个人对环境保育贡献显著，但主要责任在于政府和大型企业，因为它们的规模和影响力。只有通过协调努力，我们才能有效缓解环境问题并确保可持续的未来。",
+      "user_input": "",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "这是AI生成的作文范文，供学习参考。",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "practice_type": "essay",
+      "topic": "In many countries, environmental problems are becoming more serious. Some people believe that individuals should take the primary responsibility for protecting the environment, while others argue that governments and large corporations are more to blame and should take action.\n\nDiscuss both views and give your own opinion."
+    },
+    {
       "id": "51aabc3e-0968-4819-857e-110deee0a946",
       "timestamp": "2025-08-29T18:24:19.453932",
       "text_title": "题目：\n\nIn many countries, environmental problems are...",

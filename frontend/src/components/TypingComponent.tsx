@@ -195,7 +195,7 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
       {/* 文本显示区域 - 只在showTargetText为true时显示 */}
       {showTargetText && (
         <div className="relative mb-4">
-          <div className="p-6 bg-white rounded-lg border-2 border-gray-200 font-mono text-lg leading-relaxed min-h-[200px]">
+          <div className="p-6 bg-white rounded-lg border-2 border-gray-200 english-text text-lg leading-relaxed min-h-[200px]">
             {targetText}
           </div>
         </div>
@@ -208,7 +208,7 @@ const TypingComponent: React.FC<TypingComponentProps> = ({
           value={userInput}
           onChange={handleInputChange}
           placeholder="开始输入英文..."
-          className="w-full p-4 border-2 border-gray-300 rounded-lg font-mono text-base resize-none focus:border-primary-500 focus:outline-none min-h-[200px] max-h-[500px] overflow-y-auto leading-loose"
+          className="w-full p-4 border-2 border-gray-300 rounded-lg english-text text-base resize-none focus:border-primary-500 focus:outline-none min-h-[200px] max-h-[500px] overflow-y-auto leading-loose"
           style={{ 
             lineHeight: '1.8',
             fontSize: '16px'

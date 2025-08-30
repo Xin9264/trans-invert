@@ -471,11 +471,11 @@ const Practice: React.FC = () => {
                           {feedback.aiFeedback.corrections.map((correction: any, index: number) => (
                             <div key={index} className="text-sm">
                               <div className="flex items-start space-x-2">
-                                <span className="text-red-600 font-mono bg-red-100 px-2 py-1 rounded">
+                                <span className="text-red-600 english-text bg-red-100 px-2 py-1 rounded">
                                   {correction.original}
                                 </span>
                                 <span className="text-gray-500">→</span>
-                                <span className="text-green-600 font-mono bg-green-100 px-2 py-1 rounded">
+                                <span className="text-green-600 english-text bg-green-100 px-2 py-1 rounded">
                                   {correction.suggestion}
                                 </span>
                               </div>
@@ -553,11 +553,11 @@ const Practice: React.FC = () => {
                               {record.ai_evaluation.corrections.map((correction: any, corrIndex: number) => (
                                 <div key={corrIndex} className="bg-yellow-50 p-2 rounded border">
                                   <div className="flex items-center space-x-2 text-sm">
-                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded font-mono">
+                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded english-text">
                                       {correction.original}
                                     </span>
                                     <span>→</span>
-                                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded font-mono">
+                                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded english-text">
                                       {correction.suggestion}
                                     </span>
                                   </div>
