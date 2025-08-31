@@ -16,7 +16,7 @@ const Review: React.FC = () => {
     try {
       const response = await reviewAPI.getStats();
       
-      if (response.success) {
+      if (response.success && response.data) {
         setStats(response.data);
       } else {
         throw new Error(response.error || '获取统计失败');
@@ -37,7 +37,7 @@ const Review: React.FC = () => {
     try {
       const response = await reviewAPI.generate();
       
-      if (response.success) {
+      if (response.success && response.data) {
         setGeneratedMaterial(response.data);
         // 刷新统计数据
         fetchStats();
