@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { textAPI, practiceAPI } from '../utils/api';
 import { Text } from '../types';
-import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List, Move, MoreVertical, FolderPlus } from 'lucide-react';
+import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List, Move, FolderPlus } from 'lucide-react';
 import FolderManager from '../components/FolderManager';
 
 const Home: React.FC = () => {
@@ -41,7 +41,7 @@ const Home: React.FC = () => {
   const handleTextMove = async (textId: string, folderId: string | null) => {
     setIsMoving(textId);
     try {
-      const response = await textAPI.moveToFolder(textId, folderId);
+      const response = await textAPI.moveToFolder(textId, folderId || undefined);
       if (response.success) {
         // 刷新文本列表
         fetchTexts();

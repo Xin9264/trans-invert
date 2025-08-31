@@ -7,7 +7,6 @@ import {
   Plus, 
   Edit3, 
   Trash2, 
-  Move,
   ChevronRight,
   ChevronDown
 } from 'lucide-react';
@@ -89,7 +88,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({
     try {
       const response = await folderAPI.create({
         name: newFolderName.trim(),
-        parent_id: parentFolderId
+        parent_id: parentFolderId || undefined
       });
 
       if (response.success) {
@@ -176,7 +175,7 @@ const FolderManager: React.FC<FolderManagerProps> = ({
     if (!movingText) return;
 
     try {
-      const response = await textAPI.moveToFolder(movingText.id, folderId);
+      const response = await textAPI.moveToFolder(movingText.id, folderId || undefined);
       
       if (response.success) {
         onTextMove(movingText.id, folderId);
