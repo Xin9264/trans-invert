@@ -16,6 +16,16 @@ export interface Text {
   lastOpened?: string;
   type?: 'translation' | 'essay'; // 添加类型字段
   topic?: string; // 添加题目字段（仅作文类型使用）
+  folder_id?: string; // 添加文件夹ID字段
+}
+
+export interface Folder {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  created_at: string;
+  children?: Folder[];
+  child_count?: number;
 }
 
 export interface DifficultWord {

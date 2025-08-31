@@ -1,8 +1,10 @@
 import axios from 'axios';
 
-// 优先使用环境变量，然后根据环境选择默认值
-const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 
-  ((import.meta as any).env?.MODE === 'production' ? 'https://trans-invert-production.up.railway.app' : 'http://localhost:8000');
+// 在开发模式下使用相对路径，通过 Vite 代理转发
+// 在生产模式下使用绝对路径
+const API_BASE_URL = (import.meta as any).env?.MODE === 'production' 
+  ? 'https://trans-invert-production.up.railway.app' 
+  : ''; // 开发模式使用相对路径，通过 Vite 代理
 
 // 本地存储管理
 export const localStorageManager = {
@@ -146,6 +148,53 @@ export interface PracticeHistoryExport {
   records: PracticeHistoryRecord[];
 }
 
+export interface Folder {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  created_at: string;
+  children?: Folder[];
+  child_count?: number;
+}
+
+export const folderAPI = {
+  // 获取所有文件夹
+  getAll: async (): Promise<APIResponse<Folder[]>> => {
+    const response = await api.get('/api/folders/') as APIResponse<Folder[]>;
+    return response;
+  },
+
+  // 获取文件夹树形结构
+  getTree: async (): Promise<APIResponse<Folder[]>> => {
+    const response = await api.get('/api/folders/tree/all') as APIResponse<Folder[]>;
+    return response;
+  },
+
+  // 获取单个文件夹信息
+  getById: async (folderId: string): Promise<APIResponse<Folder>> => {
+    const response = await api.get(`/api/folders/${folderId}`) as APIResponse<Folder>;
+    return response;
+  },
+
+  // 创建文件夹
+  create: async (folderData: { name: string; parent_id?: string }): Promise<APIResponse<Folder>> => {
+    const response = await api.post('/api/folders/', folderData) as APIResponse<Folder>;
+    return response;
+  },
+
+  // 更新文件夹
+  update: async (folderId: string, folderData: { name?: string; parent_id?: string }): Promise<APIResponse<Folder>> => {
+    const response = await api.put(`/api/folders/${folderId}`, folderData) as APIResponse<Folder>;
+    return response;
+  },
+
+  // 删除文件夹
+  delete: async (folderId: string, force: boolean = false): Promise<APIResponse<any>> => {
+    const response = await api.delete(`/api/folders/${folderId}?force=${force}`) as APIResponse<any>;
+    return response;
+  }
+};
+
 export const textAPI = {
   // 上传文本
   upload: async (request: TextUploadRequest): Promise<APIResponse<{ text_id: string; word_count: number }>> => {
@@ -165,9 +214,16 @@ export const textAPI = {
     return response;
   },
 
-  // 获取所有文本列表
-  getAll: async (): Promise<APIResponse<any[]>> => {
-    const response = await api.get('/api/texts/') as APIResponse<any[]>;
+  // 获取所有文本列表（支持按文件夹筛选）
+  getAll: async (folderId?: string): Promise<APIResponse<any[]>> => {
+    const url = folderId ? `/api/texts/?folder_id=${folderId}` : '/api/texts/';
+    const response = await api.get(url) as APIResponse<any[]>;
+    return response;
+  },
+
+  // 移动文本到文件夹
+  moveToFolder: async (textId: string, folderId?: string): Promise<APIResponse<any>> => {
+    const response = await api.post(`/api/texts/${textId}/move`, { folder_id: folderId }) as APIResponse<any>;
     return response;
   },
 

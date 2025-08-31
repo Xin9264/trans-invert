@@ -18,6 +18,7 @@ class DataPersistenceService:
         self.practice_history_file = self.data_dir / "practice_history.json"
         self.texts_data_file = self.data_dir / "texts_data.json"
         self.analyses_data_file = self.data_dir / "analyses_data.json"
+        self.folders_data_file = self.data_dir / "folders_data.json"
         
         # 确保数据目录存在
         self.data_dir.mkdir(exist_ok=True)
@@ -123,13 +124,28 @@ class DataPersistenceService:
             
             texts = data.get("texts", {})
             
-            # 修复遗留的无效时间戳
+            # 修复遗留的无效时间戳和缺失的字段
             from datetime import datetime
             for text_id, text_info in texts.items():
                 if text_info.get("created_at") == "now":
                     # 将无效的"now"替换为默认时间戳
                     text_info["created_at"] = "2025-08-27T00:00:00.000000"
                     print(f"🔧 修复文本 {text_id} 的时间戳")
+                
+                # 为旧数据添加缺失的folder_id字段
+                if "folder_id" not in text_info:
+                    text_info["folder_id"] = None
+                    print(f"🔧 为文本 {text_id} 添加folder_id字段")
+                
+                # 为旧数据添加缺失的practice_type字段
+                if "practice_type" not in text_info:
+                    text_info["practice_type"] = "translation"
+                    print(f"🔧 为文本 {text_id} 添加practice_type字段")
+                
+                # 为旧数据添加缺失的topic字段
+                if "topic" not in text_info:
+                    text_info["topic"] = None
+                    print(f"🔧 为文本 {text_id} 添加topic字段")
             
             print(f"✅ 成功加载 {len(texts)} 个文本数据")
             return texts
@@ -181,15 +197,60 @@ class DataPersistenceService:
             print(f"❌ 加载分析数据失败: {e}")
             return {}
     
+    def save_folders_data(self, folders_storage: Dict[str, Dict[str, Any]]) -> bool:
+        """
+        保存文件夹数据到本地文件
+        Args:
+            folders_storage: 文件夹存储字典
+        Returns:
+            bool: 保存是否成功
+        """
+        try:
+            with open(self.folders_data_file, 'w', encoding='utf-8') as f:
+                json.dump({
+                    "version": "1.0",
+                    "folders": folders_storage
+                }, f, ensure_ascii=False, indent=2)
+            
+            print(f"✅ 文件夹数据已保存到: {self.folders_data_file}")
+            return True
+        except Exception as e:
+            print(f"❌ 保存文件夹数据失败: {e}")
+            return False
+    
+    def load_folders_data(self) -> Dict[str, Dict[str, Any]]:
+        """
+        从本地文件加载文件夹数据
+        Returns:
+            Dict[str, Dict[str, Any]]: 文件夹存储字典
+        """
+        try:
+            if not self.folders_data_file.exists():
+                print("📁 文件夹数据文件不存在，返回空字典")
+                return {}
+            
+            with open(self.folders_data_file, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            
+            folders = data.get("folders", {})
+            print(f"✅ 成功加载 {len(folders)} 个文件夹")
+            return folders
+            
+        except Exception as e:
+            print(f"❌ 加载文件夹数据失败: {e}")
+            return {}
+    
     def save_all_data(self, practice_history: List[PracticeHistoryRecord], 
                      texts_storage: Dict[str, Dict[str, Any]], 
-                     analyses_storage: Dict[str, Dict[str, Any]]) -> bool:
+                     analyses_storage: Dict[str, Dict[str, Any]],
+                     folders_storage: Dict[str, Dict[str, Any]] = None) -> bool:
         """
         保存所有数据到本地文件
         Args:
             practice_history: 练习历史记录列表
             texts_storage: 文本存储字典
             analyses_storage: 分析结果存储字典
+            folders_storage: 文件夹存储字典（可选）
         Returns:
             bool: 保存是否成功
         """
@@ -197,19 +258,22 @@ class DataPersistenceService:
         success &= self.save_practice_history(practice_history)
         success &= self.save_texts_data(texts_storage)
         success &= self.save_analyses_data(analyses_storage)
+        if folders_storage is not None:
+            success &= self.save_folders_data(folders_storage)
         return success
     
     def load_all_data(self) -> tuple:
         """
         从本地文件加载所有数据
         Returns:
-            tuple: (practice_history, texts_storage, analyses_storage)
+            tuple: (practice_history, texts_storage, analyses_storage, folders_storage)
         """
         practice_history = self.load_practice_history()
         texts_storage = self.load_texts_data()
         analyses_storage = self.load_analyses_data()
-        return practice_history, texts_storage, analyses_storage
+        folders_storage = self.load_folders_data()
+        return practice_history, texts_storage, analyses_storage, folders_storage
 
 
 # 创建全局实例
-data_persistence = DataPersistenceService()
+data_persistence = DataPersistenceService("data")

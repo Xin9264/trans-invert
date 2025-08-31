@@ -90,26 +90,28 @@ def create_user_ai_service(user_config: Dict[str, str]) -> AIService:
     return temp_service
 analyses_storage: Dict[str, Dict[str, Any]] = {}
 practice_history: List[PracticeHistoryRecord] = []
+folders_storage: Dict[str, Dict[str, Any]] = {}
 
 def initialize_data():
     """初始化数据，从本地文件加载"""
-    global practice_history, texts_storage, analyses_storage
+    global practice_history, texts_storage, analyses_storage, folders_storage
     try:
         print("🔄 正在从本地文件加载数据...")
-        loaded_history, loaded_texts, loaded_analyses = data_persistence.load_all_data()
+        loaded_history, loaded_texts, loaded_analyses, loaded_folders = data_persistence.load_all_data()
         
         practice_history = loaded_history
         texts_storage = loaded_texts
         analyses_storage = loaded_analyses
+        folders_storage = loaded_folders
         
-        print(f"✅ 数据加载完成: {len(practice_history)} 条历史记录, {len(texts_storage)} 个文本, {len(analyses_storage)} 个分析结果")
+        print(f"✅ 数据加载完成: {len(practice_history)} 条历史记录, {len(texts_storage)} 个文本, {len(analyses_storage)} 个分析结果, {len(folders_storage)} 个文件夹")
     except Exception as e:
         print(f"❌ 数据加载失败: {e}")
 
 def save_data():
     """保存所有数据到本地文件"""
     try:
-        data_persistence.save_all_data(practice_history, texts_storage, analyses_storage)
+        data_persistence.save_all_data(practice_history, texts_storage, analyses_storage, folders_storage)
         print("💾 数据已自动保存到本地文件")
     except Exception as e:
         print(f"❌ 数据保存失败: {e}")
@@ -152,7 +154,8 @@ async def upload_text(request: TextUploadRequest, http_request: Request, backgro
             "word_count": word_count,
             "created_at": datetime.now().isoformat(),
             "practice_type": request.practice_type or "translation",
-            "topic": request.topic
+            "topic": request.topic,
+            "folder_id": getattr(request, 'folder_id', None)  # 支持文件夹分类
         }
         
         # 自动保存数据
@@ -444,12 +447,54 @@ async def get_text(text_id: str, include_content: bool = False):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取文本失败: {str(e)}")
 
+@router.post("/{text_id}/move", response_model=APIResponse)
+async def move_text_to_folder(text_id: str, folder_data: Dict[str, Any]):
+    """移动文本到指定文件夹"""
+    try:
+        if text_id not in texts_storage:
+            raise HTTPException(status_code=404, detail="练习材料不存在")
+        
+        folder_id = folder_data.get("folder_id")
+        
+        # 🔧 修复：从folders模块导入正确的folders_storage
+        if folder_id:
+            from .folders import folders_storage as folder_storage
+            if folder_id not in folder_storage:
+                raise HTTPException(status_code=400, detail="目标文件夹不存在")
+            
+            target_folder_name = folder_storage[folder_id]["name"]
+            move_message = f"练习材料 '{texts_storage[text_id].get('title', '未命名材料')}' 已移动到文件夹 '{target_folder_name}'"
+        else:
+            move_message = f"练习材料 '{texts_storage[text_id].get('title', '未命名材料')}' 已移动到根目录"
+        
+        # 更新文本的文件夹关联
+        texts_storage[text_id]["folder_id"] = folder_id
+        
+        # 自动保存数据
+        save_data()
+        
+        return APIResponse(
+            success=True,
+            data={"text_id": text_id, "folder_id": folder_id},
+            message=move_message
+        )
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"移动练习材料失败: {str(e)}")
+
 @router.get("/", response_model=APIResponse)
-async def list_texts():
-    """获取所有文本列表"""
+async def list_texts(folder_id: Optional[str] = None):
+    """获取所有文本列表，支持按文件夹筛选"""
     try:
         texts_list = []
         for text_id, text_info in texts_storage.items():
+            # 如果指定了文件夹ID，只返回该文件夹下的文本
+            if folder_id is not None:
+                if text_info.get("folder_id") != folder_id:
+                    continue
+            
             # 检查是否有分析结果
             has_analysis = text_id in analyses_storage
             
@@ -462,16 +507,19 @@ async def list_texts():
                 "last_opened": text_info.get("last_opened"),
                 "created_at": text_info.get("created_at", datetime.now().isoformat()),
                 "practice_type": text_info.get("practice_type", "translation"),
-                "topic": text_info.get("topic")
+                "topic": text_info.get("topic"),
+                "folder_id": text_info.get("folder_id")  # 包含文件夹信息
             })
         
         # 按创建时间倒序排列（最新的在前面）
         texts_list.sort(key=lambda x: x["created_at"], reverse=True)
         
+        filter_msg = f"文件夹筛选下的 " if folder_id else ""
+        
         return APIResponse(
             success=True,
             data=texts_list,
-            message=f"获取到 {len(texts_list)} 个文本"
+            message=f"获取到 {filter_msg}{len(texts_list)} 个文本"
         )
         
     except Exception as e:

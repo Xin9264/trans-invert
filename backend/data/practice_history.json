@@ -1,0 +1,22 @@
+{
+  "version": "1.0",
+  "records": [
+    {
+      "id": "0e093a51-4ce7-4f8d-989e-68f8072696c3",
+      "timestamp": "2025-08-31T07:49:02.018889",
+      "text_title": "puma",
+      "text_content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.\n\nThe hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "chinese_translation": "美洲狮是大型的、猫一样的动物，它们在美国被发现。当报告传到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到时，它们没有被认真对待。然而，随着证据开始积累，动物园的专家们感到有义务去调查，因为那些声称看到美洲狮的人给出的描述异常相似。\n\n对美洲狮的搜寻开始于一个小村庄，那里一位摘草莓的妇女看到‘一只大猫’仅离她五码远。它一看到她立即跑开了，专家们确认美洲狮不会攻击人类，除非它被逼入绝境。搜寻被证明是困难的，因为美洲狮经常在早上在一个地方被观察到，晚上在二十英里外的另一个地方被观察到。无论它去哪里，它都留下了一串死鹿和小动物如兔子的踪迹。爪印在许多地方被看到，美洲狮的皮毛被发现粘在灌木上。几个人抱怨晚上有‘猫一样的噪音’，一位钓鱼旅行的商人在树上看到了美洲狮。专家们现在完全确信这动物是一只美洲狮，但它是从哪里来的？由于没有美洲狮被报告从国内任何动物园失踪，这一只一定是在私人收藏家的拥有中，并以某种方式设法逃脱了。搜寻持续了几个星期，但美洲狮没有被抓到。想到一只危险的野生动物仍然在安静的乡村逍遥法外是令人不安的。",
+      "user_input": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.\n\nThe hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and the experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "Excellent work. The translation is perfectly accurate, grammatically correct, and maintains the original text's meaning and style. No errors were found.",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "practice_type": "translation",
+      "topic": null
+    }
+  ]
+}
