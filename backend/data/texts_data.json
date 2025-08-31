@@ -11,6 +11,28 @@
       "topic": null,
       "folder_id": "82419708-8fc2-4d81-866e-56e6a45884f1",
       "last_opened": "2025-08-31T08:17:31.169947"
+    },
+    "73e9406e-c1fe-410e-8a3e-9980ead9337b": {
+      "id": "73e9406e-c1fe-410e-8a3e-9980ead9337b",
+      "title": "post1",
+      "content": "Contemporary vocabulary for talking about software testing has bothered me for a long time. The concept of a unit in unit test is not really defined, integration tests are integrating arbitrarily scoped modules, the concept of an E2E test makes sense, but it very much underspecifies the actually tested behavior as well as methods for testing it, are you using automated agents, human supervision, predefined set of actions, random exploration... it's all sweeped under the rug. On the other side you have your stress tests, load tests, peneration tests etc. but there is no proper classification in the wild, it all seems to be based on \"vibes\". A short web search reveals a \"level\" based classification as seen below, as well as an \"ad\" from Atlassian that gives you 7 \"types\" of software tests.",
+      "word_count": 134,
+      "created_at": "2025-08-31T08:55:34.289573",
+      "practice_type": "translation",
+      "topic": null,
+      "folder_id": null,
+      "last_opened": "2025-08-31T08:58:32.870938"
+    },
+    "432c6f44-3d67-4385-b3d9-8d1399bacc1f": {
+      "id": "432c6f44-3d67-4385-b3d9-8d1399bacc1f",
+      "title": "复习材料_0831",
+      "content": "In our daily lives, we often use simple expressions to communicate. For example, when meeting someone, we usually say, \"Hello, how are you?\" Many people reply, \"I'm fine, thank you.\" This is a common and polite way to greet others. Sometimes, we talk about our routines. I wake up early every morning and have breakfast. Then, I go to work or study. In the evening, I like to relax by reading a book or watching television. These basic sentences help us share information clearly. It is important to practice them regularly to improve our English skills. With consistent effort, speaking becomes easier and more natural.",
+      "word_count": 105,
+      "created_at": "2025-08-31T08:59:22.271560",
+      "practice_type": "review",
+      "source": "ai_generated_review",
+      "folder_id": null,
+      "last_opened": "2025-08-31T08:59:43.298563"
     }
   }
 }

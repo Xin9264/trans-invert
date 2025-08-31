@@ -77,3 +77,4 @@ backend/ai_providers.json
 CLAUDE.md
 .claude
 backend/backend/*
+spec.md

@@ -42,6 +42,10 @@ class PracticeHistoryRecord(BaseModel):
     score: int = Field(..., ge=0, le=100, description="得分")
     practice_type: Optional[str] = Field(default="translation", description="练习类型：translation(回译), essay(作文)")
     topic: Optional[str] = Field(default=None, description="作文原始题目（仅作文类型使用）")
+    # 复习相关字段
+    review_count: int = Field(default=0, description="复习次数")
+    last_reviewed: Optional[str] = Field(default=None, description="最后复习时间")
+    error_patterns: List[str] = Field(default_factory=list, description="错误模式标记")
 
 class PracticeHistoryExport(BaseModel):
     """练习历史导出格式"""
@@ -53,6 +57,20 @@ class PracticeHistoryExport(BaseModel):
 class PracticeHistoryImportRequest(BaseModel):
     """练习历史导入请求"""
     data: PracticeHistoryExport = Field(..., description="导入数据")
+
+class ReviewGenerateResponse(BaseModel):
+    """复习材料生成响应"""
+    text_id: str = Field(..., description="生成的复习材料ID")
+    review_article: str = Field(..., description="复习文章内容")
+    analysis_summary: Dict[str, Any] = Field(..., description="用户错误分析总结")
+
+class ReviewStatsResponse(BaseModel):
+    """复习统计响应"""
+    total_practiced: int = Field(..., description="已练习材料总数")
+    need_review: int = Field(..., description="需要复习的材料数量")
+    mastered: int = Field(..., description="已掌握的材料数量")
+    focus_areas: List[str] = Field(..., description="重点复习领域")
+    recent_errors: List[Dict[str, Any]] = Field(..., description="近期错误摘要")
 
 class APIResponse(BaseModel):
     """统一API响应格式"""

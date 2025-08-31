@@ -558,4 +558,43 @@ export const aiAPI = {
   }
 };
 
+// 复习相关接口
+export interface ReviewStats {
+  total_practiced: number;
+  need_review: number;
+  mastered: number;
+  focus_areas: string[];
+  recent_errors: any[];
+}
+
+export interface ReviewMaterial {
+  text_id: string;
+  review_article: string;
+  analysis_summary: {
+    total_records: number;
+    focus_areas: string[];
+    recent_errors: any[];
+  };
+}
+
+export const reviewAPI = {
+  // 获取复习统计
+  getStats: async (): Promise<APIResponse<ReviewStats>> => {
+    const response = await api.get('/api/review/stats') as APIResponse<ReviewStats>;
+    return response;
+  },
+
+  // 生成复习材料
+  generate: async (): Promise<APIResponse<ReviewMaterial>> => {
+    const response = await api.post('/api/review/generate') as APIResponse<ReviewMaterial>;
+    return response;
+  },
+
+  // 标记复习完成
+  markReviewed: async (textId: string): Promise<APIResponse<any>> => {
+    const response = await api.post(`/api/review/mark/${textId}`) as APIResponse<any>;
+    return response;
+  }
+};
+
 export default api;

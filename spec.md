@@ -1,395 +1,315 @@
-# Trans Invert 文件夹功能改进规格
+## 新功能：智能复习模式
 
-## 问题分析
+### 功能概述
 
-通过代码分析发现，当前文件夹功能存在以下问题：
+基于用户的练习历史数据，通过AI分析生成个性化的复习材料，形成闭环学习体验。
 
-### 1. 移动材料功能不完善
-- **后端问题**: 后端API存在但前端调用有问题
-- **UI交互问题**: 缺乏直观的拖拽或批量移动界面
-- **用户体验**: 移动操作繁琐，需要多次点击
+### 核心思路
 
-### 2. 文件夹管理功能缺失
-- **批量操作**: 无法批量移动多个材料
-- **拖拽支持**: 缺乏现代化的拖拽操作
-- **可视化反馈**: 移动操作缺乏视觉反馈
-
-## 改进方案
-
-### 1. 修复材料移动功能
-
-#### 1.1 前端Home.tsx改进
-**当前问题**: Home.tsx中的移动功能调用正确，但缺乏用户友好的移动界面
-
-**改进内容**:
-```typescript
-// 在材料卡片上添加移动按钮
-<button
-  onClick={() => {
-    setMovingText(text);
-    setShowMoveModal(true);
-  }}
-  className="p-2 text-gray-400 hover:text-blue-600"
-  title="移动到文件夹"
->
-  <Move size={16} />
-</button>
-
-// 添加批量移动功能
-const [selectedTexts, setSelectedTexts] = useState<string[]>([]);
-const [showBatchMoveModal, setShowBatchMoveModal] = useState(false);
+```
+今日复习页面 → 点击复习按键 → 复习模型读取practice_history.json → 
+输出英文文章 → 分析模型生成中文翻译 → 变成新的练习材料 → 正常回译流程
 ```
 
-#### 1.2 FolderManager组件改进  
-**当前问题**: FolderManager有移动模态框但没有被Home.tsx充分利用
+### 技术实现方案
 
-**改进内容**:
-```typescript
-// 修改FolderManager接口，支持显示移动模态框
-interface FolderManagerProps {
-  onFolderSelect: (folderId: string | null) => void;
-  selectedFolderId: string | null;
-  texts: Text[];
-  onTextMove: (textId: string, folderId: string | null) => void;
-  // 新增属性
-  showMoveModal?: boolean;
-  movingText?: Text | null;
-  onCloseMoveModal?: () => void;
-}
+#### 1. 数据结构扩展
+
+```python
+# 在 practice_history.json 中为每条记录添加复习次数字段
+class PracticeHistoryRecord:
+    # 现有字段...
+    review_count: int = 0  # 新增：复习次数
+    last_reviewed: Optional[str] = None  # 新增：最后复习时间
+    error_patterns: List[str] = []  # 新增：错误模式标记
 ```
 
-### 2. 添加拖拽功能
+#### 2. 复习分析AI模型
 
-#### 2.1 安装拖拽库
-```bash
-npm install @dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities
-npm install --save-dev @types/react-beautiful-dnd
+**后端API端点**: `/api/review/generate`
+
+**复习分析Prompt（优化版）**:
+```text
+你是一名专业的英语学习顾问。请分析用户的英文回译练习记录，生成一篇个性化的复习文章。
+
+## 输入数据
+你将收到用户的练习历史JSON数据，包含：
+- 原文、中文翻译、用户回译
+- AI评估结果和错误修正
+- 复习次数和时间戳
+
+## 输出要求
+1. **文章长度**: 严格控制在100-150词
+2. **内容重点**: 
+   - 总结用户的核心语法问题（时态、语法结构、固定搭配）
+   - 分析高频错误模式而非逐一罗列
+   - 重点关注复习次数少的材料中的错误
+3. **优先级策略**:
+   - 复习次数≤2的材料：高优先级
+   - 近期错误（7天内）：中等优先级  
+   - 复习次数≥5的材料：低优先级
+4. **语言风格**: 
+   - 使用鼓励性但专业的学术语气
+   - 提供具体的改进建议
+   - 避免技术术语，注重实用性
+
+## 文章结构
+新概念课文风格，聚焦用户错误的语法点、不要太多生僻词。
+
+只输出英文文章内容，无需其他解释。
 ```
 
-#### 2.2 实现拖拽移动
-```typescript
-// 在Home.tsx中添加拖拽上下文
-import { DndContext, DragEndEvent } from '@dnd-kit/core';
+#### 3. 后端实现
 
-const handleDragEnd = (event: DragEndEvent) => {
-  const { active, over } = event;
+```python
+# backend/app/routers/review.py
+from typing import Dict, Any, List
+import json
+from datetime import datetime, timedelta
+from app.services.ai_service import ai_service
+
+router = APIRouter(prefix="/api/review", tags=["review"])
+
+@router.post("/generate", response_model=APIResponse)
+async def generate_review_material(http_request: Request):
+    """生成个性化复习材料"""
+    try:
+        # 获取用户AI配置
+        user_config = get_user_ai_config(http_request)
+        if not user_config:
+            raise HTTPException(status_code=400, detail="请先配置AI服务")
+        
+        # 加载练习历史
+        history_data = data_persistence.load_practice_history()
+        
+        # 分析用户错误模式
+        analysis_data = analyze_user_patterns(history_data)
+        
+        # 生成复习文章
+        user_ai_service = create_user_ai_service(user_config)
+        review_article = await user_ai_service.generate_review_article(analysis_data)
+        
+        # 分析生成的文章获得中文翻译
+        article_analysis = await user_ai_service.analyze_text(review_article)
+        
+        # 创建新的练习材料
+        text_id = str(uuid.uuid4())
+        texts_storage[text_id] = {
+            "id": text_id,
+            "title": f"复习材料_{datetime.now().strftime('%m%d')}",
+            "content": review_article,
+            "word_count": len(review_article.split()),
+            "created_at": datetime.now().isoformat(),
+            "practice_type": "review",
+            "source": "ai_generated_review"
+        }
+        
+        # 保存分析结果
+        analyses_storage[text_id] = {
+            "text_id": text_id,
+            "translation": article_analysis["translation"],
+            "difficult_words": article_analysis["difficult_words"],
+            "difficulty": 4,  # 复习材料默认中等偏上难度
+            "key_points": ["复习重点", "错误总结", "学习建议"],
+            "word_count": len(review_article.split())
+        }
+        
+        save_data()
+        
+        return APIResponse(
+            success=True,
+            data={
+                "text_id": text_id,
+                "review_article": review_article,
+                "analysis_summary": analysis_data
+            },
+            message="复习材料生成成功"
+        )
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"生成复习材料失败: {str(e)}")
+
+def analyze_user_patterns(history_data: List[PracticeHistoryRecord]) -> Dict[str, Any]:
+    """分析用户的错误模式"""
+    # 按复习次数分组
+    low_review = [r for r in history_data if getattr(r, 'review_count', 0) <= 2]
+    medium_review = [r for r in history_data if 3 <= getattr(r, 'review_count', 0) <= 5]
+    
+    # 提取错误模式
+    grammar_errors = []
+    vocabulary_errors = []
+    structure_errors = []
+    
+    for record in low_review[-10:]:  # 只分析最近10条低复习记录
+        if hasattr(record, 'ai_evaluation') and record.ai_evaluation:
+            corrections = record.ai_evaluation.get('corrections', [])
+            for correction in corrections:
+                # 分类错误类型
+                reason = correction.get('reason', '').lower()
+                if any(word in reason for word in ['grammar', 'tense', '语法', '时态']):
+                    grammar_errors.append(correction)
+                elif any(word in reason for word in ['vocabulary', 'word', '词汇', '单词']):
+                    vocabulary_errors.append(correction)
+                elif any(word in reason for word in ['structure', 'sentence', '结构', '句子']):
+                    structure_errors.append(correction)
+    
+    return {
+        "total_records": len(history_data),
+        "low_review_count": len(low_review),
+        "grammar_error_count": len(grammar_errors),
+        "vocabulary_error_count": len(vocabulary_errors),
+        "structure_error_count": len(structure_errors),
+        "recent_errors": grammar_errors + vocabulary_errors + structure_errors,
+        "focus_areas": determine_focus_areas(grammar_errors, vocabulary_errors, structure_errors)
+    }
+
+def determine_focus_areas(grammar_errors, vocabulary_errors, structure_errors) -> List[str]:
+    """确定重点复习领域"""
+    areas = []
+    if len(grammar_errors) >= 3:
+        areas.append("语法和时态运用")
+    if len(vocabulary_errors) >= 3:
+        areas.append("词汇选择和搭配")
+    if len(structure_errors) >= 3:
+        areas.append("句子结构组织")
+    
+    return areas if areas else ["基础语言表达"]
+```
+
+#### 4. 前端实现
+
+```typescript
+// frontend/src/pages/Review.tsx
+const Review: React.FC = () => {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [reviewMaterial, setReviewMaterial] = useState<any>(null);
   
-  if (over && active.id !== over.id) {
-    const textId = active.id as string;
-    const folderId = over.id === 'root' ? null : over.id as string;
-    handleTextMove(textId, folderId);
-  }
-};
+  const generateReviewMaterial = async () => {
+    setIsGenerating(true);
+    try {
+      const response = await reviewAPI.generate();
+      if (response.success) {
+        setReviewMaterial(response.data);
+        // 跳转到新生成的练习材料
+        navigate(`/practice/${response.data.text_id}`);
+      }
+    } catch (error) {
+      alert('生成复习材料失败，请重试');
+    } finally {
+      setIsGenerating(false);
+    }
+  };
 
-// 包装组件
-<DndContext onDragEnd={handleDragEnd}>
-  {/* 材料列表和文件夹组件 */}
-</DndContext>
-```
-
-### 3. 增强用户界面
-
-#### 3.1 添加快捷移动按钮
-在每个材料卡片上添加快捷移动选项：
-```typescript
-// 材料卡片右键菜单
-const [contextMenu, setContextMenu] = useState<{x: number, y: number, textId: string} | null>(null);
-
-// 快捷移动下拉菜单
-<DropdownMenu>
-  <DropdownMenuTrigger>
-    <Move size={16} />
-  </DropdownMenuTrigger>
-  <DropdownMenuContent>
-    <DropdownMenuItem onClick={() => handleTextMove(text.id, null)}>
-      移动到根目录
-    </DropdownMenuItem>
-    {folders.map(folder => (
-      <DropdownMenuItem 
-        key={folder.id}
-        onClick={() => handleTextMove(text.id, folder.id)}
-      >
-        移动到 {folder.name}
-      </DropdownMenuItem>
-    ))}
-  </DropdownMenuContent>
-</DropdownMenu>
-```
-
-#### 3.2 批量操作功能
-```typescript
-// 添加批量选择
-const [selectedTexts, setSelectedTexts] = useState<Set<string>>(new Set());
-const [isSelectionMode, setIsSelectionMode] = useState(false);
-
-// 批量移动
-const handleBatchMove = async (folderId: string | null) => {
-  const movePromises = Array.from(selectedTexts).map(textId => 
-    textAPI.moveToFolder(textId, folderId)
+  return (
+    <div className="max-w-4xl mx-auto p-6">
+      <h1 className="text-3xl font-bold mb-6">智能复习</h1>
+      
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-xl font-semibold mb-4">个性化复习材料</h2>
+        <p className="text-gray-600 mb-4">
+          基于您的练习历史，AI将生成专门针对您常见错误的复习文章
+        </p>
+        
+        <button
+          onClick={generateReviewMaterial}
+          disabled={isGenerating}
+          className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        >
+          {isGenerating ? '正在生成复习材料...' : '生成今日复习'}
+        </button>
+      </div>
+      
+      <ReviewStats />
+    </div>
   );
-  
-  try {
-    await Promise.all(movePromises);
-    setSelectedTexts(new Set());
-    setIsSelectionMode(false);
-    fetchTexts(); // 刷新列表
-  } catch (error) {
-    console.error('批量移动失败:', error);
-  }
 };
-```
 
-### 4. 改进文件夹管理UI
-
-#### 4.1 文件夹展示优化
-```typescript
-// 在FolderManager中优化文件夹显示
-const FolderItem = ({ folder, onDrop }: { folder: Folder, onDrop: (textId: string) => void }) => {
-  const [isDropTarget, setIsDropTarget] = useState(false);
+// 复习统计组件
+const ReviewStats: React.FC = () => {
+  const [stats, setStats] = useState<any>(null);
+  
+  useEffect(() => {
+    // 加载复习统计数据
+    loadReviewStats();
+  }, []);
   
   return (
-    <div 
-      className={`folder-item ${isDropTarget ? 'drop-target' : ''}`}
-      onDragOver={(e) => {
-        e.preventDefault();
-        setIsDropTarget(true);
-      }}
-      onDragLeave={() => setIsDropTarget(false)}
-      onDrop={(e) => {
-        e.preventDefault();
-        const textId = e.dataTransfer.getData('text/plain');
-        onDrop(textId);
-        setIsDropTarget(false);
-      }}
-    >
-      <FolderIcon size={16} />
-      <span>{folder.name}</span>
-      <span className="text-count">({folder.textCount})</span>
+    <div className="bg-white rounded-lg shadow p-6">
+      <h3 className="text-lg font-semibold mb-4">复习统计</h3>
+      {stats && (
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-600">{stats.totalPracticed}</div>
+            <div className="text-sm text-gray-600">已练习材料</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-orange-600">{stats.needReview}</div>
+            <div className="text-sm text-gray-600">需要复习</div>
+          </div>
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-600">{stats.mastered}</div>
+            <div className="text-sm text-gray-600">已掌握</div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 ```
 
-#### 4.2 添加面包屑导航
+#### 5. API接口扩展
+
 ```typescript
-// 在文件夹管理中添加面包屑
-const Breadcrumb = ({ currentFolder, folders, onNavigate }: BreadcrumbProps) => {
-  const buildPath = (folderId: string | null): Folder[] => {
-    if (!folderId) return [];
-    const folder = folders.find(f => f.id === folderId);
-    if (!folder) return [];
-    return [...buildPath(folder.parent_id), folder];
-  };
-
-  const path = buildPath(currentFolder);
-
-  return (
-    <nav className="breadcrumb">
-      <button onClick={() => onNavigate(null)}>
-        🏠 全部材料
-      </button>
-      {path.map((folder, index) => (
-        <React.Fragment key={folder.id}>
-          <span className="separator">/</span>
-          <button onClick={() => onNavigate(folder.id)}>
-            {folder.name}
-          </button>
-        </React.Fragment>
-      ))}
-    </nav>
-  );
-};
-```
-
-## 实施步骤
-
-### 第1步：修复基础移动功能（1-2天）
-1. 在Home.tsx中添加材料移动按钮
-2. 完善FolderManager的移动模态框集成
-3. 测试基本移动功能
-
-### 第2步：添加拖拽支持（2-3天）
-1. 安装并配置拖拽库
-2. 实现材料到文件夹的拖拽移动
-3. 添加拖拽视觉反馈
-
-### 第3步：批量操作功能（2-3天）
-1. 实现材料多选功能
-2. 添加批量移动界面
-3. 实现批量操作逻辑
-
-### 第4步：UI优化（1-2天）
-1. 添加面包屑导航
-2. 优化文件夹显示效果
-3. 添加操作提示和确认
-
-### 第5步：测试和优化（1天）
-1. 全面测试移动功能
-2. 性能优化
-3. 用户体验细节调整
-
-## 预期效果
-
-- **操作便捷**: 支持拖拽、右键菜单、批量操作等多种移动方式
-- **视觉反馈**: 清晰的拖拽提示和操作确认
-- **用户体验**: 类似现代文件管理器的交互体验
-- **功能完整**: 全面的文件夹管理功能
-
-通过这些改进，文件夹功能将变得完善和易用，大大提升用户的材料管理体验。
-
-## 问题诊断
-
-### 当前移动功能的具体问题
-
-通过代码分析发现以下关键问题：
-
-#### 1. 后端API验证不完整
-**文件**: `backend/app/routers/texts.py:move_text_to_folder`
-**问题**: 
-```python
-# 如果指定了文件夹ID，验证文件夹是否存在
-if folder_id:
-    # 这里需要检查文件夹是否存在，暂时先简单处理
-    # 在实际应用中应该从folders_storage中验证
-    pass  # ❌ 没有实际验证文件夹是否存在
-```
-
-**影响**: 材料可以被"移动"到不存在的文件夹ID，导致数据不一致
-
-#### 2. 前端界面实现正确但受后端限制
-**文件**: `frontend/src/pages/Home.tsx`
-**现状**: 
-- ✅ 移动下拉菜单已正确实现
-- ✅ handleTextMove函数逻辑正确
-- ✅ 成功通知机制完整
-- ❌ 受后端API验证不足影响
-
-### 紧急修复方案
-
-#### 修复1: 完善后端文件夹验证
-```python
-# 在 backend/app/routers/texts.py 中修复 move_text_to_folder 函数
-async def move_text_to_folder(text_id: str, folder_data: Dict[str, Any]):
-    """移动文本到指定文件夹"""
-    try:
-        if text_id not in texts_storage:
-            raise HTTPException(status_code=404, detail="练习材料不存在")
-        
-        folder_id = folder_data.get("folder_id")
-        
-        # 🔧 修复：添加文件夹验证逻辑
-        if folder_id:
-            # 导入folders模块以访问folders_storage
-            from .folders import folders_storage
-            
-            if folder_id not in folders_storage:
-                raise HTTPException(status_code=400, detail="目标文件夹不存在")
-            
-            target_folder_name = folders_storage[folder_id]["name"]
-            move_message = f"练习材料已移动到文件夹 '{target_folder_name}'"
-        else:
-            move_message = "练习材料已移动到根目录"
-        
-        # 更新文本的文件夹关联
-        texts_storage[text_id]["folder_id"] = folder_id
-        
-        # 自动保存数据
-        save_data()
-        
-        text_title = texts_storage[text_id].get("title", "未命名材料")
-        
-        return APIResponse(
-            success=True,
-            data={"text_id": text_id, "folder_id": folder_id},
-            message=move_message
-        )
-```
-
-#### 修复2: 添加前端错误处理增强
-```typescript
-// 在 frontend/src/pages/Home.tsx 中增强错误处理
-const handleTextMove = async (textId: string, folderId: string | null) => {
-  setIsMoving(textId);
-  try {
-    const response = await textAPI.moveToFolder(textId, folderId);
-    if (response.success) {
-      // 刷新文本列表
-      fetchTexts();
-      setShowMoveDropdown(null);
-      
-      // 🔧 使用后端返回的具体消息
-      const successMessage = response.message || '移动成功';
-      
-      // 显示成功提示
-      showNotification(successMessage, 'success');
-    } else {
-      // 🔧 显示具体的错误信息
-      alert(response.error || '移动失败');
-    }
-  } catch (error) {
-    console.error('移动文本失败:', error);
-    // 🔧 增强错误提示
-    if (error.response?.status === 400) {
-      alert('目标文件夹不存在，请刷新页面后重试');
-    } else {
-      alert('移动失败，请检查网络连接');
-    }
-  } finally {
-    setIsMoving(null);
+// frontend/src/utils/api.ts
+export const reviewAPI = {
+  // 生成复习材料
+  generate: async (): Promise<APIResponse<any>> => {
+    const response = await api.post('/api/review/generate');
+    return response;
+  },
+  
+  // 获取复习统计
+  getStats: async (): Promise<APIResponse<any>> => {
+    const response = await api.get('/api/review/stats');
+    return response;
+  },
+  
+  // 标记复习完成
+  markReviewed: async (textId: string): Promise<APIResponse<any>> => {
+    const response = await api.post(`/api/review/mark/${textId}`);
+    return response;
   }
 };
 ```
 
-#### 修复3: 添加通知组件
-```typescript
-// 在 frontend/src/pages/Home.tsx 中添加专业的通知系统
-const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
-  const notification = document.createElement('div');
-  notification.className = `fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 transition-opacity ${
-    type === 'success' 
-      ? 'bg-green-500 text-white' 
-      : 'bg-red-500 text-white'
-  }`;
-  notification.textContent = message;
-  document.body.appendChild(notification);
-  
-  // 3秒后自动消失
-  setTimeout(() => {
-    notification.style.opacity = '0';
-    setTimeout(() => {
-      if (document.body.contains(notification)) {
-        document.body.removeChild(notification);
-      }
-    }, 300);
-  }, 3000);
-};
-```
+### 实施步骤
 
-### 立即实施步骤
+#### 第1步：数据结构更新（1天）
+1. 扩展 `PracticeHistoryRecord` 模型
+2. 更新数据持久化逻辑
+3. 添加复习次数字段的向后兼容性
 
-#### 第1步：修复后端验证（优先级：紧急）
-1. 修改 `backend/app/routers/texts.py` 的 `move_text_to_folder` 函数
-2. 添加文件夹存在性验证
-3. 改进返回消息的具体性
+#### 第2步：复习分析引擎（2天）
+1. 实现用户错误模式分析
+2. 开发复习材料生成AI模型
+3. 集成文章分析流程
 
-#### 第2步：增强前端错误处理（优先级：高）
-1. 改进 `Home.tsx` 中的错误处理逻辑
-2. 添加专业的通知系统
-3. 提供更明确的用户反馈
+#### 第3步：前端复习界面（2天）
+1. 创建复习页面组件
+2. 实现复习统计展示
+3. 添加生成复习材料的交互
 
-#### 第3步：测试验证（优先级：高）
-1. 测试移动到存在的文件夹
-2. 测试移动到不存在的文件夹ID
-3. 测试移动到根目录
-4. 验证错误提示的准确性
+#### 第4步：API集成和测试（1天）
+1. 完善后端API接口
+2. 前后端联调测试
+3. 优化复习文章质量
 
-### 预期修复结果
+### 预期效果
 
-修复完成后：
-- ✅ 材料可以正确移动到任何存在的文件夹
-- ✅ 尝试移动到不存在文件夹时显示明确错误
-- ✅ 移动成功时显示具体的目标文件夹名称
-- ✅ 所有移动操作都有适当的用户反馈
-- ✅ 数据一致性得到保障
+- ✅ **个性化学习**: 基于用户实际错误生成针对性复习材料
+- ✅ **闭环学习**: 练习→分析→复习→再练习的完整循环
+- ✅ **智能优先级**: 自动识别需要重点复习的薄弱环节
+- ✅ **进度追踪**: 可视化复习进度和掌握程度
+- ✅ **自适应难度**: 复习材料难度根据用户水平动态调整
 
-这些修复将完全解决当前"只支持移动到根目录"的问题，使材料移动功能完全可用。
+这个功能将Trans Invert从单纯的练习平台升级为智能化的个性化学习系统。

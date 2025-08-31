@@ -35,6 +35,71 @@
         "in the possession of"
       ],
       "word_count": 273
+    },
+    "73e9406e-c1fe-410e-8a3e-9980ead9337b": {
+      "text_id": "73e9406e-c1fe-410e-8a3e-9980ead9337b",
+      "translation": "关于谈论软件测试的当代词汇已经困扰我很长时间。单元测试中的单元概念并没有真正定义，集成测试是在集成任意范围的模块，端到端测试的概念是有意义的，但它非常不具体地说明实际测试的行为以及测试它的方法，你是使用自动化代理、人工监督、预定义的动作集、随机探索……所有这些都被掩盖了。另一方面，你有压力测试、负载测试、渗透测试等，但在现实中并没有适当的分类，似乎都是基于“感觉”。一次简短的网络搜索揭示了一个基于“级别”的分类，如下所示，以及来自Atlassian的一则“广告”，给你提供了7种软件测试的“类型”。",
+      "difficult_words": [
+        {
+          "word": "Contemporary",
+          "meaning": "当代的"
+        },
+        {
+          "word": "arbitrarily",
+          "meaning": "任意地"
+        },
+        {
+          "word": "underspecifies",
+          "meaning": "未充分说明"
+        },
+        {
+          "word": "supervision",
+          "meaning": "监督"
+        },
+        {
+          "word": "classification",
+          "meaning": "分类"
+        }
+      ],
+      "difficulty": 4,
+      "key_points": [
+        "unit test",
+        "integration tests",
+        "E2E test",
+        "stress tests",
+        "load tests",
+        "penetration tests"
+      ],
+      "word_count": 134
+    },
+    "432c6f44-3d67-4385-b3d9-8d1399bacc1f": {
+      "text_id": "432c6f44-3d67-4385-b3d9-8d1399bacc1f",
+      "translation": "在我们的日常生活中，我们经常使用简单的表达来交流。例如，当遇见某人时，我们通常说，“你好，你好吗？”许多人回答，“我很好，谢谢你。”这是一种常见且有礼貌的问候他人的方式。有时，我们谈论我们的日常。我每天早上早起并吃早餐。然后，我去工作或学习。在晚上，我喜欢通过阅读一本书或看电视来放松。这些基本句子帮助我们清晰地分享信息。定期练习它们以提高我们的英语技能是重要的。通过持续的努力，说话变得更容易和更自然。",
+      "difficult_words": [
+        {
+          "word": "expressions",
+          "meaning": "表达"
+        },
+        {
+          "word": "routines",
+          "meaning": "日常事务"
+        },
+        {
+          "word": "consistent",
+          "meaning": "持续的"
+        },
+        {
+          "word": "natural",
+          "meaning": "自然的"
+        }
+      ],
+      "difficulty": 4,
+      "key_points": [
+        "复习重点",
+        "错误总结",
+        "学习建议"
+      ],
+      "word_count": 105
     }
   }
 }

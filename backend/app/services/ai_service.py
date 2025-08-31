@@ -4,7 +4,7 @@ import json
 import os
 import re
 from enum import Enum
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from openai import OpenAI, AsyncOpenAI
 from app.core.settings import settings
 from app.services.template_service import template_service
@@ -946,6 +946,95 @@ ALLOWED_ORIGINS=http://localhost:3000
                 result["detailed_scores"][key] = score
         
         return result
+
+    async def generate_review_article(self, analysis_data: Dict[str, Any], history_data: List) -> str:
+        """生成个性化复习文章"""
+        try:
+            # 构建复习分析提示词
+            prompt = self._build_review_prompt(analysis_data, history_data)
+            
+            # 调用API生成复习文章
+            response = await self._call_api(prompt)
+            
+            # 清理和验证响应
+            review_article = response.strip()
+            
+            # 验证文章长度
+            word_count = len(review_article.split())
+            if word_count < 50:
+                raise Exception("生成的复习文章过短")
+            if word_count > 300:
+                # 截取到合适长度
+                words = review_article.split()
+                review_article = ' '.join(words[:250])
+                # 确保以句号结尾
+                if not review_article.endswith('.'):
+                    last_sentence_end = review_article.rfind('.')
+                    if last_sentence_end > 0:
+                        review_article = review_article[:last_sentence_end + 1]
+            
+            return review_article
+            
+        except Exception as e:
+            # 返回默认复习文章
+            return self._get_default_review_article(analysis_data)
+    
+    def _build_review_prompt(self, analysis_data: Dict[str, Any], history_data: List) -> str:
+        """构建复习分析提示词"""
+        # 提取用户的错误模式
+        total_records = analysis_data.get("total_records", 0)
+        focus_areas = analysis_data.get("focus_areas", [])
+        recent_errors = analysis_data.get("recent_errors", [])
+        
+        # 分析最常见的错误类型
+        error_summary = []
+        if analysis_data.get("grammar_error_count", 0) > 0:
+            error_summary.append(f"语法错误 {analysis_data['grammar_error_count']} 次")
+        if analysis_data.get("vocabulary_error_count", 0) > 0:
+            error_summary.append(f"词汇错误 {analysis_data['vocabulary_error_count']} 次")
+        if analysis_data.get("structure_error_count", 0) > 0:
+            error_summary.append(f"结构错误 {analysis_data['structure_error_count']} 次")
+        
+        # 构建提示词
+        prompt = f"""你是一名专业的英语学习顾问。请根据用户的练习历史数据，生成一篇个性化的复习文章。
+
+## 用户学习数据分析
+- 总练习次数：{total_records}
+- 需要重点复习的领域：{', '.join(focus_areas) if focus_areas else '基础语言表达'}
+- 错误统计：{', '.join(error_summary) if error_summary else '暂无明显错误模式'}
+
+## 复习文章要求
+1. **文章长度**：严格控制在100-150词
+2. **内容重点**：
+   - 针对用户的核心语法问题（时态、语法结构、固定搭配）
+   - 重点关注用户的薄弱环节：{', '.join(focus_areas[:2]) if focus_areas else '基础语言表达'}
+   - 使用中等难度词汇，避免过于生僻的词汇
+3. **语言风格**：
+   - 新概念英语课文风格
+   - 语法结构清晰，适合练习
+   - 内容有趣且实用
+
+## 输出要求
+只输出英文文章内容，不要包含任何解释、标题或其他文字。文章应该是一个完整的段落或几个相关段落。
+"""
+
+        return prompt
+    
+    def _get_default_review_article(self, analysis_data: Dict[str, Any]) -> str:
+        """获取默认复习文章"""
+        focus_areas = analysis_data.get("focus_areas", [])
+        
+        if "语法和时态运用" in focus_areas:
+            return """Learning English grammar can be challenging, but practice makes perfect. Many students struggle with verb tenses, especially when switching between past, present, and future forms. The key is to understand the context and timeline of events. For example, when describing completed actions, we use the past tense. When talking about habits or general facts, we use the present tense. Regular practice with various sentence structures will help you master these concepts and improve your overall language skills."""
+        
+        elif "词汇选择和搭配" in focus_areas:
+            return """Building a strong vocabulary is essential for effective communication in English. Students often confuse similar words or use incorrect word combinations. For instance, we say 'make a decision' rather than 'do a decision', and 'take a break' instead of 'make a break'. Learning common collocations and phrases will significantly improve your language fluency. Reading extensively and noting down new expressions can help expand your vocabulary systematically."""
+        
+        elif "句子结构组织" in focus_areas:
+            return """Proper sentence structure is fundamental to clear communication in English. Many learners struggle with organizing their thoughts into well-formed sentences. A basic English sentence follows the subject-verb-object pattern, but this can be expanded with adjectives, adverbs, and various clauses. Understanding how to connect ideas using conjunctions and transitional phrases will make your writing more coherent and sophisticated. Practice combining simple sentences into complex ones to enhance your expression."""
+        
+        else:
+            return """English language learning requires consistent practice and patience. Every student faces unique challenges, whether in grammar, vocabulary, or pronunciation. The most effective approach is to identify your weaknesses and focus on improving them systematically. Reading regularly, practicing speaking with native speakers, and writing short compositions can accelerate your progress. Remember that making mistakes is part of the learning process, and each error is an opportunity to improve your skills."""
 
 # 创建全局AI服务实例
 try:

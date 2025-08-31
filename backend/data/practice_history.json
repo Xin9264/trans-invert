@@ -2,6 +2,57 @@
   "version": "1.0",
   "records": [
     {
+      "id": "79c030d2-1440-46eb-9869-9f6985fe9d5b",
+      "timestamp": "2025-08-31T08:58:52.002002",
+      "text_title": "post1",
+      "text_content": "Contemporary vocabulary for talking about software testing has bothered me for a long time. The concept of a unit in unit test is not really defined, integration tests are integrating arbitrarily scoped modules, the concept of an E2E test makes sense, but it very much underspecifies the actually tested behavior as well as methods for testing it, are you using automated agents, human supervision, predefined set of actions, random exploration... it's all sweeped under the rug. On the other side you have your stress tests, load tests, peneration tests etc. but there is no proper classification in the wild, it all seems to be based on \"vibes\". A short web search reveals a \"level\" based classification as seen below, as well as an \"ad\" from Atlassian that gives you 7 \"types\" of software tests.",
+      "chinese_translation": "关于谈论软件测试的当代词汇已经困扰我很长时间。单元测试中的单元概念并没有真正定义，集成测试是在集成任意范围的模块，端到端测试的概念是有意义的，但它非常不具体地说明实际测试的行为以及测试它的方法，你是使用自动化代理、人工监督、预定义的动作集、随机探索……所有这些都被掩盖了。另一方面，你有压力测试、负载测试、渗透测试等，但在现实中并没有适当的分类，似乎都是基于“感觉”。一次简短的网络搜索揭示了一个基于“级别”的分类，如下所示，以及来自Atlassian的一则“广告”，给你提供了7种软件测试的“类型”。",
+      "user_input": "Contemporary vocabulary for talking about software testing has bothered me for a long time. The concept of a unit in unit test is not really defined, integration tests are integrating n the other side you have your stress tests, load tests, peneration tests etc. but there is no proper classification in the wild, it all seems to be based on \"vibes\". A short web search reveals a \"level\" based classification as seen below, as well as an \"ad\" from Atlassian that gives you 7 \"types\" of software tests.",
+      "ai_evaluation": {
+        "score": 65,
+        "corrections": [
+          {
+            "original": "integration tests are integrating n the other side you have",
+            "suggestion": "integration tests are integrating arbitrarily scoped modules, on the other side you have",
+            "reason": "Missing key phrase 'arbitrarily scoped modules' and incorrect transition to next point"
+          },
+          {
+            "original": "peneration tests",
+            "suggestion": "penetration tests",
+            "reason": "Spelling error"
+          }
+        ],
+        "overall_feedback": "The translation captures the main ideas but omits a significant portion of the original text (the entire section about E2E testing). The missing content affects the completeness and accuracy. Spelling error present. While the conveyed parts are mostly correct, the omission of key details makes this an incomplete translation.",
+        "is_acceptable": false
+      },
+      "score": 65,
+      "practice_type": "translation",
+      "topic": null,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "49cff8b1-06f3-42c8-8585-ccff4956d1e2",
+      "timestamp": "2025-08-31T08:58:19.081038",
+      "text_title": "post1",
+      "text_content": "Contemporary vocabulary for talking about software testing has bothered me for a long time. The concept of a unit in unit test is not really defined, integration tests are integrating arbitrarily scoped modules, the concept of an E2E test makes sense, but it very much underspecifies the actually tested behavior as well as methods for testing it, are you using automated agents, human supervision, predefined set of actions, random exploration... it's all sweeped under the rug. On the other side you have your stress tests, load tests, peneration tests etc. but there is no proper classification in the wild, it all seems to be based on \"vibes\". A short web search reveals a \"level\" based classification as seen below, as well as an \"ad\" from Atlassian that gives you 7 \"types\" of software tests.",
+      "chinese_translation": "关于谈论软件测试的当代词汇已经困扰我很长时间。单元测试中的单元概念并没有真正定义，集成测试是在集成任意范围的模块，端到端测试的概念是有意义的，但它非常不具体地说明实际测试的行为以及测试它的方法，你是使用自动化代理、人工监督、预定义的动作集、随机探索……所有这些都被掩盖了。另一方面，你有压力测试、负载测试、渗透测试等，但在现实中并没有适当的分类，似乎都是基于“感觉”。一次简短的网络搜索揭示了一个基于“级别”的分类，如下所示，以及来自Atlassian的一则“广告”，给你提供了7种软件测试的“类型”。",
+      "user_input": "Contemporary vocabulary for talking about software testing has bothered me for a long time. The concept of a unit in unit test is not really defined, integration tests are integrating arbitrarily scoped modules, the concept of an E2E test makes sense, but it very much underspecifies the actually tested behavior as well as methods for testing it, are you using automated agents, human supervision, predefined set of actions, random exploration... it's all sweeped under the rug. On the other side you have your stress tests, load tests, peneration tests etc. but there is no proper classification in the wild, it all seems to be based on \"vibes\". A short web search reveals a \"level\" based classification as seen below, ",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "Excellent work. The back-translation is grammatically perfect, semantically accurate, and maintains the original sentence structure and complexity. It is a faithful and natural English rendition of the provided Chinese text.",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "practice_type": "translation",
+      "topic": null,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
       "id": "0e093a51-4ce7-4f8d-989e-68f8072696c3",
       "timestamp": "2025-08-31T07:49:02.018889",
       "text_title": "puma",
@@ -16,7 +67,10 @@
       },
       "score": 100,
       "practice_type": "translation",
-      "topic": null
+      "topic": null,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
     }
   ]
 }

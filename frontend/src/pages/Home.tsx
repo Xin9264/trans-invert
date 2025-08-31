@@ -210,6 +210,9 @@ const Home: React.FC = () => {
           <Link to="/upload" className="btn-primary">
             开始练习
           </Link>
+          <Link to="/review" className="btn-secondary">
+            智能复习
+          </Link>
           <Link to="/history" className="btn-secondary">
             查看历史
           </Link>
