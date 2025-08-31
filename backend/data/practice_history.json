@@ -2,6 +2,144 @@
   "version": "1.0",
   "records": [
     {
+      "id": "c4fecf9f-fbda-4ef7-9dd0-a0f6e2866c52",
+      "timestamp": "2025-08-31T14:21:00.235093",
+      "text_title": "复习材料_0831",
+      "text_content": "In our daily lives, we often use simple expressions to communicate. For example, when meeting someone, we usually say, \"Hello, how are you?\" Many people reply, \"I'm fine, thank you.\" This is a common and polite way to greet others. Sometimes, we talk about our routines. I wake up early every morning and have breakfast. Then, I go to work or study. In the evening, I like to relax by reading a book or watching television. These basic sentences help us share information clearly. It is important to practice them regularly to improve our English skills. With consistent effort, speaking becomes easier and more natural.",
+      "chinese_translation": "在我们的日常生活中，我们经常使用简单的表达来交流。例如，当遇见某人时，我们通常说，“你好，你好吗？”许多人回答，“我很好，谢谢你。”这是一种常见且有礼貌的问候他人的方式。有时，我们谈论我们的日常。我每天早上早起并吃早餐。然后，我去工作或学习。在晚上，我喜欢通过阅读一本书或看电视来放松。这些基本句子帮助我们清晰地分享信息。定期练习它们以提高我们的英语技能是重要的。通过持续的努力，说话变得更容易和更自然。",
+      "user_input": "we often use simple expressions to communicate. For example, when meeting someone, we usually say, \"Hello, how are you?\" Many people reply, \"I'm fine, thank you.\" This is a common and polite way to greet others. Sometimes, we talk about our routines. I wake up early every morning and have breakfast. Then, I go to work or study. In the evening, I like to relax by reading a book or watching television. These basic sentences help us share information clearly. It is important to practice them regularly to improve our English skills. With consistent effort, speaking becomes easier and more natural.",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [
+          {
+            "original": "we often use simple expressions to communicate",
+            "suggestion": "In our daily lives, we often use simple expressions to communicate",
+            "reason": "完整性：用户遗漏了原文开头的状语短语，虽然语义仍然完整，但建议保持与原文一致的完整表达"
+          }
+        ],
+        "overall_feedback": "优秀表现。用户准确回译了原文的所有关键内容，包括问候表达、日常作息描述、练习重要性和最终效果。语法完全正确，时态使用恰当（一般现在时），词汇选择精准（如common and polite way, consistent effort等），结构完整连贯。表达自然流畅，与原文复杂度匹配。唯一微小优化点是开头可以补充'in our daily lives'使表达更完整，但这不影响整体优秀质量。",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "practice_type": "translation",
+      "topic": null,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "2f7f15b9-fde6-49ff-a854-e11fe330d1de",
+      "timestamp": "2025-08-31T13:55:23.037068",
+      "text_title": "puma",
+      "text_content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.\n\nThe hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "chinese_translation": "美洲狮是大型的、猫一样的动物，它们在美国被发现。当报告传到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到时，它们没有被认真对待。然而，随着证据开始积累，动物园的专家们感到有义务去调查，因为那些声称看到美洲狮的人给出的描述异常相似。\n\n对美洲狮的搜寻开始于一个小村庄，那里一位摘草莓的妇女看到‘一只大猫’仅离她五码远。它一看到她立即跑开了，专家们确认美洲狮不会攻击人类，除非它被逼入绝境。搜寻被证明是困难的，因为美洲狮经常在早上在一个地方被观察到，晚上在二十英里外的另一个地方被观察到。无论它去哪里，它都留下了一串死鹿和小动物如兔子的踪迹。爪印在许多地方被看到，美洲狮的皮毛被发现粘在灌木上。几个人抱怨晚上有‘猫一样的噪音’，一位钓鱼旅行的商人在树上看到了美洲狮。专家们现在完全确信这动物是一只美洲狮，但它是从哪里来的？由于没有美洲狮被报告从国内任何动物园失踪，这一只一定是在私人收藏家的拥有中，并以某种方式设法逃脱了。搜寻持续了几个星期，但美洲狮没有被抓到。想到一只危险的野生动物仍然在安静的乡村逍遥法外是令人不安的。",
+      "user_input": "The hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [
+          {
+            "original": "用户输入部分与原文完全一致",
+            "suggestion": "无需修正，但可考虑在表达上增加一些句式变化以提升语言多样性",
+            "reason": "完整性/表达自然度：用户回译与原文完全一致，覆盖所有关键信息，但若作为翻译练习，可适当展示句式转换能力"
+          }
+        ],
+        "overall_feedback": "语法完全正确，词汇使用精准，结构严谨，完整覆盖原文所有细节（包括地点、距离、行为描述、证据链和结论）。表达自然度极高，与原文复杂度完全匹配。建议可在未来练习中尝试对部分句式进行合理改写（如将被动语态转为主动），以进一步提升语言灵活性。",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "practice_type": "translation",
+      "topic": null,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "715a490a-1242-4a08-b198-a5d4ba992d5b",
+      "timestamp": "2025-08-31T13:53:45.733389",
+      "text_title": "puma",
+      "text_content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.\n\nThe hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "chinese_translation": "美洲狮是大型的、猫一样的动物，它们在美国被发现。当报告传到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到时，它们没有被认真对待。然而，随着证据开始积累，动物园的专家们感到有义务去调查，因为那些声称看到美洲狮的人给出的描述异常相似。\n\n对美洲狮的搜寻开始于一个小村庄，那里一位摘草莓的妇女看到‘一只大猫’仅离她五码远。它一看到她立即跑开了，专家们确认美洲狮不会攻击人类，除非它被逼入绝境。搜寻被证明是困难的，因为美洲狮经常在早上在一个地方被观察到，晚上在二十英里外的另一个地方被观察到。无论它去哪里，它都留下了一串死鹿和小动物如兔子的踪迹。爪印在许多地方被看到，美洲狮的皮毛被发现粘在灌木上。几个人抱怨晚上有‘猫一样的噪音’，一位钓鱼旅行的商人在树上看到了美洲狮。专家们现在完全确信这动物是一只美洲狮，但它是从哪里来的？由于没有美洲狮被报告从国内任何动物园失踪，这一只一定是在私人收藏家的拥有中，并以某种方式设法逃脱了。搜寻持续了几个星期，但美洲狮没有被抓到。想到一只危险的野生动物仍然在安静的乡村逍遥法外是令人不安的。",
+      "user_input": "The hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [
+          {
+            "original": "N/A (No errors found)",
+            "suggestion": "Consider using 'cat-like animal' instead of 'large cat' for consistency with the original text, though 'large cat' is acceptable in context.",
+            "reason": "Expression optimization for stylistic consistency"
+          }
+        ],
+        "overall_feedback": "Excellent work. The translation is grammatically flawless with accurate tense usage (e.g., 'was often observed'), proper articles ('a small village'), and correct prepositions ('away from her'). Vocabulary choices are precise ('cornered,' 'trail of dead deer,' 'at large'). The structure maintains the original's complexity, including relative clauses ('where a woman...') and adverbial phrases ('Wherever it went'). All key information is preserved: the strawberry-picking woman, expert confirmation of puma behavior, movement patterns, evidence trail, multiple witness accounts, and the private collector conclusion. The expression is natural and idiomatic throughout. No meaningful content is omitted or simplified.",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "practice_type": "translation",
+      "topic": null,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "e5673602-6363-4392-97b3-edc4abac078b",
+      "timestamp": "2025-08-31T13:45:47.355270",
+      "text_title": "puma",
+      "text_content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.\n\nThe hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "chinese_translation": "美洲狮是大型的、猫一样的动物，它们在美国被发现。当报告传到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到时，它们没有被认真对待。然而，随着证据开始积累，动物园的专家们感到有义务去调查，因为那些声称看到美洲狮的人给出的描述异常相似。\n\n对美洲狮的搜寻开始于一个小村庄，那里一位摘草莓的妇女看到‘一只大猫’仅离她五码远。它一看到她立即跑开了，专家们确认美洲狮不会攻击人类，除非它被逼入绝境。搜寻被证明是困难的，因为美洲狮经常在早上在一个地方被观察到，晚上在二十英里外的另一个地方被观察到。无论它去哪里，它都留下了一串死鹿和小动物如兔子的踪迹。爪印在许多地方被看到，美洲狮的皮毛被发现粘在灌木上。几个人抱怨晚上有‘猫一样的噪音’，一位钓鱼旅行的商人在树上看到了美洲狮。专家们现在完全确信这动物是一只美洲狮，但它是从哪里来的？由于没有美洲狮被报告从国内任何动物园失踪，这一只一定是在私人收藏家的拥有中，并以某种方式设法逃脱了。搜寻持续了几个星期，但美洲狮没有被抓到。想到一只危险的野生动物仍然在安静的乡村逍遥法外是令人不安的。",
+      "user_input": "The hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "Excellent work. The back-translation is grammatically flawless, with accurate vocabulary and natural expression that closely mirrors the original text in complexity and structure. All key details are preserved, including nuanced elements like conditional clauses ('unless it is cornered') and logical connectors ('however', 'as', 'but'). The narrative flow remains smooth and idiomatic. No improvements are needed.",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "practice_type": "translation",
+      "topic": null,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "d3007e93-e4e7-4147-aa96-18d3b30af493",
+      "timestamp": "2025-08-31T13:45:00.537176",
+      "text_title": "puma",
+      "text_content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.\n\nThe hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "chinese_translation": "美洲狮是大型的、猫一样的动物，它们在美国被发现。当报告传到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到时，它们没有被认真对待。然而，随着证据开始积累，动物园的专家们感到有义务去调查，因为那些声称看到美洲狮的人给出的描述异常相似。\n\n对美洲狮的搜寻开始于一个小村庄，那里一位摘草莓的妇女看到‘一只大猫’仅离她五码远。它一看到她立即跑开了，专家们确认美洲狮不会攻击人类，除非它被逼入绝境。搜寻被证明是困难的，因为美洲狮经常在早上在一个地方被观察到，晚上在二十英里外的另一个地方被观察到。无论它去哪里，它都留下了一串死鹿和小动物如兔子的踪迹。爪印在许多地方被看到，美洲狮的皮毛被发现粘在灌木上。几个人抱怨晚上有‘猫一样的噪音’，一位钓鱼旅行的商人在树上看到了美洲狮。专家们现在完全确信这动物是一只美洲狮，但它是从哪里来的？由于没有美洲狮被报告从国内任何动物园失踪，这一只一定是在私人收藏家的拥有中，并以某种方式设法逃脱了。搜寻持续了几个星期，但美洲狮没有被抓到。想到一只危险的野生动物仍然在安静的乡村逍遥法外是令人不安的。",
+      "user_input": "The hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "译文语法完全正确，用词精准，结构严谨，完美复现了原文的复杂句式和逻辑关系。表达自然流畅，无任何简化或语义偏差，符合专业英语写作标准。",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "practice_type": "translation",
+      "topic": null,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "e4b9f036-7b35-4c0a-a502-41d085c4fc87",
+      "timestamp": "2025-08-31T13:44:17.194308",
+      "text_title": "puma",
+      "text_content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.\n\nThe hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
+      "chinese_translation": "美洲狮是大型的、猫一样的动物，它们在美国被发现。当报告传到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到时，它们没有被认真对待。然而，随着证据开始积累，动物园的专家们感到有义务去调查，因为那些声称看到美洲狮的人给出的描述异常相似。\n\n对美洲狮的搜寻开始于一个小村庄，那里一位摘草莓的妇女看到‘一只大猫’仅离她五码远。它一看到她立即跑开了，专家们确认美洲狮不会攻击人类，除非它被逼入绝境。搜寻被证明是困难的，因为美洲狮经常在早上在一个地方被观察到，晚上在二十英里外的另一个地方被观察到。无论它去哪里，它都留下了一串死鹿和小动物如兔子的踪迹。爪印在许多地方被看到，美洲狮的皮毛被发现粘在灌木上。几个人抱怨晚上有‘猫一样的噪音’，一位钓鱼旅行的商人在树上看到了美洲狮。专家们现在完全确信这动物是一只美洲狮，但它是从哪里来的？由于没有美洲狮被报告从国内任何动物园失踪，这一只一定是在私人收藏家的拥有中，并以某种方式设法逃脱了。搜寻持续了几个星期，但美洲狮没有被抓到。想到一只危险的野生动物仍然在安静的乡村逍遥法外是令人不安的。",
+      "user_input": "The hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.\n",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "Excellent work. The back-translation is grammatically perfect, semantically accurate, and maintains the original text's complexity and nuance. No corrections are needed.",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "practice_type": "translation",
+      "topic": null,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
       "id": "79c030d2-1440-46eb-9869-9f6985fe9d5b",
       "timestamp": "2025-08-31T08:58:52.002002",
       "text_title": "post1",

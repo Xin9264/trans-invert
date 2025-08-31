@@ -10,7 +10,7 @@
       "practice_type": "translation",
       "topic": null,
       "folder_id": "82419708-8fc2-4d81-866e-56e6a45884f1",
-      "last_opened": "2025-08-31T08:17:31.169947"
+      "last_opened": "2025-08-31T14:11:30.898868"
     },
     "73e9406e-c1fe-410e-8a3e-9980ead9337b": {
       "id": "73e9406e-c1fe-410e-8a3e-9980ead9337b",
@@ -21,7 +21,7 @@
       "practice_type": "translation",
       "topic": null,
       "folder_id": null,
-      "last_opened": "2025-08-31T08:58:32.870938"
+      "last_opened": "2025-08-31T14:22:37.841035"
     },
     "432c6f44-3d67-4385-b3d9-8d1399bacc1f": {
       "id": "432c6f44-3d67-4385-b3d9-8d1399bacc1f",
@@ -32,7 +32,8 @@
       "practice_type": "review",
       "source": "ai_generated_review",
       "folder_id": null,
-      "last_opened": "2025-08-31T08:59:43.298563"
+      "last_opened": "2025-08-31T14:20:42.494076",
+      "topic": null
     }
   }
 }

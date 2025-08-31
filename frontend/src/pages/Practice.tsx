@@ -240,23 +240,27 @@ const Practice: React.FC = () => {
 
   if (error || !text || !analysis) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error || '文本不存在'}</p>
+      <div className="min-h-screen" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="text-center">
+            <p className="mb-4" style={{ color: 'var(--destructive)' }}>{error || '文本不存在'}</p>
           
           {/* 倒计时显示 */}
           {countdown !== null && (
-            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-yellow-800 mb-2">
+            <div className="mb-4 p-4 rounded-lg" style={{ backgroundColor: 'rgba(251, 191, 36, 0.1)', border: '1px solid rgba(251, 191, 36, 0.3)' }}>
+              <p className="mb-2" style={{ color: 'rgba(146, 64, 14, 1)' }}>
                 {countdown > 0 
                   ? `${countdown} 秒后自动返回首页...` 
                   : '正在返回首页...'
                 }
               </p>
-              <div className="w-full bg-yellow-200 rounded-full h-2">
+              <div className="w-full rounded-full h-2" style={{ backgroundColor: 'rgba(251, 191, 36, 0.3)' }}>
                 <div 
-                  className="bg-yellow-600 h-2 rounded-full transition-all duration-1000 ease-linear"
-                  style={{ width: `${((5 - countdown) / 5) * 100}%` }}
+                  className="h-2 rounded-full transition-all duration-1000 ease-linear"
+                  style={{ 
+                    backgroundColor: 'rgba(146, 64, 14, 1)',
+                    width: `${((5 - countdown) / 5) * 100}%` 
+                  }}
                 ></div>
               </div>
             </div>
@@ -272,6 +276,7 @@ const Practice: React.FC = () => {
           >
             {countdown !== null ? '立即返回首页' : '返回首页'}
           </button>
+        </div>
         </div>
       </div>
     );

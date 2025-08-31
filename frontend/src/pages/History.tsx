@@ -244,13 +244,51 @@ const History: React.FC = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">练习历史</h1>
-            <p className="text-gray-600">查看您的学习进度和统计数据</p>
-          </div>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-8">
+          <div className="flex justify-between items-center mb-4">
+            <div>
+              <h1 className="font-heading font-bold text-3xl" style={{ color: 'var(--primary)' }}>练习历史</h1>
+              <p style={{ color: 'var(--muted-foreground)' }}>查看您的练习记录和成长轨迹</p>
+            </div>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleExport}
+                disabled={isExporting || records.length === 0}
+                className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              >
+                {isExporting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: 'var(--primary-foreground)' }}></div>
+                    <span>导出中...</span>
+                  </>
+                ) : (
+                  <>
+                    <Download size={18} />
+                    <span>导出历史</span>
+                  </>
+                )}
+              </button>
+              
+              <button
+                onClick={handleImport}
+                disabled={isImporting}
+                className="btn-secondary disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+              >
+                {isImporting ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: 'var(--secondary-foreground)' }}></div>
+                    <span>导入中...</span>
+                  </>
+                ) : (
+                  <>
+                    <Upload size={18} />
+                    <span>导入历史</span>
+                  </>
+                )}
+              </button>
+            </div>
           <div className="flex space-x-3">
             <button
               onClick={handleExport}
@@ -451,6 +489,7 @@ const History: React.FC = () => {
           </div>
         </>
       )}
+      </div>
     </div>
   );
 };

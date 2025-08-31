@@ -1,20 +1,100 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Open+Sans:wght@400;500;600&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --background: #ffffff; /* Pure white background */
+  --foreground: #475569; /* Dark slate for text */
+  --card: #ecfeff; /* Light cyan card background */
+  --card-foreground: #475569; /* Dark slate text on cards */
+  --popover: #ffffff; /* White popover background */
+  --popover-foreground: #475569; /* Dark slate popover text */
+  --primary: #164e63; /* Cyan-800 primary color */
+  --primary-foreground: #ffffff; /* White text on primary */
+  --secondary: #10b981; /* Emerald-600 secondary */
+  --secondary-foreground: #ffffff; /* White text on secondary */
+  --muted: #f1f5f9; /* Light gray for muted elements */
+  --muted-foreground: #64748b; /* Muted text color */
+  --accent: #10b981; /* Emerald accent color */
+  --accent-foreground: #ffffff; /* White text on accent */
+  --destructive: #be123c; /* Red for destructive actions */
+  --destructive-foreground: #ffffff; /* White text on destructive */
+  --border: #e2e8f0; /* Light borders */
+  --input: #ffffff; /* White input background */
+  --ring: #10b981; /* Emerald focus ring */
+  --radius: 0.5rem; /* Consistent border radius */
+}
+
+.dark {
+  --background: #0f172a; /* Dark background */
+  --foreground: #f1f5f9; /* Light text */
+  --card: #1e293b; /* Dark card background */
+  --card-foreground: #f1f5f9; /* Light card text */
+  --popover: #0f172a; /* Dark popover */
+  --popover-foreground: #f1f5f9; /* Light popover text */
+  --primary: #0891b2; /* Lighter cyan for dark mode */
+  --primary-foreground: #0f172a; /* Dark text on primary */
+  --secondary: #34d399; /* Lighter emerald for dark mode */
+  --secondary-foreground: #0f172a; /* Dark text on secondary */
+  --muted: #334155; /* Dark muted background */
+  --muted-foreground: #94a3b8; /* Muted text */
+  --accent: #34d399; /* Lighter emerald accent */
+  --accent-foreground: #0f172a; /* Dark text on accent */
+  --destructive: #f43f5e; /* Lighter red for dark mode */
+  --destructive-foreground: #f1f5f9; /* Light text on destructive */
+  --border: #334155; /* Dark borders */
+  --input: #1e293b; /* Dark input background */
+  --ring: #34d399; /* Emerald focus ring */
+}
+
 @layer base {
+  * {
+    @apply border-gray-200;
+  }
+  
   html {
-    font-family: 'Inter', system-ui, sans-serif;
+    font-family: 'Open Sans', system-ui, sans-serif;
   }
   
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-white text-slate-600 antialiased;
+    background-color: var(--background);
+    color: var(--foreground);
   }
 }
 
 @layer components {
+  .font-heading {
+    font-family: 'Montserrat', system-ui, sans-serif;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-pretty {
+    text-wrap: pretty;
+  }
+
+  .gradient-primary {
+    background: linear-gradient(135deg, var(--primary), var(--secondary));
+  }
+
+  .gradient-card {
+    background: linear-gradient(135deg, var(--card), var(--background));
+  }
+
+  .shadow-soft {
+    box-shadow: 0 4px 6px -1px rgba(22, 78, 99, 0.1), 0 2px 4px -1px rgba(22, 78, 99, 0.06);
+  }
+
+  .shadow-glow {
+    box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+  }
+
   .typing-char {
     @apply inline-block relative transition-all duration-150;
   }
@@ -36,15 +116,37 @@
   }
   
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-soft hover:shadow-glow;
+    background-color: var(--primary);
+    color: var(--primary-foreground);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    background-color: var(--primary);
+    filter: brightness(1.1);
   }
   
   .btn-secondary {
-    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 px-4 py-2 rounded-lg font-medium transition-colors duration-200;
+    @apply px-6 py-3 rounded-lg font-medium transition-all duration-200 shadow-soft;
+    background-color: var(--secondary);
+    color: var(--secondary-foreground);
+  }
+  
+  .btn-secondary:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.1);
   }
   
   .card {
-    @apply bg-white rounded-xl shadow-sm border border-gray-200 p-6;
+    @apply p-6 rounded-xl border-0 shadow-soft transition-all duration-300;
+    background: var(--card);
+    color: var(--card-foreground);
+  }
+  
+  .card:hover {
+    @apply shadow-glow;
+    transform: translateY(-2px);
   }
   
   /* 英文文章字体样式 */

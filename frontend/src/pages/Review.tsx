@@ -65,32 +65,33 @@ const Review: React.FC = () => {
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <div className="flex justify-center mb-4">
-          <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center">
-            <Brain className="text-purple-600" size={32} />
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex justify-center mb-4">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center" style={{ backgroundColor: 'rgba(139, 69, 19, 0.1)' }}>
+              <Brain style={{ color: 'var(--accent)' }} size={32} />
+            </div>
           </div>
+          <h1 className="font-heading font-bold text-4xl mb-4" style={{ color: 'var(--primary)' }}>
+            智能复习
+          </h1>
+          <p className="text-xl max-w-3xl mx-auto" style={{ color: 'var(--muted-foreground)' }}>
+            基于您的练习历史，AI 为您生成个性化复习材料，针对性地改善薄弱环节
+          </p>
         </div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          智能复习
-        </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          基于您的练习历史，AI 为您生成个性化复习材料，针对性地改善薄弱环节
-        </p>
-      </div>
 
-      {/* Error Message */}
-      {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
-          <AlertCircle className="text-red-500 mt-0.5" size={20} />
-          <div>
-            <h3 className="font-medium text-red-800">生成失败</h3>
-            <p className="text-red-600 text-sm">{error}</p>
+        {/* Error Message */}
+        {error && (
+          <div className="mb-6 p-4 rounded-lg flex items-start space-x-3" style={{ backgroundColor: 'rgba(239, 68, 68, 0.1)', border: '1px solid var(--destructive)' }}>
+            <AlertCircle style={{ color: 'var(--destructive)' }} className="mt-0.5" size={20} />
+            <div>
+              <h3 className="font-medium" style={{ color: 'var(--destructive)' }}>生成失败</h3>
+              <p className="text-sm" style={{ color: 'var(--destructive)' }}>{error}</p>
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
       {/* Stats Overview */}
       {stats && (
@@ -240,6 +241,7 @@ const Review: React.FC = () => {
         <p className="text-gray-500 text-sm">
           复习材料会根据您的错误模式和薄弱环节动态生成，建议定期使用以获得最佳学习效果
         </p>
+      </div>
       </div>
     </div>
   );

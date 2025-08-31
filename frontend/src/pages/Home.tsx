@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { textAPI, practiceAPI } from '../utils/api';
 import { Text } from '../types';
-import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List, Move, FolderPlus } from 'lucide-react';
+import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List, Move, FolderPlus, Target, Upload, FileText, Brain, Search, SortAsc, SortDesc, Plus, BookOpenCheck } from 'lucide-react';
 import FolderManager from '../components/FolderManager';
 
 const Home: React.FC = () => {
@@ -14,6 +14,16 @@ const Home: React.FC = () => {
   const [folders, setFolders] = useState<any[]>([]);
   const [showMoveDropdown, setShowMoveDropdown] = useState<string | null>(null);
   const [isMoving, setIsMoving] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  // 统计数据
+  const stats = {
+    totalMaterials: texts.length,
+    completedToday: 3,
+    averageAccuracy: 87,
+    streakDays: 12,
+  };
 
   // 专业通知系统
   const showNotification = (message: string, type: 'success' | 'error' = 'success') => {
@@ -43,23 +53,17 @@ const Home: React.FC = () => {
     try {
       const response = await textAPI.moveToFolder(textId, folderId || undefined);
       if (response.success) {
-        // 刷新文本列表
         fetchTexts();
-        setShowMoveDropdown(null); // 关闭下拉菜单
+        setShowMoveDropdown(null);
         
-        // 🔧 使用后端返回的具体消息
         const successMessage = response.message || '移动成功';
-        
-        // 显示成功提示
         showNotification(successMessage, 'success');
         
       } else {
-        // 🔧 显示具体的错误信息
         showNotification(response.error || '移动失败', 'error');
       }
     } catch (error: any) {
       console.error('移动文本失败:', error);
-      // 🔧 增强错误提示
       if (error.response?.status === 400) {
         showNotification('目标文件夹不存在，请刷新页面后重试', 'error');
       } else if (error.response?.status === 404) {
@@ -88,7 +92,6 @@ const Home: React.FC = () => {
   // 获取文本列表
   const fetchTexts = async () => {
     try {
-      // 并行获取文本材料和练习历史
       const [textsResponse, historyResponse] = await Promise.all([
         textAPI.getAll(selectedFolderId || undefined),
         practiceAPI.getHistory()
@@ -96,42 +99,39 @@ const Home: React.FC = () => {
       
       const allTexts: Text[] = [];
       
-      // 处理上传的文本材料
       if (textsResponse.success && textsResponse.data) {
         const formattedTexts = textsResponse.data.map((item: any) => ({
           id: item.text_id,
           title: item.title,
-          content: '', // 不显示内容，保持挑战性
+          content: '',
           difficultyLevel: item.difficulty || 0,
           wordCount: item.word_count,
-          createdBy: '', // 暂时设为空字符串，因为后端没有用户系统
+          createdBy: '',
           createdAt: item.created_at,
           lastOpened: item.last_opened,
-          type: 'translation' as const, // 标记为回译材料
+          type: 'translation' as const,
           folder_id: item.folder_id
         }));
         allTexts.push(...formattedTexts);
       }
       
-      // 处理作文范文材料（仅在查看全部材料时显示）
       if (!selectedFolderId && historyResponse.success && historyResponse.data) {
         const essayMaterials = historyResponse.data
           .filter((record: any) => record.practice_type === 'essay')
           .map((record: any) => ({
             id: record.id,
             title: record.text_title,
-            content: '', // 不显示内容，保持挑战性
-            difficultyLevel: 5, // 作文材料默认难度5
+            content: '',
+            difficultyLevel: 5,
             wordCount: record.text_content.split(' ').length,
             createdBy: 'AI生成',
             createdAt: record.timestamp,
             lastOpened: record.timestamp,
-            type: 'essay' as const // 标记为作文材料
+            type: 'essay' as const
           }));
         allTexts.push(...essayMaterials);
       }
       
-      // 按创建时间排序（最新的在前）
       allTexts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       
       setTexts(allTexts);
@@ -153,7 +153,6 @@ const Home: React.FC = () => {
       const response = await textAPI.deleteMaterial(textId);
       
       if (response.success) {
-        // 从列表中移除已删除的材料
         setTexts(prev => prev.filter(text => text.id !== textId));
         alert(response.message || '删除成功！');
       } else {
@@ -172,7 +171,6 @@ const Home: React.FC = () => {
     fetchFolders();
   }, [selectedFolderId]);
 
-  // 点击外部关闭下拉菜单
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (showMoveDropdown && !(event.target as Element).closest('.move-dropdown-container')) {
@@ -186,349 +184,499 @@ const Home: React.FC = () => {
     };
   }, [showMoveDropdown]);
 
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8">
-      {/* Hero Section */}
-      <div className="text-center py-12">
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          Trans Invert 回译练习
-        </h1>
-        <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-          通过看中文写英文的方式，提升您的英语表达能力。
-          AI智能分析，即时反馈，让学习更高效。
-        </p>
-        <div className="flex justify-center space-x-4">
-          <Link to="/upload" className="btn-primary">
-            开始练习
-          </Link>
-          <Link to="/review" className="btn-secondary">
-            智能复习
-          </Link>
-          <Link to="/history" className="btn-secondary">
-            查看历史
-          </Link>
+    <div className="min-h-screen" style={{ backgroundColor: 'var(--background)', color: 'var(--foreground)' }}>
+      <div className="space-y-8 px-4 md:px-6 py-6">
+        {/* Hero Section */}
+        <div className="relative overflow-hidden rounded-2xl gradient-primary p-8 text-white">
+          <div className="relative z-10">
+            <div className="max-w-2xl">
+              <h1 className="font-heading font-black text-4xl md:text-5xl text-balance mb-4">Trans Invert</h1>
+              <p className="text-xl md:text-2xl font-medium mb-2 opacity-90">回译法语言练习平台</p>
+              <p className="text-lg opacity-80 mb-6 text-pretty">
+                通过回译练习提升英语翻译和写作能力，让语言学习更高效、更有趣
+              </p>
+              <Link to="/upload" className="btn-primary inline-flex items-center">
+                <BookOpen className="mr-2 h-5 w-5" />
+                开始练习
+              </Link>
+            </div>
+          </div>
+          <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32" />
+          <div className="absolute bottom-0 right-0 w-48 h-48 bg-white/5 rounded-full translate-y-24 translate-x-24" />
         </div>
-      </div>
 
-      {/* Features */}
-      <div className="grid md:grid-cols-3 gap-8 py-12">
-        <div className="text-center">
-          <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <BookOpen className="text-primary-600" size={32} />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">智能分析</h3>
-          <p className="text-gray-600">
-            AI自动分析文本语法结构，生成准确的中文翻译
-          </p>
-        </div>
-        <div className="text-center">
-          <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Clock className="text-primary-600" size={32} />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">即时反馈</h3>
-          <p className="text-gray-600">
-            实时评估您的输入，提供详细的语法和语义建议
-          </p>
-        </div>
-        <div className="text-center">
-          <div className="bg-primary-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-            <TrendingUp className="text-primary-600" size={32} />
-          </div>
-          <h3 className="text-xl font-semibold mb-2">进步跟踪</h3>
-          <p className="text-gray-600">
-            记录学习历史，追踪进步轨迹，个性化学习建议
-          </p>
-        </div>
-      </div>
-
-      {/* Main Content Area with Folder Management */}
-      <div className="py-12">
-        <div className="flex space-x-6">
-          {/* Folder Sidebar */}
-          <div className="w-1/4 min-w-[300px]">
-            <FolderManager
-              onFolderSelect={setSelectedFolderId}
-              selectedFolderId={selectedFolderId}
-              texts={texts}
-              onTextMove={handleTextMove}
-            />
-          </div>
-
-          {/* Main Content */}
-          <div className="flex-1">
-            {/* Recent Texts */}
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-2xl font-bold text-gray-900">
-                {selectedFolderId ? '文件夹中的材料' : '所有练习材料'}
-              </h2>
-              <div className="flex items-center space-x-3">
-                {/* 视图切换按钮 */}
-                {texts.length > 0 && (
-                  <div className="flex items-center space-x-1 bg-gray-100 rounded-lg p-1">
-                    <button
-                      onClick={() => setViewMode('card')}
-                      className={`flex items-center space-x-1 px-3 py-2 rounded-md transition-colors ${
-                        viewMode === 'card' 
-                          ? 'bg-white text-gray-900 shadow-sm' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <Grid3X3 size={16} />
-                      <span>卡片</span>
-                    </button>
-                    <button
-                      onClick={() => setViewMode('list')}
-                      className={`flex items-center space-x-1 px-3 py-2 rounded-md transition-colors ${
-                        viewMode === 'list' 
-                          ? 'bg-white text-gray-900 shadow-sm' 
-                          : 'text-gray-600 hover:text-gray-900'
-                      }`}
-                    >
-                      <List size={16} />
-                      <span>列表</span>
-                    </button>
-                  </div>
-                )}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="card gradient-card border-0 shadow-soft">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg">
+                <Target className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>{stats.totalMaterials}</p>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>练习材料</p>
               </div>
             </div>
-            {texts.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-500 mb-4">
-                  {selectedFolderId ? '此文件夹暂无练习材料' : '还没有练习材料'}
-                </p>
-                <Link to="/upload" className="btn-primary">
-                  上传第一个文本
-                </Link>
+          </div>
+
+          <div className="card gradient-card border-0 shadow-soft">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 rounded-full bg-gradient-to-br from-green-400 to-green-600 shadow-lg">
+                <TrendingUp className="h-5 w-5 text-white" />
               </div>
-            ) : (
               <div>
-                {viewMode === 'card' ? (
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {texts.map((text) => (
-                      <div key={text.id} className="card hover:shadow-md transition-shadow relative">
-                        {/* 操作菜单 */}
-                        <div className="absolute top-2 right-2 flex space-x-1">
-                          {/* 移动按钮 */}
-                          <div className="relative move-dropdown-container">
-                            <button
-                              onClick={() => setShowMoveDropdown(showMoveDropdown === text.id ? null : text.id)}
-                              disabled={isMoving === text.id}
-                              className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              title="移动到文件夹"
-                            >
-                              {isMoving === text.id ? (
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+                <p className="text-2xl font-bold" style={{ color: 'var(--secondary)' }}>{stats.completedToday}</p>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>今日完成</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="card gradient-card border-0 shadow-soft">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 shadow-lg">
+                <BookOpenCheck className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold" style={{ color: 'var(--accent)' }}>{stats.averageAccuracy}%</p>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>平均准确率</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="card gradient-card border-0 shadow-soft">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 shadow-lg">
+                <Clock className="h-5 w-5 text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold" style={{ color: 'var(--primary)' }}>{stats.streakDays}</p>
+                <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>连续天数</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Feature Cards */}
+        <div className="grid md:grid-cols-3 gap-6">
+          <div className="card group hover:shadow-glow transition-all duration-300 cursor-pointer border-0 gradient-card">
+            <div className="pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-blue-400 to-blue-600 shadow-lg group-hover:shadow-xl transition-all duration-300">
+                  <Upload className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">回译练习</h3>
+                  <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>上传文本进行回译训练</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>通过中英文对照练习，提升翻译准确性和语言表达能力</p>
+          </div>
+
+          <div className="card group hover:shadow-glow transition-all duration-300 cursor-pointer border-0 gradient-card">
+            <div className="pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 shadow-lg group-hover:shadow-xl transition-all duration-300">
+                  <FileText className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">作文练习</h3>
+                  <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>针对性作文写作训练</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>基于考试类型生成范文，练习写作技巧和表达方式</p>
+          </div>
+
+          <div className="card group hover:shadow-glow transition-all duration-300 cursor-pointer border-0 gradient-card">
+            <div className="pb-3">
+              <div className="flex items-center space-x-3">
+                <div className="p-3 rounded-2xl bg-gradient-to-br from-green-400 to-green-600 shadow-lg group-hover:shadow-xl transition-all duration-300">
+                  <Brain className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold">智能复习</h3>
+                  <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>基于艾宾浩斯曲线的智能复习</p>
+                </div>
+              </div>
+            </div>
+            <p className="text-sm" style={{ color: 'var(--muted-foreground)' }}>科学的复习安排，帮助巩固学习成果，提高记忆效果</p>
+          </div>
+        </div>
+
+        {/* Materials Management */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading font-bold text-2xl">我的练习材料</h2>
+            <Link to="/upload" className="btn-primary inline-flex items-center">
+              <Plus className="mr-2 h-4 w-4" />
+              添加材料
+            </Link>
+          </div>
+
+          {/* Content Area */}
+          <div className="grid lg:grid-cols-4 gap-6">
+            {/* Folder Sidebar */}
+            <div className="lg:col-span-1">
+              <FolderManager
+                onFolderSelect={setSelectedFolderId}
+                selectedFolderId={selectedFolderId}
+                texts={texts}
+                onTextMove={handleTextMove}
+              />
+            </div>
+
+            {/* Materials Grid/List */}
+            <div className="lg:col-span-3">
+              {/* Filters and Search */}
+              <div className="card border-0 shadow-soft mb-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                  <div className="flex-1">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4" style={{ color: 'var(--muted-foreground)' }} />
+                      <input
+                        type="text"
+                        placeholder="搜索练习材料..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 rounded-lg border"
+                        style={{ backgroundColor: 'var(--input)', borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex gap-2">
+                    <div className="flex border rounded-lg" style={{ borderColor: 'var(--border)' }}>
+                      <button
+                        onClick={() => setViewMode('card')}
+                        className={`flex items-center px-3 py-2 rounded-l-lg transition-colors ${
+                          viewMode === 'card' 
+                            ? 'text-white shadow-soft' 
+                            : 'hover:bg-gray-100'
+                        }`}
+                        style={{ 
+                          backgroundColor: viewMode === 'card' ? 'var(--primary)' : 'transparent',
+                          color: viewMode === 'card' ? 'var(--primary-foreground)' : 'var(--foreground)'
+                        }}
+                      >
+                        <Grid3X3 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => setViewMode('list')}
+                        className={`flex items-center px-3 py-2 rounded-r-lg transition-colors ${
+                          viewMode === 'list' 
+                            ? 'text-white shadow-soft' 
+                            : 'hover:bg-gray-100'
+                        }`}
+                        style={{ 
+                          backgroundColor: viewMode === 'list' ? 'var(--primary)' : 'transparent',
+                          color: viewMode === 'list' ? 'var(--primary-foreground)' : 'var(--foreground)'
+                        }}
+                      >
+                        <List className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <button
+                      onClick={() => setSortOrder(sortOrder === "asc" ? "desc" : "asc")}
+                      className="px-3 py-2 rounded-lg border transition-colors hover:bg-gray-100"
+                      style={{ borderColor: 'var(--border)', color: 'var(--foreground)' }}
+                    >
+                      {sortOrder === "asc" ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {texts.length === 0 ? (
+                <div className="text-center py-12">
+                  <p className="mb-4" style={{ color: 'var(--muted-foreground)' }}>
+                    {selectedFolderId ? '此文件夹暂无练习材料' : '还没有练习材料'}
+                  </p>
+                  <Link to="/upload" className="btn-primary">
+                    上传第一个文本
+                  </Link>
+                </div>
+              ) : (
+                <div>
+                  {viewMode === 'card' ? (
+                    <div className="grid md:grid-cols-2 xl:grid-cols-3 gap-4">
+                      {texts.map((text) => (
+                        <div key={text.id} className="card hover:shadow-glow transition-all duration-300 relative">
+                          {/* 材料类型图标 */}
+                          <div className="flex items-center space-x-3 mb-3">
+                            <div className={`p-2.5 rounded-xl shadow-md ${
+                              text.type === 'essay' 
+                                ? 'bg-gradient-to-br from-purple-400 to-purple-600' 
+                                : 'bg-gradient-to-br from-blue-400 to-blue-600'
+                            }`}>
+                              {text.type === 'essay' ? (
+                                <FileText className="h-5 w-5 text-white" />
                               ) : (
-                                <Move size={16} />
+                                <BookOpen className="h-5 w-5 text-white" />
                               )}
-                            </button>
-                            
-                            {/* 移动下拉菜单 */}
-                            {showMoveDropdown === text.id && (
-                              <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 animate-in fade-in-0 zoom-in-95 duration-100">
-                                <div className="py-1">
-                                  <button
-                                    onClick={() => handleTextMove(text.id, null)}
-                                    className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 transition-colors"
-                                  >
-                                    <FolderPlus size={14} />
-                                    <span>移动到根目录</span>
-                                  </button>
-                                  {folders.length > 0 && (
-                                    <div className="border-t border-gray-100 my-1"></div>
-                                  )}
-                                  {folders.map(folder => (
+                            </div>
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  text.type === 'essay' 
+                                    ? 'bg-purple-100 text-purple-700' 
+                                    : 'bg-blue-100 text-blue-700'
+                                }`}>
+                                  {text.type === 'essay' ? '作文练习' : '回译练习'}
+                                </span>
+                                <span className="text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                                  难度: {text.difficultyLevel}/5
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 操作菜单 */}
+                          <div className="absolute top-2 right-2 flex space-x-1">
+                            {/* 移动按钮 */}
+                            <div className="relative move-dropdown-container">
+                              <button
+                                onClick={() => setShowMoveDropdown(showMoveDropdown === text.id ? null : text.id)}
+                                disabled={isMoving === text.id}
+                                className="p-2 hover:bg-blue-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                style={{ color: 'var(--muted-foreground)' }}
+                                title="移动到文件夹"
+                              >
+                                {isMoving === text.id ? (
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2" style={{ borderColor: 'var(--primary)' }}></div>
+                                ) : (
+                                  <Move size={16} />
+                                )}
+                              </button>
+                              
+                              {/* 移动下拉菜单 */}
+                              {showMoveDropdown === text.id && (
+                                <div className="absolute right-0 top-full mt-1 w-48 rounded-lg shadow-lg z-10 animate-in fade-in-0 zoom-in-95 duration-100" style={{ backgroundColor: 'var(--popover)', borderColor: 'var(--border)' }}>
+                                  <div className="py-1">
                                     <button
-                                      key={folder.id}
-                                      onClick={() => handleTextMove(text.id, folder.id)}
-                                      className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 transition-colors"
+                                      onClick={() => handleTextMove(text.id, null)}
+                                      className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center space-x-2 transition-colors"
+                                      style={{ color: 'var(--popover-foreground)' }}
                                     >
                                       <FolderPlus size={14} />
-                                      <span>移动到 {folder.name}</span>
+                                      <span>移动到根目录</span>
                                     </button>
-                                  ))}
+                                    {folders.length > 0 && (
+                                      <div className="border-t my-1" style={{ borderColor: 'var(--border)' }}></div>
+                                    )}
+                                    {folders.map(folder => (
+                                      <button
+                                        key={folder.id}
+                                        onClick={() => handleTextMove(text.id, folder.id)}
+                                        className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center space-x-2 transition-colors"
+                                        style={{ color: 'var(--popover-foreground)' }}
+                                      >
+                                        <FolderPlus size={14} />
+                                        <span>移动到 {folder.name}</span>
+                                      </button>
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
+                            </div>
+                            
+                            {/* 删除按钮 */}
+                            <button
+                              onClick={() => handleDeleteMaterial(text.id, text.title || '未命名文本')}
+                              disabled={isDeletingId === text.id}
+                              className="p-2 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              style={{ color: 'var(--muted-foreground)' }}
+                              title="删除此材料"
+                            >
+                              {isDeletingId === text.id ? (
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
+                              ) : (
+                                <Trash2 size={16} />
+                              )}
+                            </button>
                           </div>
-                          
-                          {/* 删除按钮 */}
-                          <button
-                            onClick={() => handleDeleteMaterial(text.id, text.title || '未命名文本')}
-                            disabled={isDeletingId === text.id}
-                            className="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            title="删除此材料"
-                          >
-                            {isDeletingId === text.id ? (
-                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-600"></div>
-                            ) : (
-                              <Trash2 size={16} />
-                            )}
-                          </button>
-                        </div>
 
-                        <h3 className="font-semibold text-gray-900 mb-2 pr-16">
-                          {text.title || '未命名文本'}
-                        </h3>
-                        <p className="text-gray-600 text-sm mb-4 line-clamp-3">
-                          {text.content.substring(0, 100)}...
-                        </p>
-                        <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
-                          <div className="flex items-center space-x-2">
-                            <span>难度: {text.difficultyLevel}/5</span>
-                            {text.type === 'essay' && (
-                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                作文
-                              </span>
-                            )}
-                          </div>
-                          <span>{text.wordCount} 词</span>
-                        </div>
-                        {text.lastOpened && (
-                          <p className="text-xs text-gray-400 mb-2">
-                            上次打开: {new Date(text.lastOpened).toLocaleDateString('zh-CN')}
+                          <h3 className="font-semibold mb-2 pr-16">
+                            {text.title || '未命名文本'}
+                          </h3>
+                          <p className="text-sm mb-4 line-clamp-3" style={{ color: 'var(--muted-foreground)' }}>
+                            {text.content.substring(0, 100)}...
                           </p>
-                        )}
-                        <Link
-                          to={`/practice/${text.id}`}
-                          className="btn-primary w-full text-center"
-                        >
-                          开始练习
-                        </Link>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="bg-white rounded-lg shadow overflow-hidden">
-                    <table className="min-w-full divide-y divide-gray-200">
-                      <thead className="bg-gray-50">
-                        <tr>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            标题
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            难度
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            词数
-                          </th>
-                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            上次打开
-                          </th>
-                          <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            操作
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody className="bg-white divide-y divide-gray-200">
-                        {texts.map((text) => (
-                          <tr key={text.id} className="hover:bg-gray-50">
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <div className="flex items-center space-x-2">
-                                <div>
-                                  <div className="text-sm font-medium text-gray-900">
-                                    {text.title || '未命名文本'}
+                          <div className="flex justify-between items-center text-sm mb-4" style={{ color: 'var(--muted-foreground)' }}>
+                            <div className="flex items-center space-x-2">
+                              <Clock className="h-4 w-4" />
+                              <span>{text.wordCount} 词</span>
+                            </div>
+                            <span className="text-xs">
+                              {text.createdBy || '系统生成'}
+                            </span>
+                          </div>
+                          {text.lastOpened && (
+                            <p className="text-xs mb-2" style={{ color: 'var(--muted-foreground)' }}>
+                              上次打开: {new Date(text.lastOpened).toLocaleDateString('zh-CN')}
+                            </p>
+                          )}
+                          <Link
+                            to={`/practice/${text.id}`}
+                            className="btn-primary w-full text-center inline-block"
+                          >
+                            开始练习
+                          </Link>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="card overflow-hidden">
+                      <table className="min-w-full divide-y" style={{ borderColor: 'var(--border)' }}>
+                        <thead style={{ backgroundColor: 'var(--muted)' }}>
+                          <tr>
+                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>
+                              标题
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>
+                              难度
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>
+                              词数
+                            </th>
+                            <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>
+                              上次打开
+                            </th>
+                            <th className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider" style={{ color: 'var(--muted-foreground)' }}>
+                              操作
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody className="divide-y" style={{ backgroundColor: 'var(--card)', borderColor: 'var(--border)' }}>
+                          {texts.map((text) => (
+                            <tr key={text.id} className="hover:bg-gray-50">
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <div className="flex items-center space-x-3">
+                                  <div className={`p-2 rounded-lg shadow-sm ${
+                                    text.type === 'essay' 
+                                      ? 'bg-gradient-to-br from-purple-400 to-purple-600' 
+                                      : 'bg-gradient-to-br from-blue-400 to-blue-600'
+                                  }`}>
+                                    {text.type === 'essay' ? (
+                                      <FileText className="h-4 w-4 text-white" />
+                                    ) : (
+                                      <BookOpen className="h-4 w-4 text-white" />
+                                    )}
                                   </div>
-                                  <div className="text-sm text-gray-500 truncate max-w-xs">
-                                    {text.content.substring(0, 50)}...
+                                  <div>
+                                    <div className="flex items-center space-x-2">
+                                      <div className="text-sm font-medium">
+                                        {text.title || '未命名文本'}
+                                      </div>
+                                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                        text.type === 'essay' 
+                                          ? 'bg-purple-100 text-purple-700' 
+                                          : 'bg-blue-100 text-blue-700'
+                                      }`}>
+                                        {text.type === 'essay' ? '作文练习' : '回译练习'}
+                                      </span>
+                                    </div>
+                                    <div className="text-sm truncate max-w-xs" style={{ color: 'var(--muted-foreground)' }}>
+                                      {text.content.substring(0, 50)}...
+                                    </div>
                                   </div>
                                 </div>
-                                {text.type === 'essay' && (
-                                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                    作文
-                                  </span>
-                                )}
-                              </div>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap">
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {text.difficultyLevel}/5
-                              </span>
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {text.wordCount} 词
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                              {text.lastOpened 
-                                ? new Date(text.lastOpened).toLocaleDateString('zh-CN')
-                                : '未打开'
-                              }
-                            </td>
-                            <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <div className="flex items-center justify-end space-x-2">
-                                <Link
-                                  to={`/practice/${text.id}`}
-                                  className="text-indigo-600 hover:text-indigo-900"
-                                >
-                                  开始练习
-                                </Link>
-                                
-                                {/* 移动按钮 */}
-                                <div className="relative move-dropdown-container">
-                                  <button
-                                    onClick={() => setShowMoveDropdown(showMoveDropdown === text.id ? null : text.id)}
-                                    disabled={isMoving === text.id}
-                                    className="text-blue-600 hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    title="移动到文件夹"
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap">
+                                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                  {text.difficultyLevel}/5
+                                </span>
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                                {text.wordCount} 词
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm" style={{ color: 'var(--muted-foreground)' }}>
+                                {text.lastOpened 
+                                  ? new Date(text.lastOpened).toLocaleDateString('zh-CN')
+                                  : '未打开'
+                                }
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                <div className="flex items-center justify-end space-x-2">
+                                  <Link
+                                    to={`/practice/${text.id}`}
+                                    className="hover:text-indigo-900"
+                                    style={{ color: 'var(--primary)' }}
                                   >
-                                    {isMoving === text.id ? '移动中...' : '移动'}
-                                  </button>
+                                    开始练习
+                                  </Link>
                                   
-                                  {/* 移动下拉菜单 */}
-                                  {showMoveDropdown === text.id && (
-                                    <div className="absolute right-0 top-full mt-1 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-10 animate-in fade-in-0 zoom-in-95 duration-100">
-                                      <div className="py-1">
-                                        <button
-                                          onClick={() => handleTextMove(text.id, null)}
-                                          className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 transition-colors"
-                                        >
-                                          <FolderPlus size={14} />
-                                          <span>移动到根目录</span>
-                                        </button>
-                                        {folders.length > 0 && (
-                                          <div className="border-t border-gray-100 my-1"></div>
-                                        )}
-                                        {folders.map(folder => (
+                                  {/* 移动按钮 */}
+                                  <div className="relative move-dropdown-container">
+                                    <button
+                                      onClick={() => setShowMoveDropdown(showMoveDropdown === text.id ? null : text.id)}
+                                      disabled={isMoving === text.id}
+                                      className="hover:text-blue-900 disabled:opacity-50 disabled:cursor-not-allowed"
+                                      style={{ color: 'var(--primary)' }}
+                                      title="移动到文件夹"
+                                    >
+                                      {isMoving === text.id ? '移动中...' : '移动'}
+                                    </button>
+                                    
+                                    {/* 移动下拉菜单 */}
+                                    {showMoveDropdown === text.id && (
+                                      <div className="absolute right-0 top-full mt-1 w-48 rounded-lg shadow-lg z-10 animate-in fade-in-0 zoom-in-95 duration-100" style={{ backgroundColor: 'var(--popover)', border: '1px solid var(--border)' }}>
+                                        <div className="py-1">
                                           <button
-                                            key={folder.id}
-                                            onClick={() => handleTextMove(text.id, folder.id)}
-                                            className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 flex items-center space-x-2 transition-colors"
+                                            onClick={() => handleTextMove(text.id, null)}
+                                            className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center space-x-2 transition-colors"
+                                            style={{ color: 'var(--popover-foreground)' }}
                                           >
                                             <FolderPlus size={14} />
-                                            <span>移动到 {folder.name}</span>
+                                            <span>移动到根目录</span>
                                           </button>
-                                        ))}
+                                          {folders.length > 0 && (
+                                            <div className="border-t my-1" style={{ borderColor: 'var(--border)' }}></div>
+                                          )}
+                                          {folders.map(folder => (
+                                            <button
+                                              key={folder.id}
+                                              onClick={() => handleTextMove(text.id, folder.id)}
+                                              className="w-full px-4 py-2 text-left text-sm hover:bg-gray-100 flex items-center space-x-2 transition-colors"
+                                              style={{ color: 'var(--popover-foreground)' }}
+                                            >
+                                              <FolderPlus size={14} />
+                                              <span>移动到 {folder.name}</span>
+                                            </button>
+                                          ))}
+                                        </div>
                                       </div>
-                                    </div>
-                                  )}
+                                    )}
+                                  </div>
+                                  
+                                  <button
+                                    onClick={() => handleDeleteMaterial(text.id, text.title || '未命名文本')}
+                                    disabled={isDeletingId === text.id}
+                                    className="text-red-600 hover:text-red-900 disabled:opacity-50"
+                                  >
+                                    {isDeletingId === text.id ? '删除中...' : '删除'}
+                                  </button>
                                 </div>
-                                
-                                <button
-                                  onClick={() => handleDeleteMaterial(text.id, text.title || '未命名文本')}
-                                  disabled={isDeletingId === text.id}
-                                  className="text-red-600 hover:text-red-900 disabled:opacity-50"
-                                >
-                                  {isDeletingId === text.id ? '删除中...' : '删除'}
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
