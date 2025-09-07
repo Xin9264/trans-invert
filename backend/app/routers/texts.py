@@ -1,6 +1,7 @@
 """文本处理路由"""
 import uuid
 import json
+import asyncio
 from datetime import datetime
 from typing import Dict, Any, List, Optional
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
@@ -16,6 +17,7 @@ from app.schemas.text import (
     APIResponse
 )
 from app.services.ai_service import ai_service, AIService
+from app.services.template_service import template_service
 from app.services.data_persistence import data_persistence
 
 router = APIRouter(prefix="/api/texts", tags=["texts"])
@@ -128,6 +130,29 @@ def count_words(text: str) -> int:
     """计算单词数量"""
     return len(text.strip().split())
 
+def calculate_json_progress(content: str) -> int:
+    """根据JSON字段的出现情况计算进度"""
+    progress = 0
+    
+    # 定义关键字段及其权重
+    key_fields = {
+        '"score"': 25,
+        '"corrections"': 25, 
+        '"overall_feedback"': 25,
+        '"is_acceptable"': 25
+    }
+    
+    for field, weight in key_fields.items():
+        if field in content:
+            progress += weight
+    
+    # 如果包含完整的JSON结构，给予额外分数
+    if content.count('{') > 0 and content.count('}') > 0:
+        if content.count('{') == content.count('}'):
+            progress = min(100, progress + 10)
+    
+    return min(100, progress)
+
 @router.post("/upload", response_model=APIResponse)
 async def upload_text(request: TextUploadRequest, http_request: Request, background_tasks: BackgroundTasks):
     """上传英文文本并触发AI分析"""
@@ -178,7 +203,28 @@ async def analyze_text_background(text_id: str, content: str, user_config: Dict[
     try:
         # 使用用户的AI配置创建临时服务
         user_ai_service = create_user_ai_service(user_config)
-        analysis_result = await user_ai_service.analyze_text(content)
+        
+        # 使用模板渲染提示词
+        prompt = template_service.render_analyze_text_prompt(content)
+        
+        # 调用统一API
+        response = await user_ai_service.call_ai_api(prompt)
+        
+        # 解析JSON响应
+        analysis_result = user_ai_service.extract_json_from_response(response)
+        
+        # 验证必要字段
+        required_fields = ["translation", "difficult_words", "difficulty", "key_points"]
+        for field in required_fields:
+            if field not in analysis_result:
+                raise Exception(f"AI响应缺少必要字段: {field}")
+        
+        # 确保数据类型正确
+        analysis_result["difficulty"] = int(analysis_result["difficulty"])
+        if not isinstance(analysis_result["difficult_words"], list):
+            analysis_result["difficult_words"] = []
+        if not isinstance(analysis_result["key_points"], list):
+            analysis_result["key_points"] = []
         
         # 存储分析结果
         analyses_storage[text_id] = {
@@ -210,7 +256,27 @@ async def analyze_text_background(text_id: str, content: str, user_config: Dict[
 async def re_analyze_imported_text(text_id: str, content: str, existing_translation: str):
     """重新分析从历史记录导入的文本"""
     try:
-        analysis_result = await ai_service.analyze_text(content)
+        # 使用模板渲染提示词
+        prompt = template_service.render_analyze_text_prompt(content)
+        
+        # 调用统一API
+        response = await ai_service.call_ai_api(prompt)
+        
+        # 解析JSON响应
+        analysis_result = ai_service.extract_json_from_response(response)
+        
+        # 验证必要字段
+        required_fields = ["translation", "difficult_words", "difficulty", "key_points"]
+        for field in required_fields:
+            if field not in analysis_result:
+                raise Exception(f"AI响应缺少必要字段: {field}")
+        
+        # 确保数据类型正确
+        analysis_result["difficulty"] = int(analysis_result["difficulty"])
+        if not isinstance(analysis_result["difficult_words"], list):
+            analysis_result["difficult_words"] = []
+        if not isinstance(analysis_result["key_points"], list):
+            analysis_result["key_points"] = []
         
         # 更新分析结果，但保留已有的翻译（来自历史记录）
         analyses_storage[text_id] = {
@@ -324,12 +390,33 @@ async def submit_practice(request: PracticeSubmitRequest, http_request: Request)
         # 使用用户的AI配置创建临时服务
         user_ai_service = create_user_ai_service(user_config)
         
-        # 调用AI评估
-        evaluation = await user_ai_service.evaluate_answer(
+        # 使用模板渲染提示词
+        prompt = template_service.render_evaluate_answer_prompt(
             original_text=original_text,
             translation=translation,
             user_input=request.user_input
         )
+        
+        # 调用统一API
+        response = await user_ai_service.call_ai_api(prompt)
+        
+        # 解析JSON响应
+        evaluation = user_ai_service.extract_json_from_response(response)
+        
+        # 验证必要字段
+        required_fields = ["score", "corrections", "overall_feedback", "is_acceptable"]
+        for field in required_fields:
+            if field not in evaluation:
+                raise Exception(f"AI响应缺少必要字段: {field}")
+        
+        # 确保数据类型正确
+        evaluation["score"] = int(evaluation["score"])
+        evaluation["score"] = max(0, min(100, evaluation["score"]))  # 限制在0-100范围内
+        
+        if not isinstance(evaluation["corrections"], list):
+            evaluation["corrections"] = []
+        
+        evaluation["is_acceptable"] = bool(evaluation["is_acceptable"])
         
         response_data = PracticeEvaluationResponse(
             score=evaluation["score"],
@@ -555,17 +642,117 @@ async def submit_practice_stream(request: PracticeSubmitRequest, http_request: R
                 # 使用用户的AI配置创建临时服务
                 user_ai_service = create_user_ai_service(user_config)
                 
-                async for chunk in user_ai_service.evaluate_answer_stream(
+                # 使用模板渲染提示词
+                prompt = template_service.render_evaluate_answer_prompt(
                     original_text=original_text,
                     translation=translation,
                     user_input=request.user_input
-                ):
-                    # 保存完整的评估结果
-                    if chunk.get("type") == "complete":
-                        evaluation_result = chunk.get("result")
-                    
-                    # 将每个chunk转换为SSE格式
-                    yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+                )
+                
+                # 流式调用AI评估
+                max_retries = 2
+                evaluation_result = None
+                
+                for attempt in range(max_retries + 1):
+                    try:
+                        # 发送重试状态通知
+                        if attempt > 0:
+                            retry_chunk = {
+                                "type": "progress",
+                                "progress": 0,
+                                "content": f"正在重试 (尝试 {attempt + 1}/{max_retries + 1})..."
+                            }
+                            yield f"data: {json.dumps(retry_chunk, ensure_ascii=False)}\n\n"
+                            await asyncio.sleep(1)
+                        
+                        # 开始评估
+                        start_chunk = {
+                            "type": "progress",
+                            "progress": 10,
+                            "content": f"开始AI评估... (尝试 {attempt + 1}/{max_retries + 1})"
+                        }
+                        yield f"data: {json.dumps(start_chunk, ensure_ascii=False)}\n\n"
+                        
+                        # 使用统一的流式API
+                        collected_content = ""
+                        chunk_count = 0
+                        
+                        async for content in user_ai_service.call_ai_api_stream(prompt):
+                            collected_content += content
+                            chunk_count += 1
+                            
+                            # 计算进度
+                            progress = calculate_json_progress(collected_content)
+                            progress_chunk = {
+                                "type": "progress",
+                                "content": content,
+                                "progress": min(90, progress),
+                                "full_content": collected_content
+                            }
+                            yield f"data: {json.dumps(progress_chunk, ensure_ascii=False)}\n\n"
+                        
+                        # 验证响应内容
+                        if len(collected_content.strip()) < 10:
+                            raise Exception("AI响应内容为空或过短")
+                        
+                        if chunk_count == 0:
+                            raise Exception("没有收到有效的流式数据")
+                        
+                        # 处理完整响应
+                        result = user_ai_service.extract_json_from_response(collected_content)
+                        
+                        # 验证和清理数据
+                        required_fields = ["score", "corrections", "overall_feedback", "is_acceptable"]
+                        for field in required_fields:
+                            if field not in result:
+                                raise Exception(f"AI响应缺少必要字段: {field}")
+                        
+                        result["score"] = int(result["score"])
+                        result["score"] = max(0, min(100, result["score"]))
+                        
+                        if not isinstance(result["corrections"], list):
+                            result["corrections"] = []
+                        
+                        result["is_acceptable"] = bool(result["is_acceptable"])
+                        
+                        chunk = {
+                            "type": "complete",
+                            "result": result,
+                            "progress": 100
+                        }
+                        evaluation_result = result
+                        break  # 成功，跳出重试循环
+                        
+                    except Exception as e:
+                        if attempt < max_retries:
+                            error_chunk = {
+                                "type": "progress",
+                                "progress": 0,
+                                "content": f"网络异常，正在重试... ({attempt + 2}/{max_retries + 1})"
+                            }
+                            yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n"
+                            await asyncio.sleep(2)
+                            continue
+                        else:
+                            # 所有重试都失败了，返回默认结果
+                            chunk = {
+                                "type": "complete",
+                                "result": {
+                                    "score": 70,
+                                    "corrections": [],
+                                    "overall_feedback": f"评估服务暂时不可用，请稍后重试。错误: {str(e)}",
+                                    "is_acceptable": True
+                                },
+                                "progress": 100
+                            }
+                            evaluation_result = chunk["result"]
+                
+                # 保存完整的评估结果
+                if chunk.get("type") == "complete":
+                    evaluation_result = chunk.get("result")
+                
+                # 将每个chunk转换为SSE格式
+                yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
                 
                 # 在流式响应完成后保存历史记录
                 if evaluation_result:

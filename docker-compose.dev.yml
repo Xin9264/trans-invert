@@ -10,7 +10,7 @@ services:
       - ./frontend:/app
       - /app/node_modules
     environment:
-      - VITE_API_URL=http://backend:8000
+      - NODE_ENV=development
     depends_on:
       - backend
 

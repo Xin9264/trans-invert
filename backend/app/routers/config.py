@@ -146,7 +146,7 @@ async def test_ai_connection():
         
         # 发送测试请求
         test_prompt = "请回复：连接测试成功"
-        result = await service._call_api(test_prompt)
+        result = await service.call_ai_api(test_prompt)
         
         return APIResponse(
             success=True,

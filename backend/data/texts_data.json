@@ -21,7 +21,7 @@
       "practice_type": "translation",
       "topic": null,
       "folder_id": null,
-      "last_opened": "2025-08-31T08:58:32.870938"
+      "last_opened": "2025-09-07T01:31:13.303261"
     },
     "432c6f44-3d67-4385-b3d9-8d1399bacc1f": {
       "id": "432c6f44-3d67-4385-b3d9-8d1399bacc1f",
@@ -32,7 +32,19 @@
       "practice_type": "review",
       "source": "ai_generated_review",
       "folder_id": null,
-      "last_opened": "2025-08-31T08:59:43.298563"
+      "last_opened": "2025-08-31T08:59:43.298563",
+      "topic": null
+    },
+    "385fec2a-a7c7-45f4-92d6-7a217cf2db02": {
+      "id": "385fec2a-a7c7-45f4-92d6-7a217cf2db02",
+      "title": "复习材料_0907",
+      "content": "In today's fast-paced world, effective communication has become more crucial than ever. Many people struggle with expressing their thoughts clearly, especially when using a foreign language. This article aims to provide practical tips for improving your English skills in daily situations.\n\nFirst, try to incorporate English into your routine activities. For example, when making a shopping list, write it in English instead of your native language. This simple practice helps build vocabulary naturally. Additionally, watching English movies with subtitles can significantly enhance your listening comprehension and colloquial expressions.\n\nAnother useful strategy is to think in English throughout the day. Instead of translating from your mother tongue, form sentences directly in English. This approach develops your mental flexibility and reduces translation errors. Don't worry about perfection; the key is consistent practice.\n\nRemember that language learning is a gradual process. Set realistic goals and celebrate small achievements. Join online communities where you can practice with native speakers. With patience and regular effort, you'll notice steady progress in your communication abilities.",
+      "word_count": 168,
+      "created_at": "2025-09-07T01:27:04.926643",
+      "practice_type": "review",
+      "source": "ai_generated_review",
+      "folder_id": null,
+      "topic": null
     }
   }
 }

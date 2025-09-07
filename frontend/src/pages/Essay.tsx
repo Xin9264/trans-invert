@@ -74,9 +74,10 @@ const Essay: React.FC = () => {
     setStreamContent('');
 
     try {
-      // 获取API配置
-      const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 
-        ((import.meta as any).env?.MODE === 'production' ? 'https://trans-invert-production.up.railway.app' : 'http://localhost:8000');
+      // 在开发环境使用相对路径通过Vite代理，生产环境使用绝对路径
+      const API_BASE_URL = (import.meta as any).env?.MODE === 'production' 
+        ? 'https://trans-invert-production.up.railway.app' 
+        : '';
       
       // 从localStorage获取AI配置
       const aiConfig = localStorage.getItem('ai_config');
@@ -180,9 +181,10 @@ const Essay: React.FC = () => {
       // 直接使用作文评估API进行流式评估
       const submitEssayStream = async () => {
         try {
-          // 获取API配置
-          const API_BASE_URL = (import.meta as any).env?.VITE_API_URL || 
-            ((import.meta as any).env?.MODE === 'production' ? 'https://trans-invert-production.up.railway.app' : 'http://localhost:8000');
+          // 在开发环境使用相对路径通过Vite代理，生产环境使用绝对路径
+          const API_BASE_URL = (import.meta as any).env?.MODE === 'production' 
+            ? 'https://trans-invert-production.up.railway.app' 
+            : '';
           
           // 从localStorage获取AI配置
           const aiConfig = localStorage.getItem('ai_config');

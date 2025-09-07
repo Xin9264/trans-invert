@@ -72,6 +72,18 @@ class TemplateService:
         template = self.env.get_template('analyze_sample_essay.j2')
         return template.render(essay=essay)
     
+    def render_generate_review_article_prompt(
+        self,
+        analysis_data: Dict[str, Any],
+        history_stats: Dict[str, Any]
+    ) -> str:
+        """渲染复习文章生成提示词"""
+        template = self.env.get_template('generate_review_article.j2')
+        return template.render(
+            analysis_data=analysis_data,
+            history_stats=history_stats
+        )
+    
     def render_template(self, template_name: str, **kwargs: Any) -> str:
         """通用模板渲染方法"""
         template = self.env.get_template(template_name)

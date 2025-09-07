@@ -16,6 +16,7 @@ from app.schemas.essay import (
 )
 from app.schemas.text import APIResponse
 from app.services.ai_service import ai_service, AIService
+from app.services.template_service import template_service
 from app.services.data_persistence import data_persistence
 
 # 导入texts.py中的全局变量和函数
@@ -100,6 +101,95 @@ def count_words(text: str) -> int:
     """计算单词数量"""
     return len(text.strip().split())
 
+def calculate_essay_progress(content: str) -> int:
+    """根据作文生成的进度计算百分比"""
+    progress = 0
+    
+    # 定义关键字段及其权重
+    key_fields = {
+        '"english_essay"': 50,
+        '"chinese_translation"': 50
+    }
+    
+    for field, weight in key_fields.items():
+        if field in content:
+            progress += weight
+    
+    # 根据内容长度增加进度
+    if len(content) > 100:
+        progress += 10
+    if len(content) > 500:
+        progress += 10
+    if len(content) > 1000:
+        progress += 10
+    
+    return min(100, progress)
+
+def calculate_essay_evaluation_progress(content: str) -> int:
+    """根据作文评估的进度计算百分比"""
+    progress = 0
+    
+    # 定义关键字段及其权重
+    key_fields = {
+        '"overall_score"': 20,
+        '"detailed_scores"': 20,
+        '"strengths"': 15,
+        '"improvements"': 15,
+        '"specific_corrections"': 15,
+        '"overall_feedback"': 15
+    }
+    
+    for field, weight in key_fields.items():
+        if field in content:
+            progress += weight
+    
+    return min(100, progress)
+
+def validate_essay_scores(result, exam_type):
+    """根据考试类型验证和调整分数"""
+    # 考试类型对应的分数范围
+    score_ranges = {
+        'ielts': {'min': 0, 'max': 9, 'step': 0.5},  # 雅思：0-9分，0.5分制
+        'toefl': {'min': 0, 'max': 30, 'step': 1},   # 托福：0-30分，整数
+        'cet4': {'min': 0, 'max': 100, 'step': 1},   # 四级：0-100分，整数
+        'cet6': {'min': 0, 'max': 100, 'step': 1},   # 六级：0-100分，整数
+        'gre': {'min': 0, 'max': 6, 'step': 0.5}     # GRE：0-6分，0.5分制
+    }
+    
+    # 获取当前考试类型的分数范围，默认使用100分制
+    score_config = score_ranges.get(exam_type, {'min': 0, 'max': 100, 'step': 1})
+    min_score = score_config['min']
+    max_score = score_config['max']
+    step = score_config['step']
+    
+    # 验证总分
+    overall_score = float(result.get("overall_score", 0))
+    overall_score = max(min_score, min(max_score, overall_score))
+    
+    # 根据step调整分数（四舍五入到最近的有效分数）
+    if step == 0.5:
+        overall_score = round(overall_score * 2) / 2
+    else:
+        overall_score = round(overall_score)
+    
+    result["overall_score"] = overall_score
+    
+    # 验证分项得分
+    if "detailed_scores" in result and isinstance(result["detailed_scores"], dict):
+        for key, score in result["detailed_scores"].items():
+            score = float(score)
+            score = max(min_score, min(max_score, score))
+            
+            # 根据step调整分数
+            if step == 0.5:
+                score = round(score * 2) / 2
+            else:
+                score = round(score)
+            
+            result["detailed_scores"][key] = score
+    
+    return result
+
 @router.post("/generate")
 async def generate_essay_stream(request: EssayGenerationRequest, http_request: Request):
     """流式生成作文范文"""
@@ -113,13 +203,46 @@ async def generate_essay_stream(request: EssayGenerationRequest, http_request: R
                 # 使用用户的AI配置创建临时服务
                 user_ai_service = create_user_ai_service(user_config)
                 
-                async for chunk in user_ai_service.generate_essay_stream(
+                # 使用模板渲染提示词
+                prompt = template_service.render_generate_essay_prompt(
                     topic=request.topic,
                     exam_type=request.exam_type,
                     requirements=request.requirements
-                ):
+                )
+                
+                # 流式调用AI API
+                collected_content = ""
+                async for content in user_ai_service.call_ai_api_stream(prompt):
+                    collected_content += content
+                    
+                    # 计算进度并发送
+                    progress = calculate_essay_progress(collected_content)
+                    chunk = {
+                        "type": "progress",
+                        "progress": progress,
+                        "content": content,
+                        "full_content": collected_content
+                    }
+                    
                     # 将每个chunk转换为SSE格式
                     yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+                
+                # 处理完整响应
+                try:
+                    result = user_ai_service.extract_json_from_response(collected_content)
+                    complete_chunk = {
+                        "type": "complete",
+                        "result": result,
+                        "progress": 100
+                    }
+                    yield f"data: {json.dumps(complete_chunk, ensure_ascii=False)}\n\n"
+                except Exception as parse_error:
+                    error_chunk = {
+                        "type": "error",
+                        "error": f"解析AI响应失败: {str(parse_error)}",
+                        "progress": 0
+                    }
+                    yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n"
                 
                 # 发送结束标记
                 yield "data: [DONE]\n\n"
@@ -167,103 +290,111 @@ async def create_essay_session(request: EssayGenerationRequest, http_request: Re
                 english_essay = ""
                 chinese_translation = ""
                 
-                # 流式生成作文
-                async for chunk in user_ai_service.generate_essay_stream(
+                # 使用模板渲染提示词
+                prompt = template_service.render_generate_essay_prompt(
                     topic=request.topic,
                     exam_type=request.exam_type,
                     requirements=request.requirements
-                ):
-                    # 处理不同类型的响应
-                    chunk_type = chunk.get("type")
+                )
+                
+                # 流式生成作文
+                collected_content = ""
+                async for content in user_ai_service.call_ai_api_stream(prompt):
+                    collected_content += content
                     
-                    if chunk_type == "progress":
-                        # 发送进度更新，包含实时内容
-                        progress_chunk = {
-                            "type": "progress",
-                            "progress": chunk.get("progress", 0),
-                            "content": chunk.get("content", "正在生成...")
+                    # 计算进度并发送
+                    progress = calculate_essay_progress(collected_content)
+                    
+                    # 发送进度更新
+                    progress_chunk = {
+                        "type": "progress",
+                        "progress": progress,
+                        "content": content
+                    }
+                    yield f"data: {json.dumps(progress_chunk, ensure_ascii=False)}\n\n"
+                    
+                    # 如果有完整内容，发送内容更新
+                    if len(collected_content) > 50:
+                        content_chunk = {
+                            "type": "content",
+                            "content": collected_content,
+                            "progress": progress
                         }
-                        yield f"data: {json.dumps(progress_chunk, ensure_ascii=False)}\n\n"
-                        
-                        # 如果有完整内容，同时发送内容更新
-                        if "full_content" in chunk:
-                            content_chunk = {
-                                "type": "content",
-                                "content": chunk["full_content"],
-                                "progress": chunk.get("progress", 0)
-                            }
-                            yield f"data: {json.dumps(content_chunk, ensure_ascii=False)}\n\n"
+                        yield f"data: {json.dumps(content_chunk, ensure_ascii=False)}\n\n"
+                
+                # 处理完整响应
+                try:
+                    result = user_ai_service.extract_json_from_response(collected_content)
+                    english_essay = result.get("english_essay", "")
+                    chinese_translation = result.get("chinese_translation", "")
                     
-                    elif chunk_type == "complete":
-                        # 处理完成响应
-                        result = chunk.get("result", {})
-                        english_essay = result.get("english_essay", "")
-                        chinese_translation = result.get("chinese_translation", "")
+                    # 创建完整的会话对象
+                    session = EssaySession(
+                        id=session_id,
+                        topic=request.topic,
+                        exam_type=request.exam_type,
+                        sample_essay=english_essay,
+                        chinese_translation=chinese_translation,
+                        created_at=datetime.now().isoformat(),
+                        status="active"
+                    )
+                    
+                    # 保存会话
+                    essay_sessions[session_id] = session
+                    
+                    # 将生成的范文保存为练习历史记录（作为学习材料）
+                    try:
+                        from app.schemas.text import PracticeHistoryRecord
                         
-                        # 创建完整的会话对象
-                        session = EssaySession(
-                            id=session_id,
-                            topic=request.topic,
-                            exam_type=request.exam_type,
-                            sample_essay=english_essay,
+                        # 创建一个特殊的练习历史记录，标记为"作文"类型
+                        essay_study_record = PracticeHistoryRecord(
+                            id=str(uuid.uuid4()),
+                            timestamp=datetime.now().isoformat(),
+                            text_title=f"{request.topic[:50]}{'...' if len(request.topic) > 50 else ''}",
+                            text_content=english_essay,
                             chinese_translation=chinese_translation,
-                            created_at=datetime.now().isoformat(),
-                            status="active"
+                            user_input="",  # 范文阶段没有用户输入
+                            ai_evaluation={
+                                "score": 100,  # 范文默认满分
+                                "corrections": [],
+                                "overall_feedback": "这是AI生成的作文范文，供学习参考。",
+                                "is_acceptable": True
+                            },
+                            score=100,
+                            practice_type="essay",  # 添加练习类型标识
+                            topic=request.topic  # 保存完整的原始题目
                         )
                         
-                        # 保存会话
-                        essay_sessions[session_id] = session
+                        # 添加到练习历史中
+                        practice_history.append(essay_study_record)
+                        practice_history.sort(key=lambda x: x.timestamp, reverse=True)
                         
-                        # 将生成的范文保存为练习历史记录（作为学习材料）
-                        try:
-                            from app.schemas.text import PracticeHistoryRecord
-                            
-                            # 创建一个特殊的练习历史记录，标记为"作文"类型
-                            essay_study_record = PracticeHistoryRecord(
-                                id=str(uuid.uuid4()),
-                                timestamp=datetime.now().isoformat(),
-                                text_title=f"{request.topic[:50]}{'...' if len(request.topic) > 50 else ''}",
-                                text_content=english_essay,
-                                chinese_translation=chinese_translation,
-                                user_input="",  # 范文阶段没有用户输入
-                                ai_evaluation={
-                                    "score": 100,  # 范文默认满分
-                                    "corrections": [],
-                                    "overall_feedback": "这是AI生成的作文范文，供学习参考。",
-                                    "is_acceptable": True
-                                },
-                                score=100,
-                                practice_type="essay",  # 添加练习类型标识
-                                topic=request.topic  # 保存完整的原始题目
-                            )
-                            
-                            # 添加到练习历史中
-                            practice_history.append(essay_study_record)
-                            practice_history.sort(key=lambda x: x.timestamp, reverse=True)
-                            
-                            # 保存数据
-                            save_data()
-                            
-                            print(f"✅ 作文范文已保存为学习材料: {essay_study_record.id}")
-                        except Exception as e:
-                            print(f"⚠️ 保存作文范文失败: {e}")
+                        # 保存数据
+                        save_data()
                         
-                        # 发送完成信息
-                        complete_chunk = {
-                            "type": "complete",
-                            "result": session.dict(),
-                            "progress": 100
-                        }
-                        yield f"data: {json.dumps(complete_chunk, ensure_ascii=False)}\n\n"
-                        
-                        # 发送结束标记
-                        yield "data: [DONE]\n\n"
-                        return
+                        print(f"✅ 作文范文已保存为学习材料: {essay_study_record.id}")
+                    except Exception as e:
+                        print(f"⚠️ 保存作文范文失败: {e}")
                     
-                    elif chunk_type == "error":
-                        # 转发错误信息
-                        yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
-                        return
+                    # 发送完成信息
+                    complete_chunk = {
+                        "type": "complete",
+                        "result": session.dict(),
+                        "progress": 100
+                    }
+                    yield f"data: {json.dumps(complete_chunk, ensure_ascii=False)}\n\n"
+                    
+                    # 发送结束标记
+                    yield "data: [DONE]\n\n"
+                    return
+                    
+                except Exception as parse_error:
+                    error_chunk = {
+                        "type": "error",
+                        "error": f"解析AI响应失败: {str(parse_error)}",
+                        "progress": 0
+                    }
+                    yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n"
                 
             except Exception as e:
                 # 发送错误信息
@@ -329,18 +460,54 @@ async def submit_essay_stream(session_id: str, request: EssaySubmitRequest, http
                 # 使用用户的AI配置创建临时服务
                 user_ai_service = create_user_ai_service(user_config)
                 
-                async for chunk in user_ai_service.evaluate_essay_stream(
+                # 使用模板渲染提示词
+                prompt = template_service.render_evaluate_essay_prompt(
                     topic=session.topic,
                     exam_type=session.exam_type,
                     sample_essay=session.sample_essay,
                     user_essay=request.user_essay
-                ):
-                    # 保存完整的评估结果
-                    if chunk.get("type") == "complete":
-                        evaluation_result = chunk.get("result")
+                )
+                
+                # 流式调用AI评估
+                collected_content = ""
+                async for content in user_ai_service.call_ai_api_stream(prompt):
+                    collected_content += content
+                    
+                    # 计算进度并发送
+                    progress = calculate_essay_evaluation_progress(collected_content)
+                    chunk = {
+                        "type": "progress",
+                        "progress": progress,
+                        "content": content,
+                        "full_content": collected_content
+                    }
                     
                     # 将每个chunk转换为SSE格式
                     yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+                
+                # 处理完整响应
+                try:
+                    result = user_ai_service.extract_json_from_response(collected_content)
+                    
+                    # 验证和调整分数
+                    result = validate_essay_scores(result, session.exam_type)
+                    
+                    complete_chunk = {
+                        "type": "complete",
+                        "result": result,
+                        "progress": 100
+                    }
+                    yield f"data: {json.dumps(complete_chunk, ensure_ascii=False)}\n\n"
+                    
+                    evaluation_result = result
+                except Exception as parse_error:
+                    error_chunk = {
+                        "type": "error",
+                        "error": f"解析AI响应失败: {str(parse_error)}",
+                        "progress": 0
+                    }
+                    yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n"
+                    evaluation_result = None
                 
                 # 在流式响应完成后保存历史记录
                 if evaluation_result:

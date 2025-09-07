@@ -6,7 +6,8 @@ from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Request
 from app.schemas.text import APIResponse, ReviewGenerateResponse, ReviewStatsResponse
 from app.services.data_persistence import data_persistence
-from app.services.ai_service import AIService, AIProvider
+from app.services.ai_service import AIService, AIProvider  
+from app.services.template_service import template_service
 
 router = APIRouter(prefix="/api/review", tags=["review"])
 
@@ -94,10 +95,24 @@ async def generate_review_material(http_request: Request):
         
         # 生成复习文章
         user_ai_service = create_user_ai_service(user_config)
-        review_article = await user_ai_service.generate_review_article(analysis_data, history_data)
+        
+        # 构建历史统计数据
+        history_stats = {
+            "total_practices": len(history_data),
+            "average_score": sum(getattr(r, 'score', 0) for r in history_data) / len(history_data) if history_data else 0,
+            "low_review_count": len([r for r in history_data if getattr(r, 'review_count', 0) <= 2])
+        }
+        
+        # 使用模板渲染提示词并调用统一API
+        prompt = template_service.render_generate_review_article_prompt(analysis_data, history_stats)
+        response = await user_ai_service.call_ai_api(prompt)
+        result = user_ai_service.extract_json_from_response(response)
+        review_article = result.get("review_article", "")
         
         # 分析生成的文章获得中文翻译
-        article_analysis = await user_ai_service.analyze_text(review_article)
+        prompt = template_service.render_analyze_text_prompt(review_article)
+        analysis_response = await user_ai_service.call_ai_api(prompt)
+        article_analysis = user_ai_service.extract_json_from_response(analysis_response)
         
         # 创建新的练习材料
         text_id = str(uuid.uuid4())
