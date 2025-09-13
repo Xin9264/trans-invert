@@ -2,61 +2,136 @@
   "version": "1.0",
   "records": [
     {
-      "id": "f7da9c1c-1f7b-4794-a72e-004f7deb6fa6",
-      "timestamp": "2025-09-07T02:17:47.551032",
-      "text_title": "In many countries, people are choosing to live alo...",
-      "text_content": "In recent decades, a noticeable shift has occurred in family structures across many societies, with an increasing number of individuals opting to live alone or in smaller family units instead of traditional extended families. This trend can be attributed to several key factors, and in my view, it represents a largely positive development despite some drawbacks.\n\nThere are two primary reasons driving this change. Firstly, urbanization and career mobility have compelled many people to relocate to cities for employment or education, often leaving extended family networks behind. Economic independence, especially among women, has also empowered individuals to make autonomous living choices. Secondly, modern values prioritize privacy and personal freedom. Younger generations increasingly desire independence and the flexibility to make life decisions without familial constraints, which smaller living arrangements facilitate.\n\nOn the positive side, this trend fosters self-reliance and reduces interpersonal conflicts common in multi-generational households. Smaller families often enjoy stronger emotional bonds and more efficient decision-making. Economically, individual households stimulate markets for housing, appliances, and services, contributing to economic diversification.\n\nHowever, potential negatives include diminished emotional support for the elderly and increased social isolation for those living alone. Yet, these challenges can be mitigated through community programs and digital communication technologies that help maintain family connections across distances.\n\nIn conclusion, while the decline of extended families poses some social challenges, the overall benefits—greater personal freedom, economic adaptability, and alignment with modern lifestyles—make this a predominantly positive development. Societies should focus on strengthening social support systems to address the associated risks.",
-      "chinese_translation": "近几十年来，许多社会的家庭结构发生了显著变化，越来越多人选择独自生活或小型家庭单元，而非传统的大家庭。这一趋势可归因于几个关键因素，在我看来，尽管存在一些缺点，但它主要代表着积极的发展。\n\n这一变化主要有两个原因。首先，城市化和职业流动性迫使许多人为了就业或教育迁往城市，常常留下大家庭网络。经济独立，尤其是女性的经济独立，也使个人能够自主选择生活方式。其次，现代价值观更注重隐私和个人自由。年轻一代越来越渴望独立以及在没有家庭约束的情况下做出生活决定的灵活性，而小型居住模式促进了这一点。\n\n从积极方面看，这一趋势培养了自力更生的能力，并减少了多代同堂家庭常见的人际冲突。小型家庭通常拥有更牢固的情感联系和更高效的决策过程。经济上，个体家庭刺激了住房、家电和服务的市场，有助于经济多元化。\n\n然而，潜在的负面影响包括老年人情感支持的减少以及独居者社会孤立感的加剧。但这些挑战可以通过社区项目和数字通信技术来缓解，这些技术有助于保持远距离的家庭联系。\n\n总之，虽然大家庭的减少带来一些社会挑战，但整体益处——更大的个人自由、经济适应性以及与现代生活方式的契合——使这成为一个主要积极的发展。社会应专注于加强社会支持系统以应对相关风险。",
-      "user_input": "",
+      "id": "41def864-fd55-4bc1-b8f1-ef315ed91ac9",
+      "timestamp": "2025-09-13T08:02:50.901938",
+      "text_title": "0911_3",
+      "text_content": "Any adjective describes the \"nature\" or \"character\" of the noun it modifies. To say that hardships are \"temporary in nature\" is like saying that the Chinese flag is \"red in color\" or that pandas are \"few in number.\"",
+      "chinese_translation": "任何形容词描述它修饰的名词的“性质”或“特征”。说困难是“性质上临时的”就像说中国国旗是“颜色上红色的”或熊猫是“数量上稀少的”。",
+      "user_input": "Any adjective describes the \"nature\" or \"character\" of the noun it modifies. To say that hardships are \"temporary in nature\" is like saying that the Chinese flag is \"red in color\" or that pandas are \"few in number.\"",
       "ai_evaluation": {
         "score": 100,
         "corrections": [],
-        "overall_feedback": "这是AI生成的作文范文，供学习参考。",
+        "overall_feedback": "Excellent translation. The grammar is accurate, the meaning is clear, and the structure closely mirrors the original text. No corrections are needed.",
         "is_acceptable": true
       },
       "score": 100,
-      "practice_type": "essay",
-      "topic": "In many countries, people are choosing to live alone or in smaller family units rather than in large extended families.\nWhat are the reasons for this trend?\nDo you think it is a positive or negative development?",
       "review_count": 0,
       "last_reviewed": null,
       "error_patterns": []
     },
     {
-      "id": "80b6150c-de41-4045-a74c-ad0a19c3b788",
-      "timestamp": "2025-09-07T01:50:55.318473",
-      "text_title": "In many countries, people are choosing to live alo...",
-      "text_content": "In recent decades, a noticeable shift has occurred in family structures across many nations, with an increasing number of individuals opting to live alone or in smaller family units instead of large extended families. This trend can be attributed to several factors, and in my view, it represents a development with both positive and negative implications.\n\nOne primary reason for this change is the pursuit of greater personal independence and career opportunities. As economies develop and education becomes more accessible, young adults often relocate to urban areas for employment, leading to physical separation from extended family networks. Furthermore, changing social values emphasize individual freedom and privacy, making smaller living arrangements more appealing. Economic factors also play a role, as rising housing costs in cities make it impractical for multiple generations to co-reside.\n\nOn the positive side, smaller living units allow for more personal autonomy and flexibility in lifestyle choices. Individuals can pursue careers and relationships without traditional constraints, potentially leading to greater self-fulfillment. Nuclear families and single-person households often experience less conflict and more efficient decision-making. From an economic perspective, this trend stimulates demand for diverse housing options and household goods.\n\nHowever, this development also raises concerns about social fragmentation. Elderly members of society may experience loneliness without family support systems, while younger generations lose the wisdom and childcare traditionally provided by extended families. The reduction in family networks might also lead to increased pressure on social services to provide care that was previously family-based.\n\nIn conclusion, while the move toward smaller living arrangements reflects legitimate social and economic evolution, societies should implement policies to preserve family connections and support vulnerable individuals. This balanced approach would allow people to benefit from modern living arrangements while maintaining important social bonds.",
-      "chinese_translation": "近几十年来，许多国家的家庭结构发生了显著变化，越来越多的人选择独自生活或较小的家庭单位，而不是传统的大家庭。这种趋势可归因于若干因素，在我看来，它代表了一个兼具积极和消极影响的发展。\n\n这种变化的一个主要原因是追求更大的个人独立和职业机会。随着经济发展和教育普及，年轻人经常搬迁到城市地区就业，导致与大家庭网络的身体分离。此外，不断变化的社会价值观强调个人自由和隐私，使得较小的居住安排更具吸引力。经济因素也起作用，因为城市住房成本上升使得多代同住变得不切实际。\n\n从积极方面看，较小的居住单位允许更多的个人自主权和生活方式选择的灵活性。人们可以在没有传统约束的情况下追求职业和人际关系，可能带来更大的自我实现。核心家庭和单人家庭通常经历较少的冲突和更高效的决策。从经济角度来看，这种趋势刺激了对多样化住房选择和家庭用品的需求。\n\n然而，这种发展也引发了对社会分裂的担忧。社会中的老年成员可能在缺乏家庭支持系统的情况下经历孤独，而年轻一代则失去了传统上由大家庭提供的智慧和儿童照护。家庭网络的减少还可能导致社会服务压力增加，需要提供原本由家庭承担的照护。\n\n总之，虽然向较小居住安排的转变反映了合理的社会和经济发展，但社会应该实施政策来保持家庭联系和支持弱势个体。这种平衡的方法将让人们从现代居住安排中受益，同时保持重要的社会纽带。",
-      "user_input": "",
+      "id": "4b0c5dde-73cc-48d6-9ab1-e0041b070b4b",
+      "timestamp": "2025-09-11T09:18:11.466508",
+      "text_title": "0911_3",
+      "text_content": "Any adjective describes the \"nature\" or \"character\" of the noun it modifies. To say that hardships are \"temporary in nature\" is like saying that the Chinese flag is \"red in color\" or that pandas are \"few in number.\"",
+      "chinese_translation": "任何形容词描述它修饰的名词的“性质”或“特征”。说困难是“性质上临时的”就像说中国国旗是“颜色上红色的”或熊猫是“数量上稀少的”。",
+      "user_input": "Any adjecive describes the \"nature\" or \"character\" of none it modifies. To say hardship is \"tempory in nature\" is like to say that Chinese Flag is \"red in color\" or that panda is \"few in number\"",
       "ai_evaluation": {
-        "score": 100,
-        "corrections": [],
-        "overall_feedback": "这是AI生成的作文范文，供学习参考。",
-        "is_acceptable": true
+        "score": 65,
+        "corrections": [
+          {
+            "original": "adjecive",
+            "suggestion": "adjective",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "none",
+            "suggestion": "the noun",
+            "reason": "语义错误，原文为 'the noun' 而非 'none'"
+          },
+          {
+            "original": "hardship is",
+            "suggestion": "hardships are",
+            "reason": "主谓不一致，原文为复数形式"
+          },
+          {
+            "original": "tempory",
+            "suggestion": "temporary",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "Chinese Flag",
+            "suggestion": "the Chinese flag",
+            "reason": "缺少冠词 'the'，且 'flag' 应为小写"
+          },
+          {
+            "original": "panda is",
+            "suggestion": "pandas are",
+            "reason": "主谓不一致，原文为复数形式"
+          }
+        ],
+        "overall_feedback": "句子大致传达了原文意思，但存在多处拼写、语法和语义错误，影响了表达的准确性和流畅性。建议加强拼写和语法练习，注意主谓一致和冠词使用。",
+        "is_acceptable": false
       },
-      "score": 100,
-      "practice_type": "essay",
-      "topic": "In many countries, people are choosing to live alone or in smaller family units rather than in large extended families.\nWhat are the reasons for this trend?\nDo you think it is a positive or negative development?",
+      "score": 65,
       "review_count": 0,
       "last_reviewed": null,
       "error_patterns": []
     },
     {
-      "id": "722282ee-3137-4f3d-905b-2e94268ac585",
-      "timestamp": "2025-09-07T01:50:22.593624",
-      "text_title": "a",
-      "text_content": "In recent years, the integration of technology in education has become a widely debated topic. While some argue that it enhances learning experiences, others contend that it may lead to over-reliance and diminished fundamental skills. This essay will discuss both perspectives before presenting a balanced conclusion.\n\nOn the one hand, technology offers significant advantages in modern education. Interactive tools such as digital simulations and online resources make learning more engaging and accessible. For instance, students in remote areas can access high-quality educational materials through the internet, bridging geographical gaps. Furthermore, technology aids in developing digital literacy, a crucial skill in today’s job market.\n\nOn the other hand, excessive dependence on technology may have drawbacks. Overuse of devices can reduce students’ attention spans and hinder the development of critical thinking and problem-solving abilities. Additionally, traditional methods like handwriting and face-to-face discussions might be neglected, potentially affecting communication skills and memory retention.\n\nIn conclusion, while technology undoubtedly brings valuable benefits to education, it is essential to strike a balance. Educators should integrate technological tools without overshadowing traditional teaching methods. A hybrid approach can maximize learning outcomes while preserving essential academic and social skills.",
-      "chinese_translation": "近年来，技术在教育中的整合已成为一个广泛争论的话题。虽然一些人认为它增强了学习体验，但其他人认为它可能导致过度依赖和削弱基本技能。本文将讨论两种观点，然后提出一个平衡的结论。\n\n一方面，技术在现代教育中提供了显著优势。数字模拟和在线资源等互动工具使学习更具吸引力和可及性。例如，偏远地区的学生可以通过互联网获取高质量的教育材料，弥合地理差距。此外，技术有助于培养数字素养，这是当今就业市场中的关键技能。\n\n另一方面，过度依赖技术可能有缺点。过度使用设备可能减少学生的注意力跨度，并阻碍批判性思维和解决问题能力的发展。此外，手写和面对面讨论等传统方法可能被忽视，潜在地影响沟通技能和记忆保留。\n\n总之，虽然技术无疑为教育带来了宝贵的好处，但保持平衡至关重要。教育工作者应整合技术工具，而不掩盖传统教学方法。混合方法可以最大化学习成果，同时保留必要的学术和社交技能。",
-      "user_input": "",
+      "id": "a49bb745-f972-4638-b8f5-6da370679eb8",
+      "timestamp": "2025-09-11T09:10:10.355346",
+      "text_title": "0911_2",
+      "text_content": "It follows that any words which perform no useful function in the sentence—that is, which add nothing to the meaning—should be edited out. Almost every text that has been translated into English from Chinese, (or that has been written directly in English by a native speaker of Chinese) contains unnecessary words. Draft translations are commonly full of them, and even polished final versions are seldom free of them.",
+      "chinese_translation": "它遵循任何在句子中执行没有有用功能的词——也就是说，对意思没有增加任何东西——应该被编辑出去。几乎每一个从中文翻译成英文的文本（或者由中文母语者直接用英文写的）包含不必要的词。草稿翻译通常充满它们，甚至润色过的最终版本很少没有它们。",
+      "user_input": "It follows that any words which have no functions in sentence-that is, which add nothing to meaning-should be edited out. Almost every text that is translated from Chinese to English( or directly written by Chinese Editor in English) contains unnecessary words. Craft translations are often full of them, even the polished final versions are seldom free of them.",
       "ai_evaluation": {
-        "score": 100,
-        "corrections": [],
-        "overall_feedback": "这是AI生成的作文范文，供学习参考。",
+        "score": 82,
+        "corrections": [
+          {
+            "original": "have no functions in sentence",
+            "suggestion": "perform no useful function in the sentence",
+            "reason": "原文使用 'perform no useful function' 更准确，用户版本缺少 'useful' 和 'the'，语法不够完整"
+          },
+          {
+            "original": "Craft translations",
+            "suggestion": "Draft translations",
+            "reason": "'Craft' 是语义错误，原文使用 'draft' 表示'草稿'，而 'craft' 通常指'工艺'或'手艺'，不符合上下文"
+          }
+        ],
+        "overall_feedback": "整体表达清晰，语义基本正确，但存在少量语法和用词偏差。建议注意冠词使用和选词准确性，以更贴近原文的严谨风格。",
         "is_acceptable": true
       },
-      "score": 100,
-      "practice_type": "essay",
-      "topic": "a",
+      "score": 82,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "ab7da354-820e-4061-a15c-679a02157a91",
+      "timestamp": "2025-09-11T08:53:48.437477",
+      "text_title": "0911_1",
+      "text_content": "Naturally, readers who open this book will have reached varying levels of skill in their second language. But to one degree or another, the work of all but the most highly trained and experienced among them will inevitably contain elements of Chinglish. Chinglish, of course, is that misshapen, hybrid language that is neither English nor Chinese but that might be described as \"English with Chinese characteristics.\"",
+      "chinese_translation": "自然地，打开这本书的读者将在他们的第二语言中达到不同水平的技能。但在某种程度上，除了那些受过最高度训练和有经验的读者之外，所有人的工作都不可避免地包含中式英语的元素。中式英语，当然，是那种畸形、混合的语言，既不是英语也不是中文，但可能被描述为'具有中国特色的英语'。",
+      "user_input": "Naturally, readers who open this book will obtain different levels of skill on their second language. But to one degree or another, the work of all but that is most trained and expericed among them will inevitably contain Chinglish elements. Chinglish, of course, is that misshappen, hybrid language that is neither English nor Chinese but that may be described as English with Chinese characteristics.",
+      "ai_evaluation": {
+        "score": 85,
+        "corrections": [
+          {
+            "original": "obtain different levels of skill on their second language",
+            "suggestion": "have reached varying levels of skill in their second language",
+            "reason": "原文使用 'reached varying levels' 更自然，'in their second language' 是正确介词搭配"
+          },
+          {
+            "original": "that is most trained and expericed",
+            "suggestion": "the most highly trained and experienced",
+            "reason": "语法错误：缺少定冠词 'the'，形容词最高级形式错误，'expericed' 为拼写错误"
+          },
+          {
+            "original": "misshappen",
+            "suggestion": "misshapen",
+            "reason": "拼写错误"
+          },
+          {
+            "original": "may be described as",
+            "suggestion": "might be described as",
+            "reason": "原文使用 'might' 表示更委婉的可能性，虽然 'may' 也可接受，但建议保持原文风格"
+          }
+        ],
+        "overall_feedback": "整体意思准确传达，句式结构基本完整。主要问题在于个别词汇选择、拼写和语法细节。建议注意形容词最高级的正确形式（the + most + adj）和固定搭配介词的使用。",
+        "is_acceptable": true
+      },
+      "score": 85,
       "review_count": 0,
       "last_reviewed": null,
       "error_patterns": []
@@ -75,8 +150,6 @@
         "is_acceptable": true
       },
       "score": 100,
-      "practice_type": "translation",
-      "topic": null,
       "review_count": 0,
       "last_reviewed": null,
       "error_patterns": []
@@ -101,8 +174,6 @@
         "is_acceptable": false
       },
       "score": 0,
-      "practice_type": "translation",
-      "topic": null,
       "review_count": 0,
       "last_reviewed": null,
       "error_patterns": []
@@ -132,8 +203,6 @@
         "is_acceptable": false
       },
       "score": 65,
-      "practice_type": "translation",
-      "topic": null,
       "review_count": 0,
       "last_reviewed": null,
       "error_patterns": []
@@ -152,8 +221,6 @@
         "is_acceptable": true
       },
       "score": 100,
-      "practice_type": "translation",
-      "topic": null,
       "review_count": 0,
       "last_reviewed": null,
       "error_patterns": []
@@ -172,8 +239,6 @@
         "is_acceptable": true
       },
       "score": 100,
-      "practice_type": "translation",
-      "topic": null,
       "review_count": 0,
       "last_reviewed": null,
       "error_patterns": []

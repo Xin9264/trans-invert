@@ -36,42 +36,7 @@ class TemplateService:
             translation=translation,
             user_input=user_input
         )
-    
-    def render_generate_essay_prompt(
-        self, 
-        topic: str, 
-        exam_type: str, 
-        requirements: str = None
-    ) -> str:
-        """渲染作文生成提示词"""
-        template = self.env.get_template('generate_essay.j2')
-        return template.render(
-            topic=topic,
-            exam_type=exam_type,
-            requirements=requirements
-        )
-    
-    def render_evaluate_essay_prompt(
-        self, 
-        topic: str,
-        exam_type: str, 
-        sample_essay: str, 
-        user_essay: str
-    ) -> str:
-        """渲染作文评估提示词"""
-        template = self.env.get_template('evaluate_essay.j2')
-        return template.render(
-            topic=topic,
-            exam_type=exam_type,
-            sample_essay=sample_essay,
-            user_essay=user_essay
-        )
-    
-    def render_analyze_sample_essay_prompt(self, essay: str) -> str:
-        """渲染范文分析提示词"""
-        template = self.env.get_template('analyze_sample_essay.j2')
-        return template.render(essay=essay)
-    
+
     def render_generate_review_article_prompt(
         self,
         analysis_data: Dict[str, Any],

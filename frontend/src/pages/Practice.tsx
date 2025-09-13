@@ -110,8 +110,8 @@ const Practice: React.FC = () => {
               wordCount: analysisData.word_count,
               createdAt: new Date().toISOString(),
               createdBy: '',
-              type: textResponse.data.practice_type === 'essay' ? 'essay' as const : 'translation' as const, // 设置类型
-              topic: textResponse.data.topic // 保存题目信息
+              type: 'translation' as const, // 设置类型
+              // topic: textResponse.data.topic // 保存题目信息
             };
             setText(textData);
           }
@@ -337,23 +337,9 @@ const Practice: React.FC = () => {
         {/* 左侧：中文翻译 */}
         <div className="lg:col-span-2 space-y-6">
           {/* 作文题目显示框 - 仅当类型为作文且有题目时显示 */}
-          {text?.type === 'essay' && text?.topic && (
-            <div className="card">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4 flex items-center space-x-2">
-                <span className="text-purple-600">📝</span>
-                <span>作文题目</span>
-              </h2>
-              <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-                <p className="text-purple-900 font-medium leading-relaxed">
-                  {text.topic}
-                </p>
-              </div>
-            </div>
-          )}
-          
           <div className="card">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              {text?.type === 'essay' ? '中文思路' : '中文翻译'}
+              中文翻译
             </h2>
             <div className="prose prose-gray max-w-none">
               <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">

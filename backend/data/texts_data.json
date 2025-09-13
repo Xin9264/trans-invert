@@ -1,49 +1,37 @@
 {
   "version": "1.0",
   "texts": {
-    "95ab069b-93ce-4889-ac1b-008e19fd0a57": {
-      "id": "95ab069b-93ce-4889-ac1b-008e19fd0a57",
-      "title": "puma",
-      "content": "Pumas are large, cat-like animals which are found in America. When reports came into London Zoo that a wild puma had been spotted forty-five miles south of London, they were not taken seriously. However, as the evidence began to accumulate, experts from the Zoo felt obliged to investigate, for the descriptions given by people who claimed to have seen the puma were extraordinarily similar.\n\nThe hunt for the puma began in a small village where a woman picking strawberries saw 'a large cat' only five yards away from her. It immediately ran away when she saw it, and experts confirmed that a puma will not attack a human being unless it is cornered. The search proved difficult, for the puma was often observed at one place in the morning and at another place twenty miles away in the evening. Wherever it went, it left behind it a trail of dead deer and small animals like rabbits. Paw prints were seen in a number of places and puma fur was found clinging to bushes. Several people complained of 'cat-like noises' at night and a businessman on a fishing trip saw the puma up a tree. The experts were now fully convinced that the animal was a puma, but where had it come from? As no pumas had been reported missing from any zoo in the country, this one must have been in the possession of a private collector and somehow managed to escape. The hunt went on for several weeks, but the puma was not caught. It is disturbing to think that a dangerous wild animal is still at large in the quiet countryside.",
-      "word_count": 273,
-      "created_at": "2025-08-31T07:47:59.151767",
-      "practice_type": "translation",
-      "topic": null,
-      "folder_id": "82419708-8fc2-4d81-866e-56e6a45884f1",
-      "last_opened": "2025-08-31T08:17:31.169947"
-    },
-    "73e9406e-c1fe-410e-8a3e-9980ead9337b": {
-      "id": "73e9406e-c1fe-410e-8a3e-9980ead9337b",
-      "title": "post1",
-      "content": "Contemporary vocabulary for talking about software testing has bothered me for a long time. The concept of a unit in unit test is not really defined, integration tests are integrating arbitrarily scoped modules, the concept of an E2E test makes sense, but it very much underspecifies the actually tested behavior as well as methods for testing it, are you using automated agents, human supervision, predefined set of actions, random exploration... it's all sweeped under the rug. On the other side you have your stress tests, load tests, peneration tests etc. but there is no proper classification in the wild, it all seems to be based on \"vibes\". A short web search reveals a \"level\" based classification as seen below, as well as an \"ad\" from Atlassian that gives you 7 \"types\" of software tests.",
-      "word_count": 134,
-      "created_at": "2025-08-31T08:55:34.289573",
-      "practice_type": "translation",
-      "topic": null,
+    "b9642ba7-f49e-4ae2-afe6-4a3ee8d05d47": {
+      "id": "b9642ba7-f49e-4ae2-afe6-4a3ee8d05d47",
+      "title": "0911_1",
+      "content": "Naturally, readers who open this book will have reached varying levels of skill in their second language. But to one degree or another, the work of all but the most highly trained and experienced among them will inevitably contain elements of Chinglish. Chinglish, of course, is that misshapen, hybrid language that is neither English nor Chinese but that might be described as \"English with Chinese characteristics.\"",
+      "word_count": 66,
+      "created_at": "2025-09-11T08:40:58.848654",
       "folder_id": null,
-      "last_opened": "2025-09-07T01:31:13.303261"
-    },
-    "432c6f44-3d67-4385-b3d9-8d1399bacc1f": {
-      "id": "432c6f44-3d67-4385-b3d9-8d1399bacc1f",
-      "title": "复习材料_0831",
-      "content": "In our daily lives, we often use simple expressions to communicate. For example, when meeting someone, we usually say, \"Hello, how are you?\" Many people reply, \"I'm fine, thank you.\" This is a common and polite way to greet others. Sometimes, we talk about our routines. I wake up early every morning and have breakfast. Then, I go to work or study. In the evening, I like to relax by reading a book or watching television. These basic sentences help us share information clearly. It is important to practice them regularly to improve our English skills. With consistent effort, speaking becomes easier and more natural.",
-      "word_count": 105,
-      "created_at": "2025-08-31T08:59:22.271560",
-      "practice_type": "review",
-      "source": "ai_generated_review",
-      "folder_id": null,
-      "last_opened": "2025-08-31T08:59:43.298563",
+      "last_opened": "2025-09-11T09:10:24.972313",
+      "practice_type": "translation",
       "topic": null
     },
-    "385fec2a-a7c7-45f4-92d6-7a217cf2db02": {
-      "id": "385fec2a-a7c7-45f4-92d6-7a217cf2db02",
-      "title": "复习材料_0907",
-      "content": "In today's fast-paced world, effective communication has become more crucial than ever. Many people struggle with expressing their thoughts clearly, especially when using a foreign language. This article aims to provide practical tips for improving your English skills in daily situations.\n\nFirst, try to incorporate English into your routine activities. For example, when making a shopping list, write it in English instead of your native language. This simple practice helps build vocabulary naturally. Additionally, watching English movies with subtitles can significantly enhance your listening comprehension and colloquial expressions.\n\nAnother useful strategy is to think in English throughout the day. Instead of translating from your mother tongue, form sentences directly in English. This approach develops your mental flexibility and reduces translation errors. Don't worry about perfection; the key is consistent practice.\n\nRemember that language learning is a gradual process. Set realistic goals and celebrate small achievements. Join online communities where you can practice with native speakers. With patience and regular effort, you'll notice steady progress in your communication abilities.",
-      "word_count": 168,
-      "created_at": "2025-09-07T01:27:04.926643",
-      "practice_type": "review",
-      "source": "ai_generated_review",
+    "26f1d9a9-846d-406f-93e9-6c68ae58d20a": {
+      "id": "26f1d9a9-846d-406f-93e9-6c68ae58d20a",
+      "title": "0911_2",
+      "content": "It follows that any words which perform no useful function in the sentence—that is, which add nothing to the meaning—should be edited out. Almost every text that has been translated into English from Chinese, (or that has been written directly in English by a native speaker of Chinese) contains unnecessary words. Draft translations are commonly full of them, and even polished final versions are seldom free of them.",
+      "word_count": 68,
+      "created_at": "2025-09-11T09:02:54.654418",
       "folder_id": null,
+      "last_opened": "2025-09-11T09:03:30.716602",
+      "practice_type": "translation",
+      "topic": null
+    },
+    "5f33f69b-d7bb-4951-b3e5-1ec420820dbd": {
+      "id": "5f33f69b-d7bb-4951-b3e5-1ec420820dbd",
+      "title": "0911_3",
+      "content": "Any adjective describes the \"nature\" or \"character\" of the noun it modifies. To say that hardships are \"temporary in nature\" is like saying that the Chinese flag is \"red in color\" or that pandas are \"few in number.\"",
+      "word_count": 38,
+      "created_at": "2025-09-11T09:15:20.037235",
+      "folder_id": null,
+      "last_opened": "2025-09-13T08:02:40.300216",
+      "practice_type": "translation",
       "topic": null
     }
   }

@@ -6,8 +6,6 @@ import { Upload as UploadIcon, FileText } from 'lucide-react';
 const Upload: React.FC = () => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
-  const [practiceType, setPracticeType] = useState<'translation' | 'essay'>('translation');
-  const [topic, setTopic] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
@@ -20,20 +18,13 @@ const Upload: React.FC = () => {
       return;
     }
 
-    if (practiceType === 'essay' && !topic.trim()) {
-      setError('作文类型需要填写题目');
-      return;
-    }
-
     setIsLoading(true);
     setError(null);
 
     try {
       const response = await textAPI.upload({
         content: content.trim(),
-        title: title.trim() || undefined,
-        practice_type: practiceType,
-        topic: practiceType === 'essay' ? topic.trim() : undefined
+        title: title.trim() || undefined
       });
       if (response.success && response.data) {
         navigate(`/practice/${response.data.text_id}`);
@@ -73,48 +64,6 @@ const Upload: React.FC = () => {
           <div className="card">
             <form onSubmit={handleSubmit}>
               <div className="mb-6">
-                <label htmlFor="practiceType" className="block text-sm font-medium text-gray-700 mb-2">
-                  练习类型 *
-                </label>
-                <select
-                  id="practiceType"
-                  value={practiceType}
-                  onChange={(e) => setPracticeType(e.target.value as 'translation' | 'essay')}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  required
-                >
-                  <option value="translation">回译练习</option>
-                  <option value="essay">作文练习</option>
-                </select>
-                <p className="mt-1 text-sm text-gray-500">
-                  {practiceType === 'translation' 
-                    ? '上传英文文本，练习中译英' 
-                    : '上传作文范文和题目，学习写作技巧'
-                  }
-                </p>
-              </div>
-
-              {practiceType === 'essay' && (
-                <div className="mb-6">
-                  <label htmlFor="topic" className="block text-sm font-medium text-gray-700 mb-2">
-                    作文题目 *
-                  </label>
-                  <textarea
-                    id="topic"
-                    value={topic}
-                    onChange={(e) => setTopic(e.target.value)}
-                    rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                    placeholder="请输入作文的原题目，例如：Some people think that success is only measured by wealth. Do you agree or disagree?"
-                    required
-                  />
-                  <p className="mt-1 text-sm text-gray-500">
-                    输入完整的作文题目，这将帮助您更好地理解范文的写作思路
-                  </p>
-                </div>
-              )}
-
-              <div className="mb-6">
                 <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
                   文本标题 (可选)
                 </label>
@@ -124,13 +73,13 @@ const Upload: React.FC = () => {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder={practiceType === 'essay' ? "为这篇作文范文起个名字" : "为您的练习文本起个名字"}
+                  placeholder="为您的练习文本起个名字"
                 />
               </div>
 
               <div className="mb-6">
                 <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-                  {practiceType === 'essay' ? '作文范文 *' : '英文文本 *'}
+                  英文文本 *
                 </label>
                 <textarea
                   id="content"
@@ -138,10 +87,7 @@ const Upload: React.FC = () => {
                   onChange={(e) => setContent(e.target.value)}
                   rows={12}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent english-text"
-                  placeholder={practiceType === 'essay' 
-                    ? "粘贴或输入优秀的英文作文范文..."
-                    : "粘贴或输入您想要练习的英文文本..."
-                  }
+                  placeholder="粘贴或输入您想要练习的英文文本..."
                   required
                 />
                 <div className="mt-2 text-sm text-gray-500">

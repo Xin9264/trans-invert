@@ -1,138 +1,105 @@
 {
   "version": "1.0",
   "analyses": {
-    "95ab069b-93ce-4889-ac1b-008e19fd0a57": {
-      "text_id": "95ab069b-93ce-4889-ac1b-008e19fd0a57",
-      "translation": "美洲狮是大型的、猫一样的动物，它们在美国被发现。当报告传到伦敦动物园，说一只野生美洲狮在伦敦以南四十五英里处被看到时，它们没有被认真对待。然而，随着证据开始积累，动物园的专家们感到有义务去调查，因为那些声称看到美洲狮的人给出的描述异常相似。\n\n对美洲狮的搜寻开始于一个小村庄，那里一位摘草莓的妇女看到‘一只大猫’仅离她五码远。它一看到她立即跑开了，专家们确认美洲狮不会攻击人类，除非它被逼入绝境。搜寻被证明是困难的，因为美洲狮经常在早上在一个地方被观察到，晚上在二十英里外的另一个地方被观察到。无论它去哪里，它都留下了一串死鹿和小动物如兔子的踪迹。爪印在许多地方被看到，美洲狮的皮毛被发现粘在灌木上。几个人抱怨晚上有‘猫一样的噪音’，一位钓鱼旅行的商人在树上看到了美洲狮。专家们现在完全确信这动物是一只美洲狮，但它是从哪里来的？由于没有美洲狮被报告从国内任何动物园失踪，这一只一定是在私人收藏家的拥有中，并以某种方式设法逃脱了。搜寻持续了几个星期，但美洲狮没有被抓到。想到一只危险的野生动物仍然在安静的乡村逍遥法外是令人不安的。",
+    "b9642ba7-f49e-4ae2-afe6-4a3ee8d05d47": {
+      "text_id": "b9642ba7-f49e-4ae2-afe6-4a3ee8d05d47",
+      "translation": "自然地，打开这本书的读者将在他们的第二语言中达到不同水平的技能。但在某种程度上，除了那些受过最高度训练和有经验的读者之外，所有人的工作都不可避免地包含中式英语的元素。中式英语，当然，是那种畸形、混合的语言，既不是英语也不是中文，但可能被描述为'具有中国特色的英语'。",
       "difficult_words": [
         {
-          "word": "puma",
-          "meaning": "美洲狮"
+          "word": "varying",
+          "meaning": "不同的，变化的"
         },
         {
-          "word": "accumulate",
-          "meaning": "积累"
+          "word": "inevitably",
+          "meaning": "不可避免地"
         },
         {
-          "word": "obliged",
-          "meaning": "有义务的"
+          "word": "misshapen",
+          "meaning": "畸形的，变形的"
         },
         {
-          "word": "cornered",
-          "meaning": "被逼入绝境的"
-        },
-        {
-          "word": "at large",
-          "meaning": "逍遥法外"
+          "word": "hybrid",
+          "meaning": "混合的，杂交的"
         }
       ],
       "difficulty": 3,
       "key_points": [
-        "taken seriously",
-        "felt obliged to",
-        "unless it is cornered",
-        "proved difficult",
-        "in the possession of"
+        "to one degree or another",
+        "all but",
+        "neither...nor...",
+        "might be described as"
       ],
-      "word_count": 273
+      "word_count": 66
     },
-    "73e9406e-c1fe-410e-8a3e-9980ead9337b": {
-      "text_id": "73e9406e-c1fe-410e-8a3e-9980ead9337b",
-      "translation": "关于谈论软件测试的当代词汇已经困扰我很长时间。单元测试中的单元概念并没有真正定义，集成测试是在集成任意范围的模块，端到端测试的概念是有意义的，但它非常不具体地说明实际测试的行为以及测试它的方法，你是使用自动化代理、人工监督、预定义的动作集、随机探索……所有这些都被掩盖了。另一方面，你有压力测试、负载测试、渗透测试等，但在现实中并没有适当的分类，似乎都是基于“感觉”。一次简短的网络搜索揭示了一个基于“级别”的分类，如下所示，以及来自Atlassian的一则“广告”，给你提供了7种软件测试的“类型”。",
+    "26f1d9a9-846d-406f-93e9-6c68ae58d20a": {
+      "text_id": "26f1d9a9-846d-406f-93e9-6c68ae58d20a",
+      "translation": "它遵循任何在句子中执行没有有用功能的词——也就是说，对意思没有增加任何东西——应该被编辑出去。几乎每一个从中文翻译成英文的文本（或者由中文母语者直接用英文写的）包含不必要的词。草稿翻译通常充满它们，甚至润色过的最终版本很少没有它们。",
       "difficult_words": [
         {
-          "word": "Contemporary",
-          "meaning": "当代的"
+          "word": "polished",
+          "meaning": "润色过的"
         },
         {
-          "word": "arbitrarily",
-          "meaning": "任意地"
+          "word": "function",
+          "meaning": "功能"
         },
         {
-          "word": "underspecifies",
-          "meaning": "未充分说明"
+          "word": "edited",
+          "meaning": "编辑"
         },
         {
-          "word": "supervision",
-          "meaning": "监督"
+          "word": "contains",
+          "meaning": "包含"
         },
         {
-          "word": "classification",
-          "meaning": "分类"
+          "word": "seldom",
+          "meaning": "很少"
         }
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "key_points": [
-        "unit test",
-        "integration tests",
-        "E2E test",
-        "stress tests",
-        "load tests",
-        "penetration tests"
+        "It follows that",
+        "edited out",
+        "full of",
+        "free of",
+        "native speaker"
       ],
-      "word_count": 134
+      "word_count": 68
     },
-    "432c6f44-3d67-4385-b3d9-8d1399bacc1f": {
-      "text_id": "432c6f44-3d67-4385-b3d9-8d1399bacc1f",
-      "translation": "在我们的日常生活中，我们经常使用简单的表达来交流。例如，当遇见某人时，我们通常说，“你好，你好吗？”许多人回答，“我很好，谢谢你。”这是一种常见且有礼貌的问候他人的方式。有时，我们谈论我们的日常。我每天早上早起并吃早餐。然后，我去工作或学习。在晚上，我喜欢通过阅读一本书或看电视来放松。这些基本句子帮助我们清晰地分享信息。定期练习它们以提高我们的英语技能是重要的。通过持续的努力，说话变得更容易和更自然。",
+    "5f33f69b-d7bb-4951-b3e5-1ec420820dbd": {
+      "text_id": "5f33f69b-d7bb-4951-b3e5-1ec420820dbd",
+      "translation": "任何形容词描述它修饰的名词的“性质”或“特征”。说困难是“性质上临时的”就像说中国国旗是“颜色上红色的”或熊猫是“数量上稀少的”。",
       "difficult_words": [
         {
-          "word": "expressions",
-          "meaning": "表达"
+          "word": "adjective",
+          "meaning": "形容词"
         },
         {
-          "word": "routines",
-          "meaning": "日常事务"
+          "word": "modifies",
+          "meaning": "修饰"
         },
         {
-          "word": "consistent",
-          "meaning": "持续的"
+          "word": "temporary",
+          "meaning": "临时的"
         },
         {
-          "word": "natural",
-          "meaning": "自然的"
+          "word": "nature",
+          "meaning": "性质"
+        },
+        {
+          "word": "character",
+          "meaning": "特征"
         }
       ],
-      "difficulty": 4,
+      "difficulty": 3,
       "key_points": [
-        "复习重点",
-        "错误总结",
-        "学习建议"
+        "in nature",
+        "in color",
+        "in number",
+        "describes the nature",
+        "it modifies"
       ],
-      "word_count": 105
-    },
-    "385fec2a-a7c7-45f4-92d6-7a217cf2db02": {
-      "text_id": "385fec2a-a7c7-45f4-92d6-7a217cf2db02",
-      "translation": "在当今快节奏的世界中，有效的沟通变得比以往任何时候都更加关键。许多人在清晰表达他们的想法上挣扎，尤其是在使用外语时。这篇文章旨在为在日常情境中提高你的英语技能提供实用建议。首先，尝试将英语融入你的日常活动中。例如，当制作购物清单时，用英语而不是你的母语来写。这个简单的练习有助于自然地积累词汇。此外，观看带字幕的英语电影可以显著增强你的听力理解和口语表达。另一个有用的策略是在一天中用英语思考。而不是从你的母语翻译，直接用英语构建句子。这种方法发展你的思维灵活性并减少翻译错误。不要担心完美；关键是持续的练习。记住语言学习是一个渐进的过程。设定现实的目标并庆祝小的成就。加入在线社区，在那里你可以与母语者练习。有耐心和定期的努力，你会注意到你的沟通能力的稳步进步。",
-      "difficult_words": [
-        {
-          "word": "crucial",
-          "meaning": "关键的"
-        },
-        {
-          "word": "incorporate",
-          "meaning": "融入"
-        },
-        {
-          "word": "colloquial",
-          "meaning": "口语的"
-        },
-        {
-          "word": "flexibility",
-          "meaning": "灵活性"
-        },
-        {
-          "word": "gradual",
-          "meaning": "渐进的"
-        }
-      ],
-      "difficulty": 4,
-      "key_points": [
-        "复习重点",
-        "错误总结",
-        "学习建议"
-      ],
-      "word_count": 168
+      "word_count": 38
     }
   }
 }

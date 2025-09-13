@@ -37,13 +37,6 @@ const Layout: React.FC = () => {
                   <span>上传文本</span>
                 </Link>
                 <Link
-                  to="/essay"
-                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors"
-                >
-                  <FileText size={18} />
-                  <span>作文练习</span>
-                </Link>
-                <Link
                   to="/review"
                   className="flex items-center space-x-2 px-3 py-2 rounded-md text-gray-700 hover:text-primary-600 hover:bg-gray-100 transition-colors"
                 >

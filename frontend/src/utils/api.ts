@@ -87,8 +87,6 @@ export interface APIResponse<T = any> {
 export interface TextUploadRequest {
   content: string;
   title?: string;
-  practice_type?: 'translation' | 'essay';
-  topic?: string;
 }
 
 export interface DifficultWord {
@@ -409,28 +407,6 @@ export const healthAPI = {
   check: async (): Promise<APIResponse<any>> => {
     const response = await api.get('/health') as APIResponse<any>;
     return response;
-  }
-};
-
-// 作文练习相关接口
-export interface EssayHistoryRecord {
-  id: string;
-  session_id: string;
-  topic: string;
-  exam_type: string;
-  sample_essay: string;
-  chinese_translation: string;
-  user_essay: string;
-  evaluation: any;
-  timestamp: string;
-  overall_score: number;
-}
-
-export const essayAPI = {
-  // 获取作文练习历史记录
-  getHistory: async (): Promise<APIResponse<EssayHistoryRecord[]>> => {
-    const response = await api.get('/api/essays/history');
-    return response.data;
   }
 };
 

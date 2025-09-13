@@ -8,12 +8,15 @@ from app.schemas.text import PracticeHistoryRecord
 class DataPersistenceService:
     """本地数据持久化服务类"""
     
-    def __init__(self, data_dir: str = "backend"):
+    def __init__(self, data_dir: str | None = None):
         """
         初始化数据持久化服务
         Args:
             data_dir: 数据存储目录
         """
+        # 支持通过环境变量 DATA_DIR 配置存储目录，默认 data/
+        if data_dir is None:
+            data_dir = os.getenv("DATA_DIR", "data")
         self.data_dir = Path(data_dir)
         self.practice_history_file = self.data_dir / "practice_history.json"
         self.texts_data_file = self.data_dir / "texts_data.json"
@@ -275,5 +278,5 @@ class DataPersistenceService:
         return practice_history, texts_storage, analyses_storage, folders_storage
 
 
-# 创建全局实例
-data_persistence = DataPersistenceService("data")
+# 创建全局实例（目录可通过环境变量 DATA_DIR 覆盖）
+data_persistence = DataPersistenceService(None)

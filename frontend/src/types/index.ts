@@ -14,8 +14,7 @@ export interface Text {
   createdBy: string;
   createdAt: string;
   lastOpened?: string;
-  type?: 'translation' | 'essay'; // 添加类型字段
-  topic?: string; // 添加题目字段（仅作文类型使用）
+  type?: 'translation'; // 添加类型字段
   folder_id?: string; // 添加文件夹ID字段
 }
 

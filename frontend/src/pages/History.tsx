@@ -1,19 +1,19 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { practiceAPI, PracticeHistoryRecord, PracticeHistoryExport, essayAPI, EssayHistoryRecord } from '../utils/api';
+import { practiceAPI, PracticeHistoryRecord, PracticeHistoryExport } from '../utils/api';
 import { Calendar, TrendingUp, Target, Clock, Download, Upload } from 'lucide-react';
 
 // 统一的历史记录类型
 interface UnifiedHistoryRecord {
   id: string;
-  type: 'practice' | 'essay' | 'essay-study'; // 添加作文范文学习类型
+  type: 'practice'; // 移除essay相关类型
   title: string;
   content: string;
   score: number;
   timestamp: string;
   userInput: string;
   feedback: string;
-  originalRecord: PracticeHistoryRecord | EssayHistoryRecord;
+  originalRecord: PracticeHistoryRecord;
 }
 
 const History: React.FC = () => {
@@ -27,55 +27,28 @@ const History: React.FC = () => {
     averageScore: 0,
     totalTimeSpent: 0,
     bestScore: 0,
-    practiceCount: 0,
-    essayCount: 0
+    practiceCount: 0
   });
 
   useEffect(() => {
     const fetchHistory = async () => {
       try {
-        const [practiceResponse, essayResponse] = await Promise.all([
-          practiceAPI.getHistory(),
-          essayAPI.getHistory()
-        ]);
-        
+        const practiceResponse = await practiceAPI.getHistory();
+
         const unifiedRecords: UnifiedHistoryRecord[] = [];
-        
+
         // 处理回译练习记录
         if (practiceResponse.success && practiceResponse.data) {
           practiceResponse.data.forEach(record => {
-            // 根据 practice_type 字段判断类型
-            const practiceType = (record as any).practice_type || 'translation';
-            const recordType = practiceType === 'essay' ? 'essay-study' : 'practice';
-            
             unifiedRecords.push({
               id: record.id,
-              type: recordType,
-              title: recordType === 'essay-study' 
-                ? `作文范文：${record.text_title || '未命名文本'}`  // 在列表中显示前缀
-                : record.text_title || '未命名文本',
+              type: 'practice',
+              title: record.text_title || '未命名文本',
               content: record.text_content,
               score: record.score,
               timestamp: record.timestamp,
               userInput: record.user_input,
               feedback: record.ai_evaluation.overall_feedback,
-              originalRecord: record
-            });
-          });
-        }
-        
-        // 处理作文练习记录
-        if (essayResponse.success && essayResponse.data) {
-          essayResponse.data.forEach(record => {
-            unifiedRecords.push({
-              id: record.id,
-              type: 'essay',
-              title: record.topic,
-              content: record.sample_essay,
-              score: record.overall_score,
-              timestamp: record.timestamp,
-              userInput: record.user_essay,
-              feedback: record.evaluation.overall_feedback,
               originalRecord: record
             });
           });
@@ -101,7 +74,6 @@ const History: React.FC = () => {
 
     const totalSessions = records.length;
     const practiceCount = records.filter(r => r.type === 'practice').length;
-    const essayCount = records.filter(r => r.type === 'essay' || r.type === 'essay-study').length;
     const averageScore = Math.round(records.reduce((sum, record) => sum + record.score, 0) / totalSessions);
     const totalTimeSpent = 0; // 简化处理
     const bestScore = Math.max(...records.map(record => record.score));
@@ -111,8 +83,7 @@ const History: React.FC = () => {
       averageScore,
       totalTimeSpent,
       bestScore,
-      practiceCount,
-      essayCount
+      practiceCount
     });
   };
 
@@ -191,15 +162,10 @@ const History: React.FC = () => {
           // 转换为统一格式
           const unifiedRecords: UnifiedHistoryRecord[] = [];
           historyResponse.data.forEach(record => {
-            const practiceType = (record as any).practice_type || 'translation';
-            const recordType = practiceType === 'essay' ? 'essay-study' : 'practice';
-            
             unifiedRecords.push({
               id: record.id,
-              type: recordType,
-              title: recordType === 'essay-study' 
-                ? `作文范文：${record.text_title || '未命名文本'}`  // 在列表中显示前缀
-                : record.text_title || '未命名文本',
+              type: 'practice',
+              title: record.text_title || '未命名文本',
               content: record.text_content,
               score: record.score,
               timestamp: record.timestamp,
@@ -208,7 +174,7 @@ const History: React.FC = () => {
               originalRecord: record
             });
           });
-          
+
           setRecords(unifiedRecords);
           calculateStats(unifiedRecords);
         }
@@ -344,14 +310,8 @@ const History: React.FC = () => {
                       <h3 className="font-medium text-gray-900 text-sm leading-relaxed break-words" title={record.title}>
                         {record.title}
                       </h3>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        record.type === 'essay' 
-                          ? 'bg-purple-100 text-purple-700'
-                          : record.type === 'essay-study'
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-blue-100 text-blue-700'
-                      }`}>
-                        {record.type === 'essay' ? '作文' : record.type === 'essay-study' ? '作文' : '回译'}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700`}>
+                        回译
                       </span>
                     </div>
                     <div className="flex items-center space-x-4 text-sm text-gray-600">
@@ -359,7 +319,7 @@ const History: React.FC = () => {
                       <span>•</span>
                       <span>字数: {record.content.split(' ').length}词</span>
                       <span>•</span>
-                      <span>评价: {record.type === 'essay' ? '已完成' : (record.originalRecord as PracticeHistoryRecord).ai_evaluation?.is_acceptable ? '通过' : '需改进'}</span>
+                      <span>评价: {(record.originalRecord as PracticeHistoryRecord).ai_evaluation?.is_acceptable ? '通过' : '需改进'}</span>
                     </div>
                   </div>
                   
@@ -369,15 +329,7 @@ const History: React.FC = () => {
                     </div>
                     <button
                       onClick={() => {
-                        if (record.type === 'essay') {
-                          alert(`作文题目：${record.title}\n\n范文：${record.content.substring(0, 100)}...\n\n您的作文：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
-                        } else if (record.type === 'essay-study') {
-                          // 直接使用原始记录中的题目
-                          const actualTopic = (record.originalRecord as PracticeHistoryRecord).text_title;
-                          alert(`作文题目：${actualTopic}\n\n英文范文：${record.content.substring(0, 200)}...\n\n中文思路：${(record.originalRecord as PracticeHistoryRecord).chinese_translation.substring(0, 200)}...\n\n说明：这是AI生成的作文范文，供学习参考。`);
-                        } else {
-                          alert(`文章：${record.title}\n\n英文原文：${record.content.substring(0, 100)}...\n\n您的回译：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
-                        }
+                        alert(`文章：${record.title}\n\n英文原文：${record.content.substring(0, 100)}...\n\n您的回译：${record.userInput.substring(0, 100)}...\n\nAI评价：${record.feedback}`);
                       }}
                       className="text-primary-600 hover:text-primary-700 text-sm font-medium"
                     >
@@ -425,10 +377,6 @@ const History: React.FC = () => {
                       <span>回译练习：</span>
                       <span className="text-blue-600">{stats.practiceCount} 次</span>
                     </div>
-                    <div className="flex justify-between">
-                      <span>作文练习：</span>
-                      <span className="text-purple-600">{stats.essayCount} 次</span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -439,9 +387,6 @@ const History: React.FC = () => {
               <div className="space-y-4">
                 <Link to="/upload" className="block w-full btn-primary text-center">
                   上传新文本练习
-                </Link>
-                <Link to="/essay" className="block w-full bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg text-center transition-colors">
-                  开始作文练习
                 </Link>
                 <Link to="/" className="block w-full btn-secondary text-center">
                   浏览练习材料

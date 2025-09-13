@@ -114,22 +114,7 @@ const Home: React.FC = () => {
       }
       
       // 处理作文范文材料（仅在查看全部材料时显示）
-      if (!selectedFolderId && historyResponse.success && historyResponse.data) {
-        const essayMaterials = historyResponse.data
-          .filter((record: any) => record.practice_type === 'essay')
-          .map((record: any) => ({
-            id: record.id,
-            title: record.text_title,
-            content: '', // 不显示内容，保持挑战性
-            difficultyLevel: 5, // 作文材料默认难度5
-            wordCount: record.text_content.split(' ').length,
-            createdBy: 'AI生成',
-            createdAt: record.timestamp,
-            lastOpened: record.timestamp,
-            type: 'essay' as const // 标记为作文材料
-          }));
-        allTexts.push(...essayMaterials);
-      }
+      // 已移除作文相关功能
       
       // 按创建时间排序（最新的在前）
       allTexts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
@@ -385,11 +370,6 @@ const Home: React.FC = () => {
                         <div className="flex justify-between items-center text-sm text-gray-500 mb-4">
                           <div className="flex items-center space-x-2">
                             <span>难度: {text.difficultyLevel}/5</span>
-                            {text.type === 'essay' && (
-                              <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                作文
-                              </span>
-                            )}
                           </div>
                           <span>{text.wordCount} 词</span>
                         </div>
@@ -442,11 +422,6 @@ const Home: React.FC = () => {
                                     {text.content.substring(0, 50)}...
                                   </div>
                                 </div>
-                                {text.type === 'essay' && (
-                                  <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-700">
-                                    作文
-                                  </span>
-                                )}
                               </div>
                             </td>
                             <td className="px-6 py-4 whitespace-nowrap">
