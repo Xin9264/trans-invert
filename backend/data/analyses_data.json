@@ -101,54 +101,132 @@
       ],
       "word_count": 38
     },
-    "f101d5b2-4602-4ecd-9f05-ed61e0b0b80f": {
-      "text_id": "f101d5b2-4602-4ecd-9f05-ed61e0b0b80f",
-      "translation": "分析失败，请重试",
+    "14d921ab-3456-474d-942c-6c23077265b0": {
+      "text_id": "14d921ab-3456-474d-942c-6c23077265b0",
+      "translation": "珍妮弗深吸一口气，当她看着白板上覆盖着方形便利贴，每张都写着一两个单词。在房间里，十六名初级设计工程师坐着头脑风暴刚刚打乱他们一天的一个紧急情况的解决方案。在接下来的一个小时里，她引导了与小组的激烈讨论，在白板上导航想法的海洋。目标是简单的：将愿景缩小到单一解决方案，创建一个原型，然后迭代直到问题解决。",
       "difficult_words": [
         {
-          "word": "分析失败",
-          "meaning": "请稍后重试"
+          "word": "facilitated",
+          "meaning": "促进、引导"
+        },
+        {
+          "word": "navigating",
+          "meaning": "导航、引导"
+        },
+        {
+          "word": "iterate",
+          "meaning": "迭代、重复"
+        },
+        {
+          "word": "derailed",
+          "meaning": "使脱轨、打乱"
+        },
+        {
+          "word": "brainstorming",
+          "meaning": "头脑风暴、集思广益"
         }
       ],
       "difficulty": 3,
       "key_points": [
-        "分析失败"
+        "took a deep breath",
+        "covered in",
+        "sit brainstorming",
+        "narrow the vision",
+        "iterate until"
       ],
-      "word_count": 20
+      "word_count": 83
     },
-    "c23cea59-c4c0-4339-8e65-d6c38d8e6aec": {
-      "text_id": "c23cea59-c4c0-4339-8e65-d6c38d8e6aec",
-      "translation": "这是一个测试英文文本用于翻译练习。它包含足够的单词来满足分析的最低要求。",
+    "20470e87-6329-4e77-b14c-5e0a840c5a3d": {
+      "text_id": "20470e87-6329-4e77-b14c-5e0a840c5a3d",
+      "translation": "有这样一个庞大且缺乏经验的团队，这个任务并不容易。但这是那种Jennifer受过训练来应对的挑战。她准备好引导这些年轻工程师通过一个思维过程，希望这能带来一个富有成效的结果。那天我不在房间里，但我看到了最终的产品，它是令人难以置信的。结果超出了任何人的预期，团队对他们的工作感到极其自豪。",
       "difficult_words": [
         {
-          "word": "translation",
-          "meaning": "翻译"
+          "word": "inexperienced",
+          "meaning": "缺乏经验的"
         },
         {
-          "word": "practice",
-          "meaning": "练习"
+          "word": "productive",
+          "meaning": "富有成效的"
         },
         {
-          "word": "contains",
-          "meaning": "包含"
+          "word": "incredible",
+          "meaning": "难以置信的"
         },
         {
-          "word": "requirement",
-          "meaning": "要求"
-        },
-        {
-          "word": "analysis",
-          "meaning": "分析"
+          "word": "expectation",
+          "meaning": "预期"
         }
       ],
-      "difficulty": 2,
+      "difficulty": 3,
       "key_points": [
-        "translation practice",
-        "contains enough words",
-        "minimum requirement",
-        "for analysis"
+        "trained for",
+        "guide through",
+        "beyond anyone’s expectation",
+        "extremely proud of"
       ],
-      "word_count": 20
+      "word_count": 76
+    },
+    "49e07696-a4ca-4214-8a70-00a7b4fb5e8b": {
+      "text_id": "49e07696-a4ca-4214-8a70-00a7b4fb5e8b",
+      "translation": "对于我自己，以及其他目睹了结果的外人来说，我们亲眼见证了创新在工作的力量，以及一小群人合作在短时间内可以完成的事情。但到目前为止，项目中最令人印象深刻的部分是工程团队中没有一个人超过五岁。",
+      "difficult_words": [
+        {
+          "word": "innovation",
+          "meaning": "创新"
+        },
+        {
+          "word": "accomplish",
+          "meaning": "完成"
+        },
+        {
+          "word": "impressive",
+          "meaning": "令人印象深刻的"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "at work",
+        "working together",
+        "in a short period of time",
+        "by far",
+        "no one older than"
+      ],
+      "word_count": 59
+    },
+    "f61e82c9-4d97-4447-9bac-c824749cdd84": {
+      "text_id": "f61e82c9-4d97-4447-9bac-c824749cdd84",
+      "translation": "Jennifer Vasilis (又名 Ms. Jenny) 是我儿子的学前班老师。一天，在一次大规模蚂蚁侵扰迫使学生在炎热的加州阳光下户外用餐后，Ms. Jenny 暂停了下午的活动，来教她的班级一个重要课程。他们一起头脑风暴讨论该怎么做。当孩子们喊出他们的想法时，Ms. Jenny 把它们写在便利贴上并贴在白板上。有些想法不切实际，比如每天在 Chick-fil-A 吃饭，而其他更奇怪，比如干脆吃蚂蚁当午餐。所有想法都受欢迎，没有过滤或害怕评判，这是我们长大后往往会失去的一种自由感。过了一段时间，Ms. Jenny 将讨论引导向一个共识：建造一个遮阳棚。",
+      "difficult_words": [
+        {
+          "word": "infestation",
+          "meaning": "侵扰，泛滥"
+        },
+        {
+          "word": "brainstormed",
+          "meaning": "头脑风暴，集思广益"
+        },
+        {
+          "word": "impractical",
+          "meaning": "不切实际的"
+        },
+        {
+          "word": "bizarre",
+          "meaning": "奇怪的，古怪的"
+        },
+        {
+          "word": "consensus",
+          "meaning": "共识，一致意见"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "massive ant infestation",
+        "eat outside",
+        "paused the afternoon’s activities",
+        "no filters or fears of judgment",
+        "steered the discussion toward a consensus"
+      ],
+      "word_count": 133
     }
   }
 }

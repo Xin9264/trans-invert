@@ -2,6 +2,409 @@
   "version": "1.0",
   "records": [
     {
+      "id": "743e1e58-f3c7-4184-ab7f-c088379770e5",
+      "timestamp": "2025-09-14T10:31:37.039010",
+      "text_title": "0914_4",
+      "text_content": "Jennifer Vasilis (aka Ms. Jenny) was my son’s preschool teacher. One day after a massive ant infestation forced the students to eat outside in the hot California sun, Ms. Jenny paused the afternoon’s activities to teach her class an important lesson. Together, they brainstormed about what to do. As the kids shouted out their ideas, Ms. Jenny wrote them down on sticky notes and placed them on the whiteboard. Some ideas were impractical, like eating at Chick-fil-A every day, and others were more bizarre, like just eating the ants for lunch. All ideas were welcome with no filters or fears of judgment, which is a sense of freedom we tend to lose as we grow older. After a bit of time, Ms. Jenny steered the discussion toward a consensus: constructing a sun shade.",
+      "chinese_translation": "Jennifer Vasilis (又名 Ms. Jenny) 是我儿子的学前班老师。一天，在一次大规模蚂蚁侵扰迫使学生在炎热的加州阳光下户外用餐后，Ms. Jenny 暂停了下午的活动，来教她的班级一个重要课程。他们一起头脑风暴讨论该怎么做。当孩子们喊出他们的想法时，Ms. Jenny 把它们写在便利贴上并贴在白板上。有些想法不切实际，比如每天在 Chick-fil-A 吃饭，而其他更奇怪，比如干脆吃蚂蚁当午餐。所有想法都受欢迎，没有过滤或害怕评判，这是我们长大后往往会失去的一种自由感。过了一段时间，Ms. Jenny 将讨论引导向一个共识：建造一个遮阳棚。",
+      "user_input": "Jennifer Vasilis (aka Ms.Jenny) was my son's preschool teacher. One day after a massive of ant infestation forced the students eating under the hot California sunshine, Ms. Jenny paused the afternoon activity to teach her class an important lesson. Together, ther brainstormed to discuss what to do. As children shout out their ideas, Ms. Jenny wrote them down on the sticky notes and sticked on the whiteboard. Some ideas were impractical, like eating on Chick-fil-A everyday, and others were more  bizzare, like eating ant as lunch. All of the ideas were welcome, with no filters or fear of judge, which was a sense of freedom to lose after we grow older. After some time, Ms. Jenny steered the discussion to a consensus: build a shade.",
+      "ai_evaluation": {
+        "score": 75,
+        "corrections": [
+          {
+            "original": "a massive of ant infestation",
+            "suggestion": "a massive ant infestation",
+            "reason": "冗余介词 'of' 导致语法错误，应为名词短语直接修饰"
+          },
+          {
+            "original": "forced the students eating",
+            "suggestion": "forced the students to eat",
+            "reason": "force 的正确搭配为 force someone to do something，需用不定式"
+          },
+          {
+            "original": "under the hot California sunshine",
+            "suggestion": "in the hot California sun",
+            "reason": "原文使用 'sun' 而非 'sunshine'，且介词 'in' 更符合英语习惯搭配"
+          },
+          {
+            "original": "afternoon activity",
+            "suggestion": "afternoon's activities",
+            "reason": "缺少所有格，且应用复数形式以匹配原文的多种活动"
+          },
+          {
+            "original": "ther brainstormed",
+            "suggestion": "they brainstormed",
+            "reason": "拼写错误，应为 they"
+          },
+          {
+            "original": "to discuss what to do",
+            "suggestion": "about what to do",
+            "reason": "brainstorm 后接 about 更自然，原文未使用 discuss"
+          },
+          {
+            "original": "As children shout out",
+            "suggestion": "As the kids shouted out",
+            "reason": "时态错误（应过去时），且原文使用 'the kids' 特指班级学生"
+          },
+          {
+            "original": "sticked on the whiteboard",
+            "suggestion": "placed them on the whiteboard",
+            "reason": "stick 的过去式为 stuck，但原文使用更自然的 placed"
+          },
+          {
+            "original": "eating on Chick-fil-A",
+            "suggestion": "eating at Chick-fil-A",
+            "reason": "介词错误，在餐厅就餐应使用 at"
+          },
+          {
+            "original": "everyday",
+            "suggestion": "every day",
+            "reason": "everyday 是形容词（日常的），此处应为副词短语 every day（每天）"
+          },
+          {
+            "original": "eating ant as lunch",
+            "suggestion": "just eating the ants for lunch",
+            "reason": "缺少冠词（应为 the ants），且原文有强调词 just 和介词 for"
+          },
+          {
+            "original": "fear of judge",
+            "suggestion": "fears of judgment",
+            "reason": "judge 应为名词 judgment，且用复数 fears 以匹配原文"
+          },
+          {
+            "original": "a sense of freedom to lose",
+            "suggestion": "a sense of freedom we tend to lose",
+            "reason": "缺少关系从句，导致语义不完整"
+          },
+          {
+            "original": "build a shade",
+            "suggestion": "constructing a sun shade",
+            "reason": "用词过于简化（build 替代 construct），且缺少 sun 导致语义不精准"
+          }
+        ],
+        "overall_feedback": "译文存在大量语法错误（介词、时态、冠词、单复数）和用词不精准问题，如 'massive of ant infestation'、'sticked'、'judge'。句式结构明显简化，丢失原文的复杂性和细节（如 'we tend to lose' 被简化为 'to lose'）。语义基本可懂，但表达生硬，多处偏离地道英语习惯。需系统复习基础语法和搭配，避免机翻式直译。",
+        "is_acceptable": false
+      },
+      "score": 75,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "61a71bcb-ca7d-4d5a-9129-ee8527fdc302",
+      "timestamp": "2025-09-14T10:14:19.912124",
+      "text_title": "0914_3",
+      "text_content": "For myself, and the other outsiders who witnessed the result, we had seen firsthand the power of innovation at work and what a small group of individuals working together can accomplish in a short period of time. But by far, the most impressive part of the project was that no one on the engineering team was older than five.",
+      "chinese_translation": "对于我自己，以及其他目睹了结果的外人来说，我们亲眼见证了创新在工作的力量，以及一小群人合作在短时间内可以完成的事情。但到目前为止，项目中最令人印象深刻的部分是工程团队中没有一个人超过五岁。",
+      "user_input": "For myself, and the outside people who had witness the result, we had seen firsthand the power of innovation at work and what a small group of people could accomplish together in a short time. But by far, the most impressive part of the project is that there is no individuals in the engineering team who had experience over five years.",
+      "ai_evaluation": {
+        "score": 65,
+        "corrections": [
+          {
+            "original": "outside people who had witness",
+            "suggestion": "other outsiders who witnessed",
+            "reason": "语法错误：'had witness' 应为 'witnessed'；'outside people' 不如 'outsiders' 地道"
+          },
+          {
+            "original": "a small group of people could accomplish together",
+            "suggestion": "a small group of individuals working together can accomplish",
+            "reason": "时态错误：'could' 应为 'can'；'people' 不如 'individuals' 精确；缺少 'working together' 的主动态表达"
+          },
+          {
+            "original": "there is no individuals",
+            "suggestion": "no one",
+            "reason": "主谓不一致：'there is' 与复数 'individuals' 冲突；语义偏差：原文强调年龄而非经验"
+          },
+          {
+            "original": "who had experience over five years",
+            "suggestion": "was older than five",
+            "reason": "严重语义错误：原文指年龄不超过5岁，用户误译为经验不超过5年"
+          },
+          {
+            "original": "the most impressive part of the project is",
+            "suggestion": "the most impressive part of the project was",
+            "reason": "时态错误：全文为过去时，此处应用 'was'"
+          }
+        ],
+        "overall_feedback": "译文存在严重语义偏差（将年龄误解为经验）和多个语法错误（时态混乱、主谓不一致）。表达生硬，用词不精准（如'outside people'），整体质量较差。需严格对照原文语义，加强语法准确性训练。",
+        "is_acceptable": false
+      },
+      "score": 65,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "f3bc52cc-c6df-449c-95e9-9dcfcc318679",
+      "timestamp": "2025-09-14T09:59:32.795339",
+      "text_title": "0914_2",
+      "text_content": "With such a large and inexperienced group, the task wasn’t easy. But this was the kind of challenge Jennifer had been trained for. She was ready to guide these young engineers through a process of thinking that would hopefully lead to a productive outcome. I wasn’t in the room that day, but I saw the final product and it was incredible. The result was beyond anyone’s expectation, and the team was extremely proud of their work.",
+      "chinese_translation": "有这样一个庞大且缺乏经验的团队，这个任务并不容易。但这是那种Jennifer受过训练来应对的挑战。她准备好引导这些年轻工程师通过一个思维过程，希望这能带来一个富有成效的结果。那天我不在房间里，但我看到了最终的产品，它是令人难以置信的。结果超出了任何人的预期，团队对他们的工作感到极其自豪。",
+      "user_input": "With such a large and inexperienced team, the task wasn't easy. But this was the kind of challenge that Jennifer had been trained for. She was ready to guide these young engineers through a process of thinking which hopefully could bring a productive outcome. I wasn't in the room that day, but I saw the final product and it was incredible. The result was beyond anyone's expectation, and the team was extremely proud of their work.",
+      "ai_evaluation": {
+        "score": 92,
+        "corrections": [
+          {
+            "original": "which hopefully could bring a productive outcome",
+            "suggestion": "that would hopefully lead to a productive outcome",
+            "reason": "原文使用 'that would hopefully lead to' 更符合英语中表达预期结果的常见搭配，'which could bring' 虽然语法正确但显得不够自然和精准，'lead to' 比 'bring' 更常用于引导结果。"
+          }
+        ],
+        "overall_feedback": "整体表达基本准确，但关键处用词不够地道，略显生硬。'which could bring' 削弱了原文的流畅性和专业性。虽然语法错误极少，但细节上的不自然影响了文本的整体质量。需要更注意搭配和语境下的用词选择。",
+        "is_acceptable": true
+      },
+      "score": 92,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "3990271e-5318-48e9-99df-b59821366842",
+      "timestamp": "2025-09-14T09:52:28.874119",
+      "text_title": "0914_2",
+      "text_content": "With such a large and inexperienced group, the task wasn’t easy. But this was the kind of challenge Jennifer had been trained for. She was ready to guide these young engineers through a process of thinking that would hopefully lead to a productive outcome. I wasn’t in the room that day, but I saw the final product and it was incredible. The result was beyond anyone’s expectation, and the team was extremely proud of their work.",
+      "chinese_translation": "有这样一个庞大且缺乏经验的团队，这个任务并不容易。但这是那种Jennifer受过训练来应对的挑战。她准备好引导这些年轻工程师通过一个思维过程，希望这能带来一个富有成效的结果。那天我不在房间里，但我看到了最终的产品，它是令人难以置信的。结果超出了任何人的预期，团队对他们的工作感到极其自豪。",
+      "user_input": "With such a large and unexpericed team, the task wasn't esay. But this is the kind of challenge Jennifer was trained for. She was ready to lead these young engineers through the process of thinking that could bring a productive outcome. I wasn't at the room that dat, but I saw the final product and it was incredible. The outcome was beyond everyone's expectation, and the team was extremely proud of their work.",
+      "ai_evaluation": {
+        "score": 78,
+        "corrections": [
+          {
+            "original": "unexpericed",
+            "suggestion": "inexperienced",
+            "reason": "拼写错误，正确拼写为 'inexperienced'"
+          },
+          {
+            "original": "esay",
+            "suggestion": "easy",
+            "reason": "拼写错误，正确拼写为 'easy'"
+          },
+          {
+            "original": "is",
+            "suggestion": "was",
+            "reason": "时态错误，原文使用过去时 'was' 以保持时态一致"
+          },
+          {
+            "original": "lead",
+            "suggestion": "guide",
+            "reason": "用词不准确，原文使用 'guide' 更符合语境，表示引导而非单纯领导"
+          },
+          {
+            "original": "could bring",
+            "suggestion": "would hopefully lead to",
+            "reason": "表达不够自然且简化，原文使用 'would hopefully lead to' 更精确地传达预期结果"
+          },
+          {
+            "original": "at the room",
+            "suggestion": "in the room",
+            "reason": "介词错误，正确搭配为 'in the room'"
+          },
+          {
+            "original": "dat",
+            "suggestion": "day",
+            "reason": "拼写错误，正确拼写为 'day'"
+          },
+          {
+            "original": "outcome",
+            "suggestion": "result",
+            "reason": "用词偏差，原文使用 'result' 更贴切，'outcome' 虽可接受但稍显不自然"
+          },
+          {
+            "original": "everyone's",
+            "suggestion": "anyone's",
+            "reason": "用词不精准，原文使用 'anyone's' 以强调超出所有人的预期，'everyone's' 语义稍弱"
+          }
+        ],
+        "overall_feedback": "译文存在多处拼写、时态和用词错误，严重影响了表达的准确性和自然度。虽然大意基本正确，但细节处理粗糙，缺乏原文的流畅性和复杂度。建议加强语法基础训练，并注重词汇的精准使用，避免过度简化表达。",
+        "is_acceptable": false
+      },
+      "score": 78,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "d7027cd0-6b3d-4ae9-a073-7b6a64d17a23",
+      "timestamp": "2025-09-14T09:42:11.491544",
+      "text_title": "0914_1",
+      "text_content": "Jennifer took a deep breath as she looked at the whiteboard covered in square sticky notes, each inscribed with a word or two. In the room, sixteen junior design engineers sat brainstorming solutions to an emergency that had just derailed their day. For the next hour, she facilitated an intense discussion with the group, navigating an ocean of ideas on the board. The goal was simple: narrow the vision to a single solution, create a prototype, then iterate until the problem was solved.",
+      "chinese_translation": "珍妮弗深吸一口气，当她看着白板上覆盖着方形便利贴，每张都写着一两个单词。在房间里，十六名初级设计工程师坐着头脑风暴刚刚打乱他们一天的一个紧急情况的解决方案。在接下来的一个小时里，她引导了与小组的激烈讨论，在白板上导航想法的海洋。目标是简单的：将愿景缩小到单一解决方案，创建一个原型，然后迭代直到问题解决。",
+      "user_input": "Jennifer took a deep breathe as she looked at the whiteboard covered with square sticky notes, each inscribed with one word or two. In the room, sixteen junior design engineers sat brainstorming solutions to an emergency that had just derailed their day. In the next hour, she facilitated discussion with the group, navigating an ocean of ideas on the whiteboard. The goal was simple: narrow the vision to a single solution, create a prototype, and then iterate until the problem was solved.",
+      "ai_evaluation": {
+        "score": 87,
+        "corrections": [
+          {
+            "original": "took a deep breathe",
+            "suggestion": "took a deep breath",
+            "reason": "拼写错误：'breathe' 是动词，此处应为名词 'breath'"
+          },
+          {
+            "original": "covered with square sticky notes",
+            "suggestion": "covered in square sticky notes",
+            "reason": "介词使用不自然：'covered in' 更符合英语母语者的表达习惯"
+          },
+          {
+            "original": "one word or two",
+            "suggestion": "a word or two",
+            "reason": "表达不够地道：'a word or two' 是英语中更自然的固定搭配"
+          },
+          {
+            "original": "sat brainstorming",
+            "suggestion": "were sitting brainstorming",
+            "reason": "时态简化：原文使用过去进行时更准确描述持续动作"
+          },
+          {
+            "original": "In the next hour",
+            "suggestion": "For the next hour",
+            "reason": "介词错误：表示持续时间应使用 'for' 而非 'in'"
+          },
+          {
+            "original": "facilitated discussion",
+            "suggestion": "facilitated an intense discussion",
+            "reason": "省略关键形容词：缺少 'intense' 使语气弱化，未能准确传达原文的激烈程度"
+          },
+          {
+            "original": "navigating an ocean of ideas on the whiteboard",
+            "suggestion": "navigating an ocean of ideas on the board",
+            "reason": "用词重复：前文已出现 'whiteboard'，此处使用 'the board' 更简洁自然"
+          },
+          {
+            "original": "and then iterate",
+            "suggestion": "then iterate",
+            "reason": "连接词冗余：'and then' 不如单用 'then' 简洁有力"
+          }
+        ],
+        "overall_feedback": "译文基本传达了原文意思，但存在多处细节错误和表达不自然的问题。冠词、介词和时态使用不够精准，部分关键形容词被省略导致语气弱化。需要更严格注意名词与动词的拼写区分，并提升用词的地道性。虽然语法错误不算严重，但整体表达距离母语者水平仍有明显差距。",
+        "is_acceptable": false
+      },
+      "score": 87,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "0bbfe216-b4dc-450d-8f7e-1cbb78f0f1eb",
+      "timestamp": "2025-09-14T09:30:42.787335",
+      "text_title": "0914_1",
+      "text_content": "Jennifer took a deep breath as she looked at the whiteboard covered in square sticky notes, each inscribed with a word or two. In the room, sixteen junior design engineers sat brainstorming solutions to an emergency that had just derailed their day. For the next hour, she facilitated an intense discussion with the group, navigating an ocean of ideas on the board. The goal was simple: narrow the vision to a single solution, create a prototype, then iterate until the problem was solved.",
+      "chinese_translation": "珍妮弗深吸一口气，当她看着白板上覆盖着方形便利贴，每张都写着一两个单词。在房间里，十六名初级设计工程师坐着头脑风暴刚刚打乱他们一天的一个紧急情况的解决方案。在接下来的一个小时里，她引导了与小组的激烈讨论，在白板上导航想法的海洋。目标是简单的：将愿景缩小到单一解决方案，创建一个原型，然后迭代直到问题解决。",
+      "user_input": "Jennif took a deep breath as she looked at the white board, covered with square sticky notes, each describes one word or two. In the room, sixteen junoir design engineering sat brainstorming solutions to an emergency situation which derailed their day. In the next hour, she facilitated a disicussion with the group, navigating an ocean of ideas on the white board. The target is simple: xxx a single solution, create a prototype and then iterate untile the problem solved.",
+      "ai_evaluation": {
+        "score": 65,
+        "corrections": [
+          {
+            "original": "Jennif",
+            "suggestion": "Jennifer",
+            "reason": "拼写错误，缺少字母 'e'"
+          },
+          {
+            "original": "white board",
+            "suggestion": "whiteboard",
+            "reason": "应为复合名词 'whiteboard'，而非分开写"
+          },
+          {
+            "original": "each describes one word or two",
+            "suggestion": "each inscribed with a word or two",
+            "reason": "语法错误：动词 'describes' 与主语 'each' 单复数不一致，且表达不自然；原文使用过去分词短语更地道"
+          },
+          {
+            "original": "juniors design engineering",
+            "suggestion": "junior design engineers",
+            "reason": "词序和单复数错误：'juniors' 应为形容词 'junior'，'engineering' 应为复数名词 'engineers'"
+          },
+          {
+            "original": "emergency situation which derailed their day",
+            "suggestion": "emergency that had just derailed their day",
+            "reason": "时态错误：缺少过去完成时 'had just derailed'；'which' 不如 'that' 自然（限制性定语从句）"
+          },
+          {
+            "original": "disicussion",
+            "suggestion": "discussion",
+            "reason": "拼写错误，应为 'discussion'"
+          },
+          {
+            "original": "The target is simple: xxx a single solution",
+            "suggestion": "The goal was simple: narrow the vision to a single solution",
+            "reason": "语义不完整：'xxx' 缺失关键动词；'target' 不如 'goal' 自然；时态错误（应为过去时 'was'）"
+          },
+          {
+            "original": "iterate untile the problem solved",
+            "suggestion": "iterate until the problem was solved",
+            "reason": "拼写错误 'untile' 应为 'until'；语法错误：缺少动词 'was'（被动语态）"
+          }
+        ],
+        "overall_feedback": "译文存在大量语法错误、拼写错误和语义偏差，严重偏离原文的复杂结构和精确表达。时态混乱，用词不准确（如'target'代替'goal'），关键信息缺失（'narrow the vision'被简化为'xxx'）。整体表达生硬，接近机翻风格，需彻底重写以符合英语母语者的自然度和逻辑严谨性。",
+        "is_acceptable": false
+      },
+      "score": 65,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "dffaa4bd-2481-4458-ae99-c688006795ac",
+      "timestamp": "2025-09-14T09:30:13.615985",
+      "text_title": "0914_1",
+      "text_content": "Jennifer took a deep breath as she looked at the whiteboard covered in square sticky notes, each inscribed with a word or two. In the room, sixteen junior design engineers sat brainstorming solutions to an emergency that had just derailed their day. For the next hour, she facilitated an intense discussion with the group, navigating an ocean of ideas on the board. The goal was simple: narrow the vision to a single solution, create a prototype, then iterate until the problem was solved.",
+      "chinese_translation": "珍妮弗深吸一口气，当她看着白板上覆盖着方形便利贴，每张都写着一两个单词。在房间里，十六名初级设计工程师坐着头脑风暴刚刚打乱他们一天的一个紧急情况的解决方案。在接下来的一个小时里，她引导了与小组的激烈讨论，在白板上导航想法的海洋。目标是简单的：将愿景缩小到单一解决方案，创建一个原型，然后迭代直到问题解决。",
+      "user_input": "Jennif took a deep breath as she looked at the white board, covered with square sticky notes, each describes one word or two. In the room, sixteen junoir design engineering sat brainstorming solutions to an emergency situation which derailed their day. In the next hour, she facilitated a disicussion with the group, navigating an ocean of ideas on the white board. The target is simple: xxx a single solution, create a prototype and then iterate untile the problem solved.",
+      "ai_evaluation": {
+        "score": 65,
+        "corrections": [
+          {
+            "original": "Jennif",
+            "suggestion": "Jennifer",
+            "reason": "拼写错误，遗漏字母 'e'"
+          },
+          {
+            "original": "white board",
+            "suggestion": "whiteboard",
+            "reason": "应为复合名词，而非分开的两个词"
+          },
+          {
+            "original": "each describes one word or two",
+            "suggestion": "each inscribed with a word or two",
+            "reason": "语法错误（动词单复数不一致）且表达不自然，原文使用过去分词短语作定语"
+          },
+          {
+            "original": "juniors design engineering",
+            "suggestion": "junior design engineers",
+            "reason": "词序错误、名词单复数错误（应为复数）和词性错误（应为名词而非动名词）"
+          },
+          {
+            "original": "emergency situation which derailed their day",
+            "suggestion": "emergency that had just derailed their day",
+            "reason": "关系代词使用不当（应用 'that' 而非 'which' 引导限制性定语从句），且遗漏 'just' 导致语义偏差"
+          },
+          {
+            "original": "disicussion",
+            "suggestion": "discussion",
+            "reason": "拼写错误，字母 's' 和 'c' 顺序颠倒"
+          },
+          {
+            "original": "navigating an ocean of ideas on the white board",
+            "suggestion": "navigating an ocean of ideas on the board",
+            "reason": "重复使用 'white board'（前文已提）显得冗余，原文仅用 'the board' 保持简洁"
+          },
+          {
+            "original": "The target is simple: xxx a single solution",
+            "suggestion": "The goal was simple: narrow the vision to a single solution",
+            "reason": "用词错误（'target' 不如 'goal' 自然），时态错误（应为过去时），语义不全（缺失 'narrow the vision to'）且 'xxx' 为未完成部分"
+          },
+          {
+            "original": "iterate untile the problem solved",
+            "suggestion": "iterate until the problem was solved",
+            "reason": "拼写错误（'untile'），语法错误（缺少动词 'was'，应为被动语态）"
+          }
+        ],
+        "overall_feedback": "译文存在严重问题：拼写错误频发（如人名、关键名词），语法错误密集（时态混乱、单复数错误、句子结构残缺），用词不准确（如'target'代替'goal'），且过度简化导致语义丢失（如省略'narrow the vision to'）。整体表达生硬，明显偏离原文的流畅度和逻辑性，需系统性地修正基础语法并提升用词精准度。",
+        "is_acceptable": false
+      },
+      "score": 65,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
       "id": "68c6606f-bb7c-4728-9d4b-d98a216e9391",
       "timestamp": "2025-09-14T05:03:18.934705",
       "text_title": "Test Upload",

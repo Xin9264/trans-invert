@@ -34,27 +34,49 @@
       "practice_type": "translation",
       "topic": null
     },
-    "f101d5b2-4602-4ecd-9f05-ed61e0b0b80f": {
-      "id": "f101d5b2-4602-4ecd-9f05-ed61e0b0b80f",
-      "title": "Test Upload",
-      "content": "This is a test English text for translation practice. It contains enough words to meet the minimum requirement for analysis.",
-      "word_count": 20,
-      "created_at": "2025-09-14T04:35:44.428598",
-      "practice_type": "translation",
-      "topic": "testing",
-      "folder_id": null,
-      "last_opened": "2025-09-14T05:03:08.936397"
-    },
-    "c23cea59-c4c0-4339-8e65-d6c38d8e6aec": {
-      "id": "c23cea59-c4c0-4339-8e65-d6c38d8e6aec",
-      "title": "文本_c23cea59",
-      "content": "This is a test English text for translation practice. It contains enough words to meet the minimum requirement for analysis.",
-      "word_count": 20,
-      "created_at": "2025-09-14T05:03:27.686435",
+    "14d921ab-3456-474d-942c-6c23077265b0": {
+      "id": "14d921ab-3456-474d-942c-6c23077265b0",
+      "title": "0914_1",
+      "content": "Jennifer took a deep breath as she looked at the whiteboard covered in square sticky notes, each inscribed with a word or two. In the room, sixteen junior design engineers sat brainstorming solutions to an emergency that had just derailed their day. For the next hour, she facilitated an intense discussion with the group, navigating an ocean of ideas on the board. The goal was simple: narrow the vision to a single solution, create a prototype, then iterate until the problem was solved.",
+      "word_count": 83,
+      "created_at": "2025-09-14T09:18:56.788480",
       "practice_type": "translation",
       "topic": null,
       "folder_id": null,
-      "last_opened": "2025-09-14T05:03:39.852191"
+      "last_opened": "2025-09-14T09:34:44.663847"
+    },
+    "20470e87-6329-4e77-b14c-5e0a840c5a3d": {
+      "id": "20470e87-6329-4e77-b14c-5e0a840c5a3d",
+      "title": "0914_2",
+      "content": "With such a large and inexperienced group, the task wasn’t easy. But this was the kind of challenge Jennifer had been trained for. She was ready to guide these young engineers through a process of thinking that would hopefully lead to a productive outcome. I wasn’t in the room that day, but I saw the final product and it was incredible. The result was beyond anyone’s expectation, and the team was extremely proud of their work.",
+      "word_count": 76,
+      "created_at": "2025-09-14T09:44:01.205930",
+      "practice_type": "translation",
+      "topic": null,
+      "folder_id": null,
+      "last_opened": "2025-09-14T09:44:43.574937"
+    },
+    "49e07696-a4ca-4214-8a70-00a7b4fb5e8b": {
+      "id": "49e07696-a4ca-4214-8a70-00a7b4fb5e8b",
+      "title": "0914_3",
+      "content": "For myself, and the other outsiders who witnessed the result, we had seen firsthand the power of innovation at work and what a small group of individuals working together can accomplish in a short period of time. But by far, the most impressive part of the project was that no one on the engineering team was older than five.",
+      "word_count": 59,
+      "created_at": "2025-09-14T10:00:34.498215",
+      "practice_type": "translation",
+      "topic": null,
+      "folder_id": null,
+      "last_opened": "2025-09-14T10:01:19.082389"
+    },
+    "f61e82c9-4d97-4447-9bac-c824749cdd84": {
+      "id": "f61e82c9-4d97-4447-9bac-c824749cdd84",
+      "title": "0914_4",
+      "content": "Jennifer Vasilis (aka Ms. Jenny) was my son’s preschool teacher. One day after a massive ant infestation forced the students to eat outside in the hot California sun, Ms. Jenny paused the afternoon’s activities to teach her class an important lesson. Together, they brainstormed about what to do. As the kids shouted out their ideas, Ms. Jenny wrote them down on sticky notes and placed them on the whiteboard. Some ideas were impractical, like eating at Chick-fil-A every day, and others were more bizarre, like just eating the ants for lunch. All ideas were welcome with no filters or fears of judgment, which is a sense of freedom we tend to lose as we grow older. After a bit of time, Ms. Jenny steered the discussion toward a consensus: constructing a sun shade.",
+      "word_count": 133,
+      "created_at": "2025-09-14T10:17:35.634584",
+      "practice_type": "translation",
+      "topic": null,
+      "folder_id": null,
+      "last_opened": "2025-09-14T10:18:44.438694"
     }
   }
 }

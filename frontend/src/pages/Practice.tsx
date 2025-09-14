@@ -20,6 +20,7 @@ const Practice: React.FC = () => {
   const [showHistoryModal, setShowHistoryModal] = useState(false); // 历史回译模态框
   const [practiceHistory, setPracticeHistory] = useState<any[]>([]); // 练习历史记录
   const [countdown, setCountdown] = useState<number | null>(null); // 倒计时状态
+  const [userInput, setUserInput] = useState<string>(''); // 用户输入内容
 
   // 高亮数据的存储键
   const getHighlightStorageKey = (textId: string) => `highlights_${textId}`;
@@ -160,8 +161,11 @@ const Practice: React.FC = () => {
 
   const handlePracticeComplete = async (userInput: string) => {
     if (!id) return;
-    
+
     try {
+      // 保存用户输入
+      setUserInput(userInput);
+
       const response = await practiceAPI.submit({
         text_id: id,
         user_input: userInput
@@ -187,7 +191,10 @@ const Practice: React.FC = () => {
   // 流式提交处理函数
   const handleStreamSubmit = async (userInput: string, onProgress: (progress: number) => void) => {
     if (!id) return;
-    
+
+    // 保存用户输入
+    setUserInput(userInput);
+
     return new Promise<void>((resolve, reject) => {
       practiceAPI.submitStream(
         {
@@ -228,6 +235,7 @@ const Practice: React.FC = () => {
   const handleRestart = () => {
     setPracticeMode('study');
     setFeedback(null);
+    setUserInput(''); // 清除用户输入
   };
 
   if (isLoading) {
@@ -436,17 +444,29 @@ const Practice: React.FC = () => {
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
                       <span className="font-medium">得分</span>
                       <span className={`text-2xl font-bold ${
-                        feedback.score >= 80 ? 'text-green-600' : 
+                        feedback.score >= 80 ? 'text-green-600' :
                         feedback.score >= 60 ? 'text-yellow-600' : 'text-red-600'
                       }`}>
                         {feedback.score}/100
                       </span>
                     </div>
-                    
+
+                    {/* 原文内容 */}
+                    <div className="p-4 bg-blue-50 rounded-lg">
+                      <h4 className="font-medium text-blue-900 mb-2">原文内容</h4>
+                      <p className="text-blue-800 leading-relaxed whitespace-pre-wrap">{text.content}</p>
+                    </div>
+
+                    {/* 您的回译 */}
+                    <div className="p-4 bg-purple-50 rounded-lg">
+                      <h4 className="font-medium text-purple-900 mb-2">您的回译</h4>
+                      <p className="text-purple-800 leading-relaxed whitespace-pre-wrap">{userInput}</p>
+                    </div>
+
                     {feedback.aiFeedback?.overall && (
-                      <div className="p-4 bg-blue-50 rounded-lg">
-                        <h4 className="font-medium text-blue-900 mb-2">AI 评价</h4>
-                        <p className="text-blue-800">{feedback.aiFeedback.overall}</p>
+                      <div className="p-4 bg-green-50 rounded-lg">
+                        <h4 className="font-medium text-green-900 mb-2">AI 评价</h4>
+                        <p className="text-green-800">{feedback.aiFeedback.overall}</p>
                       </div>
                     )}
 
