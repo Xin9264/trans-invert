@@ -87,6 +87,9 @@ export interface APIResponse<T = any> {
 export interface TextUploadRequest {
   content: string;
   title?: string;
+  practice_type?: string;
+  topic?: string;
+  folder_id?: string;
 }
 
 export interface DifficultWord {

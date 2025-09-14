@@ -2,6 +2,66 @@
   "version": "1.0",
   "records": [
     {
+      "id": "68c6606f-bb7c-4728-9d4b-d98a216e9391",
+      "timestamp": "2025-09-14T05:03:18.934705",
+      "text_title": "Test Upload",
+      "text_content": "This is a test English text for translation practice. It contains enough words to meet the minimum requirement for analysis.",
+      "chinese_translation": "分析失败，请重试",
+      "user_input": "This is a test English text for translation practice. It contains enough words to meet the minimum requirement for analysis.",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "Excellent work! Your translation is grammatically correct, semantically accurate, and matches the complexity of the original text. No errors were found.",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "434b89ee-973e-4dc1-91c8-9bc1cc416238",
+      "timestamp": "2025-09-13T15:19:22.206969",
+      "text_title": "0911_3",
+      "text_content": "Any adjective describes the \"nature\" or \"character\" of the noun it modifies. To say that hardships are \"temporary in nature\" is like saying that the Chinese flag is \"red in color\" or that pandas are \"few in number.\"",
+      "chinese_translation": "任何形容词描述它修饰的名词的“性质”或“特征”。说困难是“性质上临时的”就像说中国国旗是“颜色上红色的”或熊猫是“数量上稀少的”。",
+      "user_input": "Any",
+      "ai_evaluation": {
+        "score": 0,
+        "corrections": [
+          {
+            "original": "Any",
+            "suggestion": "Any adjective describes the 'nature' or 'character' of the noun it modifies. To say that hardships are 'temporary in nature' is like saying that the Chinese flag is 'red in color' or that pandas are 'few in number.'",
+            "reason": "用户仅输入了一个单词，未完成完整的句子翻译，导致语义不完整且无法传达原文含义。"
+          }
+        ],
+        "overall_feedback": "输入内容不完整，仅有一个单词，无法评估完整的翻译质量。请提供完整的句子翻译以便准确评估。",
+        "is_acceptable": false
+      },
+      "score": 0,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "23f64275-05dc-4e82-80bc-bfce9af58e4a",
+      "timestamp": "2025-09-13T15:18:54.810927",
+      "text_title": "0911_2",
+      "text_content": "It follows that any words which perform no useful function in the sentence—that is, which add nothing to the meaning—should be edited out. Almost every text that has been translated into English from Chinese, (or that has been written directly in English by a native speaker of Chinese) contains unnecessary words. Draft translations are commonly full of them, and even polished final versions are seldom free of them.",
+      "chinese_translation": "它遵循任何在句子中执行没有有用功能的词——也就是说，对意思没有增加任何东西——应该被编辑出去。几乎每一个从中文翻译成英文的文本（或者由中文母语者直接用英文写的）包含不必要的词。草稿翻译通常充满它们，甚至润色过的最终版本很少没有它们。",
+      "user_input": "Hello world, this is a test for Chinese translation functionality.",
+      "ai_evaluation": {
+        "score": 100,
+        "corrections": [],
+        "overall_feedback": "Perfect translation with accurate grammar and clear meaning. The sentence is natural and fully acceptable.",
+        "is_acceptable": true
+      },
+      "score": 100,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
       "id": "41def864-fd55-4bc1-b8f1-ef315ed91ac9",
       "timestamp": "2025-09-13T08:02:50.901938",
       "text_title": "0911_3",

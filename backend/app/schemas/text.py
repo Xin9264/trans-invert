@@ -6,6 +6,9 @@ class TextUploadRequest(BaseModel):
     """文本上传请求"""
     content: str = Field(..., min_length=10, max_length=10000, description="英文文本内容")
     title: Optional[str] = Field(None, max_length=200, description="文本标题（可选）")
+    practice_type: Optional[str] = Field(default="translation", description="练习类型")
+    topic: Optional[str] = Field(None, description="主题")
+    folder_id: Optional[str] = Field(None, description="文件夹ID")
 
 class TextAnalysisResponse(BaseModel):
     """AI文本分析响应"""

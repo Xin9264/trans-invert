@@ -100,6 +100,55 @@
         "it modifies"
       ],
       "word_count": 38
+    },
+    "f101d5b2-4602-4ecd-9f05-ed61e0b0b80f": {
+      "text_id": "f101d5b2-4602-4ecd-9f05-ed61e0b0b80f",
+      "translation": "分析失败，请重试",
+      "difficult_words": [
+        {
+          "word": "分析失败",
+          "meaning": "请稍后重试"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "分析失败"
+      ],
+      "word_count": 20
+    },
+    "c23cea59-c4c0-4339-8e65-d6c38d8e6aec": {
+      "text_id": "c23cea59-c4c0-4339-8e65-d6c38d8e6aec",
+      "translation": "这是一个测试英文文本用于翻译练习。它包含足够的单词来满足分析的最低要求。",
+      "difficult_words": [
+        {
+          "word": "translation",
+          "meaning": "翻译"
+        },
+        {
+          "word": "practice",
+          "meaning": "练习"
+        },
+        {
+          "word": "contains",
+          "meaning": "包含"
+        },
+        {
+          "word": "requirement",
+          "meaning": "要求"
+        },
+        {
+          "word": "analysis",
+          "meaning": "分析"
+        }
+      ],
+      "difficulty": 2,
+      "key_points": [
+        "translation practice",
+        "contains enough words",
+        "minimum requirement",
+        "for analysis"
+      ],
+      "word_count": 20
     }
   }
 }

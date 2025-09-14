@@ -30,9 +30,31 @@
       "word_count": 38,
       "created_at": "2025-09-11T09:15:20.037235",
       "folder_id": null,
-      "last_opened": "2025-09-13T08:02:40.300216",
+      "last_opened": "2025-09-14T04:35:55.507107",
       "practice_type": "translation",
       "topic": null
+    },
+    "f101d5b2-4602-4ecd-9f05-ed61e0b0b80f": {
+      "id": "f101d5b2-4602-4ecd-9f05-ed61e0b0b80f",
+      "title": "Test Upload",
+      "content": "This is a test English text for translation practice. It contains enough words to meet the minimum requirement for analysis.",
+      "word_count": 20,
+      "created_at": "2025-09-14T04:35:44.428598",
+      "practice_type": "translation",
+      "topic": "testing",
+      "folder_id": null,
+      "last_opened": "2025-09-14T05:03:08.936397"
+    },
+    "c23cea59-c4c0-4339-8e65-d6c38d8e6aec": {
+      "id": "c23cea59-c4c0-4339-8e65-d6c38d8e6aec",
+      "title": "文本_c23cea59",
+      "content": "This is a test English text for translation practice. It contains enough words to meet the minimum requirement for analysis.",
+      "word_count": 20,
+      "created_at": "2025-09-14T05:03:27.686435",
+      "practice_type": "translation",
+      "topic": null,
+      "folder_id": null,
+      "last_opened": "2025-09-14T05:03:39.852191"
     }
   }
 }
