@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Outlet, Link } from 'react-router-dom';
-import { Home, Upload, History, Settings, AlertTriangle, FileText, Brain } from 'lucide-react';
+import { Home, Upload, History, Settings, AlertTriangle, Brain } from 'lucide-react';
 import { useAIStatus } from '../hooks/useAIStatus';
 import AIConfigModal from './AIConfigModal';
 

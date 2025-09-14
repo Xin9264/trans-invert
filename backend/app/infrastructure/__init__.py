@@ -1,0 +1,1 @@
+"""Infrastructure layer - Contains implementations of repositories and external service adapters"""

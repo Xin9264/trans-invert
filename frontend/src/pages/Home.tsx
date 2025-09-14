@@ -89,7 +89,7 @@ const Home: React.FC = () => {
   const fetchTexts = async () => {
     try {
       // 并行获取文本材料和练习历史
-      const [textsResponse, historyResponse] = await Promise.all([
+      const [textsResponse] = await Promise.all([
         textAPI.getAll(selectedFolderId || undefined),
         practiceAPI.getHistory()
       ]);
