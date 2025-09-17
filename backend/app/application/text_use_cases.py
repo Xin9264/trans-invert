@@ -1,6 +1,6 @@
 """Use cases for text management bounded context"""
 import uuid
-from typing import List, Optional, Dict, Any
+from typing import List, Optional, Dict, Any, AsyncGenerator
 from datetime import datetime
 
 from ..domain.entities import TextMaterial, TextAnalysis
@@ -60,6 +60,59 @@ class UploadTextUseCase:
 
         return text_id.value
 
+
+class UploadTextStreamUseCase:
+    """Use case for uploading text materials with streaming AI analysis"""
+
+    def __init__(
+        self,
+        text_repository: TextMaterialRepository,
+        ai_service: AIServiceInterface,
+    ):
+        self.text_repository = text_repository
+        self.ai_service = ai_service
+
+    async def execute(self, command: TextUploadCommand) -> AsyncGenerator[dict, None]:
+        """Upload text material and stream AI analysis progress"""
+
+        text_id = TextId(str(uuid.uuid4()))
+        content = TextContent(command.content)
+        practice_type = (
+            PracticeType(command.practice_type)
+            if command.practice_type
+            else PracticeType.TRANSLATION
+        )
+        folder_id = FolderId(command.folder_id) if command.folder_id else None
+
+        text_material = TextMaterial(
+            id=text_id,
+            title=command.title or f"文本_{text_id.value[:8]}",
+            content=content,
+            created_at=Timestamp.now(),
+            practice_type=practice_type,
+            topic=command.topic,
+            folder_id=folder_id,
+        )
+
+        await self.text_repository.save(text_material)
+
+        initial_chunk = {
+            "type": "init",
+            "text_id": text_id.value,
+            "title": text_material.title,
+            "progress": 5,
+            "message": "文本已保存，正在召唤AI分析…",
+            "word_count": text_material.word_count,
+        }
+        yield initial_chunk
+
+        async for chunk in self.ai_service.analyze_text_stream(
+            text_id.value, command.content
+        ):
+            chunk.setdefault("text_id", text_id.value)
+            if chunk.get("type") == "complete" and "analysis" in chunk:
+                chunk["analysis"]["word_count"] = text_material.word_count
+            yield chunk
 
 class GetTextAnalysisUseCase:
     """Use case for getting text analysis"""

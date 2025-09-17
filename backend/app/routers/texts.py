@@ -1,5 +1,6 @@
 """Refactored text management routes using DDD architecture"""
 from typing import Dict, Any, Optional
+import json
 from fastapi import APIRouter, HTTPException, BackgroundTasks, Request
 from fastapi.responses import StreamingResponse, Response
 
@@ -23,6 +24,7 @@ class TextController:
     def _setup_routes(self):
         """Setup route handlers"""
         self.router.post("/upload", response_model=APIResponse)(self.upload_text)
+        self.router.post("/upload-stream")(self.upload_text_stream)
         self.router.get("/{text_id}/analysis", response_model=APIResponse)(self.get_text_analysis)
         self.router.get("/{text_id}", response_model=APIResponse)(self.get_text)
         self.router.post("/{text_id}/move", response_model=APIResponse)(self.move_text_to_folder)
@@ -85,6 +87,64 @@ class TextController:
 
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e))
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=f"Text upload failed: {str(e)}")
+
+    async def upload_text_stream(self, request_data: TextUploadRequest, http_request: Request):
+        """Upload text and stream AI analysis progress"""
+
+        try:
+            user_config = self._get_user_ai_config(http_request)
+            if not user_config:
+                raise HTTPException(
+                    status_code=400,
+                    detail="Please configure AI service (provider and API key) in browser first",
+                )
+
+            command = TextUploadCommand(
+                content=request_data.content,
+                title=request_data.title,
+                practice_type=getattr(request_data, "practice_type", "translation"),
+                topic=getattr(request_data, "topic", None),
+                folder_id=getattr(request_data, "folder_id", None),
+            )
+
+            async def event_stream():
+                current_text_id: Optional[str] = None
+                try:
+                    async for chunk in self.container.upload_text_stream_use_case.execute(command):
+                        if isinstance(chunk, dict) and chunk.get("text_id"):
+                            current_text_id = chunk.get("text_id")
+                        yield f"data: {json.dumps(chunk, ensure_ascii=False)}\n\n"
+
+                    yield "data: [DONE]\n\n"
+
+                except Exception as exc:
+                    error_chunk = {
+                        "type": "error",
+                        "error": str(exc),
+                        "progress": 0,
+                    }
+                    if current_text_id:
+                        error_chunk["text_id"] = current_text_id
+                    yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n"
+
+                finally:
+                    await self.container.save_all_data()
+
+            return StreamingResponse(
+                event_stream(),
+                media_type="text/event-stream",
+                headers={
+                    "Cache-Control": "no-cache",
+                    "Connection": "keep-alive",
+                    "Access-Control-Allow-Origin": "*",
+                    "Access-Control-Allow-Headers": "*",
+                },
+            )
+
+        except HTTPException:
+            raise
         except Exception as e:
             raise HTTPException(status_code=500, detail=f"Text upload failed: {str(e)}")
 

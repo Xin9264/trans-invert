@@ -336,7 +336,7 @@ const Practice: React.FC = () => {
       <div className="grid lg:grid-cols-5 gap-8">
         {/* 左侧：中文翻译 */}
         <div className="lg:col-span-2 space-y-6">
-          {/* 作文题目显示框 - 仅当类型为作文且有题目时显示 */}
+          {/* 中文翻译显示框 */}
           <div className="card">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">
               中文翻译

@@ -1,66 +1,162 @@
 {
-  "version": "1.0",
-  "records": [
-    {
-      "id": "68c6606f-bb7c-4728-9d4b-d98a216e9391",
-      "timestamp": "2025-09-14T05:03:18.934705",
-      "text_title": "Test Upload",
-      "text_content": "This is a test English text for translation practice. It contains enough words to meet the minimum requirement for analysis.",
-      "chinese_translation": "分析失败，请重试",
-      "user_input": "This is a test English text for translation practice. It contains enough words to meet the minimum requirement for analysis.",
-      "ai_evaluation": {
-        "score": 100,
-        "corrections": [],
-        "overall_feedback": "Excellent work! Your translation is grammatically correct, semantically accurate, and matches the complexity of the original text. No errors were found.",
-        "is_acceptable": true
-      },
-      "score": 100,
-      "review_count": 0,
-      "last_reviewed": null,
-      "error_patterns": []
+  "version": "2.0",
+  "metadata": {
+    "created_at": "2025-09-13T00:00:00.000000",
+    "updated_at": "2025-09-13T00:00:00.000000"
+  },
+  "texts": {
+    "b9642ba7-f49e-4ae2-afe6-4a3ee8d05d47": {
+      "id": "b9642ba7-f49e-4ae2-afe6-4a3ee8d05d47",
+      "title": "0911_1",
+      "content": "Naturally, readers who open this book will have reached varying levels of skill in their second language. But to one degree or another, the work of all but the most highly trained and experienced among them will inevitably contain elements of Chinglish. Chinglish, of course, is that misshapen, hybrid language that is neither English nor Chinese but that might be described as \"English with Chinese characteristics.\"",
+      "word_count": 66,
+      "created_at": "2025-09-11T08:40:58.848654",
+      "folder_id": null,
+      "last_opened": "2025-09-11T09:10:24.972313",
+      "practice_type": "translation",
+      "topic": null
     },
-    {
-      "id": "434b89ee-973e-4dc1-91c8-9bc1cc416238",
-      "timestamp": "2025-09-13T15:19:22.206969",
-      "text_title": "0911_3",
-      "text_content": "Any adjective describes the \"nature\" or \"character\" of the noun it modifies. To say that hardships are \"temporary in nature\" is like saying that the Chinese flag is \"red in color\" or that pandas are \"few in number.\"",
-      "chinese_translation": "任何形容词描述它修饰的名词的“性质”或“特征”。说困难是“性质上临时的”就像说中国国旗是“颜色上红色的”或熊猫是“数量上稀少的”。",
-      "user_input": "Any",
-      "ai_evaluation": {
-        "score": 0,
-        "corrections": [
-          {
-            "original": "Any",
-            "suggestion": "Any adjective describes the 'nature' or 'character' of the noun it modifies. To say that hardships are 'temporary in nature' is like saying that the Chinese flag is 'red in color' or that pandas are 'few in number.'",
-            "reason": "用户仅输入了一个单词，未完成完整的句子翻译，导致语义不完整且无法传达原文含义。"
-          }
-        ],
-        "overall_feedback": "输入内容不完整，仅有一个单词，无法评估完整的翻译质量。请提供完整的句子翻译以便准确评估。",
-        "is_acceptable": false
-      },
-      "score": 0,
-      "review_count": 0,
-      "last_reviewed": null,
-      "error_patterns": []
+    "26f1d9a9-846d-406f-93e9-6c68ae58d20a": {
+      "id": "26f1d9a9-846d-406f-93e9-6c68ae58d20a",
+      "title": "0911_2",
+      "content": "It follows that any words which perform no useful function in the sentence—that is, which add nothing to the meaning—should be edited out. Almost every text that has been translated into English from Chinese, (or that has been written directly in English by a native speaker of Chinese) contains unnecessary words. Draft translations are commonly full of them, and even polished final versions are seldom free of them.",
+      "word_count": 68,
+      "created_at": "2025-09-11T09:02:54.654418",
+      "folder_id": null,
+      "last_opened": "2025-09-11T09:03:30.716602",
+      "practice_type": "translation",
+      "topic": null
     },
-    {
-      "id": "23f64275-05dc-4e82-80bc-bfce9af58e4a",
-      "timestamp": "2025-09-13T15:18:54.810927",
-      "text_title": "0911_2",
-      "text_content": "It follows that any words which perform no useful function in the sentence—that is, which add nothing to the meaning—should be edited out. Almost every text that has been translated into English from Chinese, (or that has been written directly in English by a native speaker of Chinese) contains unnecessary words. Draft translations are commonly full of them, and even polished final versions are seldom free of them.",
-      "chinese_translation": "它遵循任何在句子中执行没有有用功能的词——也就是说，对意思没有增加任何东西——应该被编辑出去。几乎每一个从中文翻译成英文的文本（或者由中文母语者直接用英文写的）包含不必要的词。草稿翻译通常充满它们，甚至润色过的最终版本很少没有它们。",
-      "user_input": "Hello world, this is a test for Chinese translation functionality.",
-      "ai_evaluation": {
-        "score": 100,
-        "corrections": [],
-        "overall_feedback": "Perfect translation with accurate grammar and clear meaning. The sentence is natural and fully acceptable.",
-        "is_acceptable": true
-      },
-      "score": 100,
-      "review_count": 0,
-      "last_reviewed": null,
-      "error_patterns": []
+    "5f33f69b-d7bb-4951-b3e5-1ec420820dbd": {
+      "id": "5f33f69b-d7bb-4951-b3e5-1ec420820dbd",
+      "title": "0911_3",
+      "content": "Any adjective describes the \"nature\" or \"character\" of the noun it modifies. To say that hardships are \"temporary in nature\" is like saying that the Chinese flag is \"red in color\" or that pandas are \"few in number.\"",
+      "word_count": 38,
+      "created_at": "2025-09-11T09:15:20.037235",
+      "practice_type": "translation",
+      "topic": null,
+      "folder_id": "ba80e6e3-c1dd-47b3-ab9a-01a41fda323b",
+      "last_opened": "2025-09-13T08:02:40.300216"
+    }
+  },
+  "analyses": {
+    "b9642ba7-f49e-4ae2-afe6-4a3ee8d05d47": {
+      "text_id": "b9642ba7-f49e-4ae2-afe6-4a3ee8d05d47",
+      "translation": "自然地，打开这本书的读者将在他们的第二语言中达到不同水平的技能。但在某种程度上，除了那些受过最高度训练和有经验的读者之外，所有人的工作都不可避免地包含中式英语的元素。中式英语，当然，是那种畸形、混合的语言，既不是英语也不是中文，但可能被描述为'具有中国特色的英语'。",
+      "difficult_words": [
+        {
+          "word": "varying",
+          "meaning": "不同的，变化的"
+        },
+        {
+          "word": "inevitably",
+          "meaning": "不可避免地"
+        },
+        {
+          "word": "misshapen",
+          "meaning": "畸形的，变形的"
+        },
+        {
+          "word": "hybrid",
+          "meaning": "混合的，杂交的"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "to one degree or another",
+        "all but",
+        "neither...nor...",
+        "might be described as"
+      ],
+      "word_count": 66
     },
+    "26f1d9a9-846d-406f-93e9-6c68ae58d20a": {
+      "text_id": "26f1d9a9-846d-406f-93e9-6c68ae58d20a",
+      "translation": "它遵循任何在句子中执行没有有用功能的词——也就是说，对意思没有增加任何东西——应该被编辑出去。几乎每一个从中文翻译成英文的文本（或者由中文母语者直接用英文写的）包含不必要的词。草稿翻译通常充满它们，甚至润色过的最终版本很少没有它们。",
+      "difficult_words": [
+        {
+          "word": "polished",
+          "meaning": "润色过的"
+        },
+        {
+          "word": "function",
+          "meaning": "功能"
+        },
+        {
+          "word": "edited",
+          "meaning": "编辑"
+        },
+        {
+          "word": "contains",
+          "meaning": "包含"
+        },
+        {
+          "word": "seldom",
+          "meaning": "很少"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "It follows that",
+        "edited out",
+        "full of",
+        "free of",
+        "native speaker"
+      ],
+      "word_count": 68
+    },
+    "5f33f69b-d7bb-4951-b3e5-1ec420820dbd": {
+      "text_id": "5f33f69b-d7bb-4951-b3e5-1ec420820dbd",
+      "translation": "任何形容词描述它修饰的名词的“性质”或“特征”。说困难是“性质上临时的”就像说中国国旗是“颜色上红色的”或熊猫是“数量上稀少的”。",
+      "difficult_words": [
+        {
+          "word": "adjective",
+          "meaning": "形容词"
+        },
+        {
+          "word": "modifies",
+          "meaning": "修饰"
+        },
+        {
+          "word": "temporary",
+          "meaning": "临时的"
+        },
+        {
+          "word": "nature",
+          "meaning": "性质"
+        },
+        {
+          "word": "character",
+          "meaning": "特征"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "in nature",
+        "in color",
+        "in number",
+        "describes the nature",
+        "it modifies"
+      ],
+      "word_count": 38
+    }
+  },
+  "folders": {
+    "82419708-8fc2-4d81-866e-56e6a45884f1": {
+      "id": "82419708-8fc2-4d81-866e-56e6a45884f1",
+      "name": "新概念",
+      "parent_id": null,
+      "created_at": "2025-08-31T08:18:42.995778"
+    },
+    "ba80e6e3-c1dd-47b3-ab9a-01a41fda323b": {
+      "id": "ba80e6e3-c1dd-47b3-ab9a-01a41fda323b",
+      "name": "test1",
+      "description": null,
+      "created_at": "2025-09-13T08:44:59.517281",
+      "parent_id": null
+    }
+  },
+  "practice_history": [
     {
       "id": "41def864-fd55-4bc1-b8f1-ef315ed91ac9",
       "timestamp": "2025-09-13T08:02:50.901938",

@@ -87,9 +87,26 @@ export interface APIResponse<T = any> {
 export interface TextUploadRequest {
   content: string;
   title?: string;
-  practice_type?: string;
-  topic?: string;
-  folder_id?: string;
+}
+
+export interface TextUploadStreamEvent {
+  type: 'init' | 'progress' | 'complete' | 'error';
+  text_id?: string;
+  title?: string;
+  progress?: number;
+  message?: string;
+  content?: string;
+  full_content?: string;
+  word_count?: number;
+  analysis?: {
+    text_id: string;
+    translation: string;
+    difficult_words: DifficultWord[];
+    difficulty: number;
+    key_points: string[];
+    word_count: number;
+  };
+  error?: string;
 }
 
 export interface DifficultWord {
@@ -142,11 +159,20 @@ export interface PracticeHistoryRecord {
   score: number;
 }
 
-export interface PracticeHistoryExport {
-  export_version: string;
-  export_time: string;
-  total_records: number;
-  records: PracticeHistoryRecord[];
+export interface BackupSnapshot {
+  version: string;
+  exported_at: string;
+  folders: Record<string, any>;
+  texts: Record<string, any>;
+  analyses: Record<string, any>;
+  practice_history: any[];
+  stats?: Record<string, number>;
+  metadata?: Record<string, any>;
+}
+
+export interface BackupImportOptions {
+  mode?: 'merge' | 'replace';
+  dry_run?: boolean;
 }
 
 export interface Folder {
@@ -201,6 +227,81 @@ export const textAPI = {
   upload: async (request: TextUploadRequest): Promise<APIResponse<{ text_id: string; word_count: number }>> => {
     const response = await api.post('/api/texts/upload', request) as APIResponse<{ text_id: string; word_count: number }>;
     return response;
+  },
+
+  // 流式上传文本并获取AI分析进度
+  uploadStream: async (
+    request: TextUploadRequest,
+    onEvent: (event: TextUploadStreamEvent) => void,
+    onError: (error: string) => void
+  ): Promise<void> => {
+    try {
+      const aiConfig = localStorageManager.getAIConfig();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json'
+      };
+
+      if (aiConfig) {
+        headers['X-AI-Provider'] = aiConfig.provider;
+        headers['X-AI-Key'] = aiConfig.api_key;
+        if (aiConfig.base_url) {
+          headers['X-AI-Base-URL'] = aiConfig.base_url;
+        }
+        if (aiConfig.model) {
+          headers['X-AI-Model'] = aiConfig.model;
+        }
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/texts/upload-stream`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(request)
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) {
+        throw new Error('无法获取响应流');
+      }
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const segments = buffer.split('\n\n');
+        buffer = segments.pop() || '';
+
+        for (const segment of segments) {
+          if (!segment.startsWith('data: ')) continue;
+          const payload = segment.slice(6);
+
+          if (payload.trim() === '[DONE]') {
+            return;
+          }
+
+          try {
+            const event = JSON.parse(payload) as TextUploadStreamEvent;
+            if (event.type === 'error') {
+              onError(event.error || 'AI分析失败');
+            }
+            onEvent(event);
+          } catch (err) {
+            console.warn('解析流式数据失败:', err, payload);
+          }
+        }
+      }
+    } catch (error) {
+      console.error('流式上传失败:', error);
+      onError(error instanceof Error ? error.message : '未知错误');
+    }
   },
 
   // 获取文本分析结果
@@ -265,20 +366,6 @@ export const practiceAPI = {
   // 获取特定文本的练习历史
   getTextHistory: async (textId: string): Promise<APIResponse<PracticeHistoryRecord[]>> => {
     const response = await api.get(`/api/texts/${textId}/practice/history`) as APIResponse<PracticeHistoryRecord[]>;
-    return response;
-  },
-
-  // 导出练习历史
-  exportHistory: async (): Promise<Blob> => {
-    const response = await api.get('/api/texts/practice/history/export', {
-      responseType: 'blob'
-    });
-    return response as unknown as Blob;
-  },
-
-  // 导入练习历史
-  importHistory: async (data: PracticeHistoryExport): Promise<APIResponse<any>> => {
-    const response = await api.post('/api/texts/practice/history/import', { data }) as APIResponse<any>;
     return response;
   },
 
@@ -572,6 +659,37 @@ export const reviewAPI = {
   // 标记复习完成
   markReviewed: async (textId: string): Promise<APIResponse<any>> => {
     const response = await api.post(`/api/review/mark/${textId}`) as APIResponse<any>;
+    return response;
+  }
+};
+
+export const backupAPI = {
+  // 导出全量数据快照
+  exportSnapshot: async (): Promise<Blob> => {
+    const response = await fetch(`${API_BASE_URL}/api/backup/export`, {
+      method: 'GET'
+    });
+
+    if (!response.ok) {
+      throw new Error(`导出失败，状态码: ${response.status}`);
+    }
+
+    return await response.blob();
+  },
+
+  // 导入全量数据快照
+  importSnapshot: async (
+    snapshot: BackupSnapshot,
+    options?: BackupImportOptions
+  ): Promise<APIResponse<any>> => {
+    const mode = options?.mode ?? 'merge';
+    const dryRun = options?.dry_run ?? false;
+
+    const response = await api.post(
+      `/api/backup/import?mode=${mode}&dry_run=${dryRun}`,
+      snapshot
+    ) as APIResponse<any>;
+
     return response;
   }
 };

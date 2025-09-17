@@ -77,6 +77,104 @@ class AIServiceAdapter(AIServiceInterface):
             )
             await self.analysis_repository.save(failure_analysis)
 
+    async def analyze_text_stream(
+        self, text_id: str, content: str
+    ) -> AsyncGenerator[Dict[str, Any], None]:
+        """Analyze text content with streaming updates"""
+
+        prompt = self.template_service.render_analyze_text_prompt(content)
+        collected_content = ""
+
+        try:
+            # Notify client that streaming has started
+            start_chunk = {
+                "type": "progress",
+                "progress": 10,
+                "content": "AI正在认真分析文本，请稍候…",
+            }
+            yield start_chunk
+
+            async for piece in self.ai_service.call_ai_api_stream(prompt):
+                if not piece:
+                    continue
+
+                collected_content += piece
+                progress = self._calculate_json_progress(collected_content)
+                yield {
+                    "type": "progress",
+                    "progress": min(95, max(progress, 15)),
+                    "content": piece,
+                    "full_content": collected_content,
+                }
+
+            if len(collected_content.strip()) < 10:
+                raise Exception("AI response content is empty or too short")
+
+            analysis_result = self.ai_service.extract_json_from_response(collected_content)
+
+            required_fields = [
+                "translation",
+                "difficult_words",
+                "difficulty",
+                "key_points",
+            ]
+            for field in required_fields:
+                if field not in analysis_result:
+                    raise Exception(f"AI response missing required field: {field}")
+
+            difficult_words = [
+                DifficultWord(word=dw.get("word", ""), meaning=dw.get("meaning", ""))
+                for dw in analysis_result.get("difficult_words", [])
+                if dw.get("word") and dw.get("meaning")
+            ]
+
+            analysis = TextAnalysis(
+                text_id=TextId(text_id),
+                translation=Translation(analysis_result["translation"]),
+                difficult_words=difficult_words,
+                difficulty=DifficultyLevel(int(analysis_result["difficulty"])),
+                key_points=analysis_result.get("key_points", []),
+                analyzed_at=Timestamp.now(),
+            )
+
+            await self.analysis_repository.save(analysis)
+
+            yield {
+                "type": "complete",
+                "progress": 100,
+                "analysis": {
+                    "text_id": text_id,
+                    "translation": analysis.translation.content,
+                    "difficult_words": [
+                        {"word": dw.word, "meaning": dw.meaning}
+                        for dw in analysis.difficult_words
+                    ],
+                    "difficulty": analysis.difficulty.level,
+                    "key_points": analysis.key_points,
+                    "word_count": len(content.strip().split()),
+                },
+            }
+
+        except Exception as exc:
+            # Persist failure result for traceability
+            failure_analysis = TextAnalysis(
+                text_id=TextId(text_id),
+                translation=Translation("Analysis failed, please retry"),
+                difficult_words=[
+                    DifficultWord(word="Analysis failed", meaning=str(exc))
+                ],
+                difficulty=DifficultyLevel(3),
+                key_points=["Analysis failed"],
+                analyzed_at=Timestamp.now(),
+            )
+            await self.analysis_repository.save(failure_analysis)
+
+            yield {
+                "type": "error",
+                "error": str(exc),
+                "progress": 100,
+            }
+
     async def evaluate_practice(
         self,
         original_text: str,

@@ -113,9 +113,6 @@ const Home: React.FC = () => {
         allTexts.push(...formattedTexts);
       }
       
-      // 处理作文范文材料（仅在查看全部材料时显示）
-      // 已移除作文相关功能
-      
       // 按创建时间排序（最新的在前）
       allTexts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
       

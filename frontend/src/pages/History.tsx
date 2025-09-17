@@ -1,12 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { practiceAPI, PracticeHistoryRecord, PracticeHistoryExport } from '../utils/api';
+import { practiceAPI, PracticeHistoryRecord, backupAPI, BackupSnapshot } from '../utils/api';
 import { Calendar, TrendingUp, Target, Clock, Download, Upload } from 'lucide-react';
 
 // 统一的历史记录类型
 interface UnifiedHistoryRecord {
   id: string;
-  type: 'practice'; // 移除essay相关类型
+  type: 'practice'; // 回译练习记录类型
   title: string;
   content: string;
   score: number;
@@ -105,16 +105,16 @@ const History: React.FC = () => {
 
     setIsExporting(true);
     try {
-      const blob = await practiceAPI.exportHistory();
-      
+      const blob = await backupAPI.exportSnapshot();
+
       // 创建下载链接
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      
+
       // 生成文件名
       const timestamp = new Date().toISOString().slice(0, 19).replace(/:/g, '-');
-      link.download = `practice_history_${timestamp}.json`;
+      link.download = `trans_invert_backup_${timestamp}.json`;
       
       document.body.appendChild(link);
       link.click();
@@ -146,15 +146,14 @@ const History: React.FC = () => {
     setIsImporting(true);
     try {
       const text = await file.text();
-      const importData: PracticeHistoryExport = JSON.parse(text);
-      
-      // 验证数据格式
-      if (!importData.records || !Array.isArray(importData.records)) {
-        throw new Error('无效的数据格式');
+      const snapshot = JSON.parse(text) as BackupSnapshot;
+
+      if (!snapshot || !snapshot.version || !snapshot.practice_history) {
+        throw new Error('无效的备份文件');
       }
 
-      const response = await practiceAPI.importHistory(importData);
-      
+      const response = await backupAPI.importSnapshot(snapshot, { mode: 'merge' });
+
       if (response.success) {
         // 重新获取历史记录
         const historyResponse = await practiceAPI.getHistory();
@@ -179,7 +178,8 @@ const History: React.FC = () => {
           calculateStats(unifiedRecords);
         }
         
-        alert(response.message || '导入成功！');
+        const summary = response.data?.counts ? `（共 ${response.data.counts.practice_history} 条练习记录，${response.data.counts.texts} 篇文本）` : '';
+        alert((response.message || '导入成功！') + summary);
       } else {
         throw new Error(response.error || '导入失败');
       }

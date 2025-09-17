@@ -8,7 +8,7 @@ from ..infrastructure.repositories import (
 )
 from ..infrastructure.adapters import AIServiceAdapter, TemplateServiceAdapter, DataPersistenceAdapter
 from ..application.text_use_cases import (
-    UploadTextUseCase, GetTextAnalysisUseCase, ListTextMaterialsUseCase,
+    UploadTextUseCase, UploadTextStreamUseCase, GetTextAnalysisUseCase, ListTextMaterialsUseCase,
     MoveTextToFolderUseCase, DeleteTextMaterialUseCase, GetTextContentUseCase
 )
 from ..application.practice_use_cases import (
@@ -80,6 +80,10 @@ class DIContainer:
         """Initialize use cases"""
         # Text use cases
         self.upload_text_use_case = UploadTextUseCase(
+            self.text_material_repository,
+            self.ai_service_adapter
+        )
+        self.upload_text_stream_use_case = UploadTextStreamUseCase(
             self.text_material_repository,
             self.ai_service_adapter
         )

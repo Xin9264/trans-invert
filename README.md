@@ -56,20 +56,14 @@ trans_invert/
 - `x-ai-provider: deepseek|openai|volcano`
 - `x-ai-key: <api_key>` 可选：`x-ai-base-url`, `x-ai-model`
 
-文本与练习 `/api/texts`
+文本与回译练习 `/api/texts`
 - POST `/upload` 上传英文文本并生成分析
 - GET `/{text_id}` 获取材料详情；GET `/{text_id}/analysis` 获取分析
-- POST `/practice/submit` 提交练习并评估；GET `/practice/history` 获取练习历史
+- POST `/practice/submit` 提交回译答案并获取评估；GET `/practice/history` 获取练习历史
 - GET `/{text_id}/practice/history` 获取指定材料的历史
 - POST `/{text_id}/move` 移动材料到文件夹；DELETE `/{text_id}` 删除材料
 - GET `/materials/export` 导出材料；POST `/materials/import` 导入材料
 - GET `/practice/history/export` 导出历史；POST `/practice/history/import` 导入历史
-
-作文练习 `/api/essays`
-- POST `/generate` 流式生成范文
-- POST `/sessions` 创建会话；GET `/sessions/{id}` 获取会话
-- POST `/sessions/{id}/submit` 提交作文评估；GET `/history` 获取作文历史
-- DELETE `/sessions/{id}` 删除会话
 
 文件夹 `/api/folders`
 - GET `/` 列出；POST `/` 新建；GET `/{folder_id}` 获取；PUT `/{folder_id}` 更新；DELETE `/{folder_id}` 删除

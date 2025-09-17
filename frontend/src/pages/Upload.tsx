@@ -1,14 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { textAPI } from '../utils/api';
+import { textAPI, TextUploadStreamEvent } from '../utils/api';
 import { Upload as UploadIcon, FileText } from 'lucide-react';
 
 const Upload: React.FC = () => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isStreaming, setIsStreaming] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [thinkingContent, setThinkingContent] = useState('');
+  const [analysisPreview, setAnalysisPreview] = useState<TextUploadStreamEvent['analysis'] | null>(null);
+  const [createdTextId, setCreatedTextId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const thinkingRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (thinkingRef.current) {
+      thinkingRef.current.scrollTop = thinkingRef.current.scrollHeight;
+    }
+  }, [thinkingContent]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -19,23 +31,72 @@ const Upload: React.FC = () => {
     }
 
     setIsLoading(true);
+    setIsStreaming(true);
     setError(null);
+    setUploadProgress(5);
+    setThinkingContent('🚀 已收到文本，正在启动AI分析…\n');
+    setAnalysisPreview(null);
+    setCreatedTextId(null);
 
-    try {
-      const response = await textAPI.upload({
+    await textAPI.uploadStream(
+      {
         content: content.trim(),
         title: title.trim() || undefined
-      });
-      if (response.success && response.data) {
-        navigate(`/practice/${response.data.text_id}`);
-      } else {
-        setError(response.message || response.error || '上传失败');
+      },
+      (event) => {
+        if (event.type === 'init') {
+          if (event.text_id) {
+            setCreatedTextId(event.text_id);
+          }
+          if (event.progress !== undefined) {
+            setUploadProgress(event.progress);
+          }
+          if (event.message) {
+            setThinkingContent(prev => `${prev}${event.message}\n`);
+          }
+          if (event.word_count) {
+            setThinkingContent(prev => `${prev}字数统计：约 ${event.word_count} 词\n`);
+          }
+        } else if (event.type === 'progress') {
+          if (event.progress !== undefined) {
+            setUploadProgress(prev => Math.min(98, Math.max(event.progress ?? prev, prev)));
+          }
+          if (event.message) {
+            setThinkingContent(prev => `${prev}${event.message}\n`);
+          }
+          if (event.content) {
+            setThinkingContent(prev => `${prev}${event.content}`);
+          }
+        } else if (event.type === 'complete') {
+          setUploadProgress(100);
+          if (event.analysis) {
+            setAnalysisPreview(event.analysis);
+          }
+          const finalId = event.analysis?.text_id || event.text_id || createdTextId;
+          if (finalId) {
+            setCreatedTextId(finalId);
+            setThinkingContent(prev => `${prev}\n✅ 分析完成，正在跳转练习页面…\n`);
+            setTimeout(() => navigate(`/practice/${finalId}`), 1200);
+          } else {
+            setThinkingContent(prev => `${prev}\n⚠️ 分析完成，但未获取文本ID，请稍后在列表中查看。\n`);
+          }
+        } else if (event.type === 'error') {
+          setError(event.error || 'AI分析失败，请稍后重试');
+          setThinkingContent(prev => `${prev}\n❌ ${event.error || 'AI分析失败'}\n`);
+          setIsStreaming(false);
+          setIsLoading(false);
+        }
+      },
+      (errorMessage) => {
+        setError(errorMessage);
+        setThinkingContent(prev => `${prev}\n❌ ${errorMessage}\n`);
+        setIsStreaming(false);
+        setIsLoading(false);
       }
-    } catch (error: any) {
-      setError(error.response?.data?.error || error.message || '上传失败，请重试');
-    } finally {
-      setIsLoading(false);
-    }
+    );
+
+    setIsStreaming(false);
+    setIsLoading(false);
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -127,13 +188,18 @@ const Upload: React.FC = () => {
 
               <button
                 type="submit"
-                disabled={isLoading || !content.trim()}
+                disabled={isLoading || isStreaming || !content.trim()}
                 className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
               >
-                {isLoading ? (
+                {isStreaming ? (
                   <>
                     <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>分析中...</span>
+                    <span>AI分析中… {Math.min(100, Math.round(uploadProgress))}%</span>
+                  </>
+                ) : isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                    <span>准备中...</span>
                   </>
                 ) : (
                   <>
@@ -142,6 +208,39 @@ const Upload: React.FC = () => {
                   </>
                 )}
               </button>
+
+              {(isStreaming || analysisPreview || thinkingContent) && (
+                <div className="mt-6 space-y-4">
+                  <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                    <div
+                      className="bg-primary-500 h-2 transition-all duration-300 ease-out"
+                      style={{ width: `${Math.min(100, Math.max(uploadProgress, 0))}%` }}
+                    ></div>
+                  </div>
+
+                  <div
+                    ref={thinkingRef}
+                    className="bg-gray-900 text-green-300 font-mono text-xs sm:text-sm p-4 rounded-lg h-48 overflow-y-auto shadow-inner"
+                  >
+                    {thinkingContent.trim().length > 0 ? thinkingContent : 'AI正在思考，请稍候…'}
+                  </div>
+
+                  {analysisPreview && (
+                    <div className="bg-white border border-primary-100 rounded-lg p-4 shadow-sm">
+                      <h4 className="text-sm font-semibold text-primary-600 mb-2">
+                        初步分析摘要
+                      </h4>
+                      <div className="space-y-2 text-sm text-gray-700">
+                        <p className="whitespace-pre-wrap">{analysisPreview.translation}</p>
+                        <div className="text-xs text-gray-500 flex items-center justify-between">
+                          <span>难度：{analysisPreview.difficulty}</span>
+                          <span>预计单词数：{analysisPreview.word_count}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </form>
           </div>
 

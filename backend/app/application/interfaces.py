@@ -12,6 +12,13 @@ class AIServiceInterface(ABC):
         pass
 
     @abstractmethod
+    async def analyze_text_stream(
+        self, text_id: str, content: str
+    ) -> AsyncGenerator[Dict[str, Any], None]:
+        """Analyze text content with streaming response"""
+        pass
+
+    @abstractmethod
     async def evaluate_practice(
         self,
         original_text: str,
