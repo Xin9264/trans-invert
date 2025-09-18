@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { textAPI, practiceAPI } from '../utils/api';
+import { textAPI } from '../utils/api';
 import { Text } from '../types';
 import { BookOpen, Clock, TrendingUp, Trash2, Grid3X3, List, Move, FolderPlus } from 'lucide-react';
 import FolderManager from '../components/FolderManager';
@@ -88,11 +88,8 @@ const Home: React.FC = () => {
   // 获取文本列表
   const fetchTexts = async () => {
     try {
-      // 并行获取文本材料和练习历史
-      const [textsResponse, historyResponse] = await Promise.all([
-        textAPI.getAll(selectedFolderId || undefined),
-        practiceAPI.getHistory()
-      ]);
+      // 获取文本材料
+      const textsResponse = await textAPI.getAll(selectedFolderId || undefined);
       
       const allTexts: Text[] = [];
       

@@ -2,6 +2,351 @@
   "version": "1.0",
   "records": [
     {
+      "id": "e8187017-4f94-4ee7-b341-5cdaea82e39f",
+      "timestamp": "2025-09-16T14:20:14.454621",
+      "text_title": "0916_2",
+      "text_content": "In contrast, my son’s preschool class began their process with a clear problem, then carved out dedicated time in their schedule to address it, and they dove right in and got to work. The children weren’t paralyzed by their need for absolute certainty—they were willing to experiment and learn as they went. They didn’t feel the need to know everything about sun shades or construction before beginning—they only needed to know enough to get started. They, like the rest of us, could figure out the rest along the way.",
+      "chinese_translation": "相比之下，我儿子的幼儿园班级以一个明确的问题开始了他们的过程，然后在他们日程中划出专门的时间来解决它，并且他们直接投入并开始工作。孩子们没有被他们对绝对确定性的需求所麻痹——他们愿意在过程中实验和学习。他们不觉得在开始前需要了解关于遮阳篷或建筑的一切——他们只需要知道足够开始。他们，像我们其他人一样，可以在过程中弄清楚其余部分。",
+      "user_input": "In contrast, my son's preschool class began their process with a clear problem, then craved out the dedicated time in their schedule to solve it, and they dove right in and got to work. The children were not paralyzed by the need for absolut certainty - they were willing to experiment and learn as they went. They didn't need everything about sun shades or constructs before starting - they only need enough to start. They, like rest of us, could figure out the rest in the process",
+      "ai_evaluation": {
+        "score": 78,
+        "corrections": [
+          {
+            "original": "craved out",
+            "suggestion": "carved out",
+            "reason": "拼写错误，'craved'（渴望）应为 'carved'（划出）"
+          },
+          {
+            "original": "solve it",
+            "suggestion": "address it",
+            "reason": "用词不准确，'address it' 更符合原文语境，表示着手处理问题"
+          },
+          {
+            "original": "absolut certainty",
+            "suggestion": "absolute certainty",
+            "reason": "拼写错误，'absolut' 应为 'absolute'"
+          },
+          {
+            "original": "constructs",
+            "suggestion": "construction",
+            "reason": "用词错误，'constructs'（构造物）应为 'construction'（建筑）"
+          },
+          {
+            "original": "need enough to start",
+            "suggestion": "needed to know enough to get started",
+            "reason": "时态错误和表达不完整，应用过去时，并补充 'know' 和 'get' 使语义更准确"
+          },
+          {
+            "original": "like rest of us",
+            "suggestion": "like the rest of us",
+            "reason": "缺少冠词 'the'，表达不完整"
+          },
+          {
+            "original": "in the process",
+            "suggestion": "along the way",
+            "reason": "表达不够地道，'along the way' 更符合原文的自然表达"
+          }
+        ],
+        "overall_feedback": "译文存在多处拼写、用词和语法错误，严重影响了表达的准确性和自然度。时态不一致、冠词缺失以及过度简化原文结构，导致整体质量下降。需要更仔细地检查拼写和用词，确保语法正确并贴近原文的复杂度和地道性。",
+        "is_acceptable": false
+      },
+      "score": 78,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "66e9ff47-953a-4a75-accc-da3658857370",
+      "timestamp": "2025-09-16T14:00:36.428845",
+      "text_title": "0916_1",
+      "text_content": "I was made aware of this plan in an email Ms. Jenny sent the parents that evening calling for donations of old blankets, PVC piping, and other materials, and during drop-off the next morning, a giant pile of goods was accumulating just outside the preschool door. I wasn’t sure what to expect, but when I arrived for pickup later that day, my wife and I, along with several other parents, were in awe of what was standing before us.",
+      "chinese_translation": "我是通过Ms. Jenny那天晚上发给家长们的电子邮件了解到这个计划的，邮件呼吁捐赠旧毯子、PVC管道和其他材料，并且在第二天早上送孩子时，一大堆物品正在幼儿园门外堆积起来。我不确定会看到什么，但当我那天晚些时候来接孩子时，我和我妻子，以及其他几位家长，都对眼前呈现的景象感到惊叹。",
+      "user_input": "I was made aware of this plan in the email Ms. Jenny sent parents that evening calling for donations of old blankets, PVC piping and other materials, and during drop-off the next morning, a great pile of goods was accumulating just outside the preshool door. I wasn't sure what to expect, but when I arrived later for pickup my kid, my wife and I, along with severial other parents, were in awe of what was standing before us.",
+      "ai_evaluation": {
+        "score": 78,
+        "corrections": [
+          {
+            "original": "sent parents",
+            "suggestion": "sent the parents",
+            "reason": "缺少定冠词 'the'，导致表达不够自然和准确"
+          },
+          {
+            "original": "PVC piping and other materials",
+            "suggestion": "PVC piping, and other materials",
+            "reason": "缺少牛津逗号，不符合正式英语写作规范"
+          },
+          {
+            "original": "preshool",
+            "suggestion": "preschool",
+            "reason": "拼写错误，正确拼写为 'preschool'"
+          },
+          {
+            "original": "later for pickup my kid",
+            "suggestion": "later for pickup",
+            "reason": "原文中并未明确提及 'my kid'，属于冗余信息，且结构略显生硬"
+          },
+          {
+            "original": "severial",
+            "suggestion": "several",
+            "reason": "拼写错误，正确拼写为 'several'"
+          }
+        ],
+        "overall_feedback": "译文整体能传达原文意思，但存在多处语法和拼写错误，表达不够自然流畅。冠词缺失、拼写错误和冗余词汇严重影响了文本质量。建议加强语法细节和拼写准确性训练，避免过度简化或添加不必要信息。",
+        "is_acceptable": false
+      },
+      "score": 78,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "75d3c7d2-7400-40ba-b8bb-0d3d00c98bb5",
+      "timestamp": "2025-09-16T13:53:36.260388",
+      "text_title": "0916_1",
+      "text_content": "I was made aware of this plan in an email Ms. Jenny sent the parents that evening calling for donations of old blankets, PVC piping, and other materials, and during drop-off the next morning, a giant pile of goods was accumulating just outside the preschool door. I wasn’t sure what to expect, but when I arrived for pickup later that day, my wife and I, along with several other parents, were in awe of what was standing before us.",
+      "chinese_translation": "我是通过Ms. Jenny那天晚上发给家长们的电子邮件了解到这个计划的，邮件呼吁捐赠旧毯子、PVC管道和其他材料，并且在第二天早上送孩子时，一大堆物品正在幼儿园门外堆积起来。我不确定会看到什么，但当我那天晚些时候来接孩子时，我和我妻子，以及其他几位家长，都对眼前呈现的景象感到惊叹。",
+      "user_input": "I was made aware of this plan in the email Ms. Jenny sent parents that evening calling for donations of old blankets, PVC pipes and other materials, and during drop-off the next morning, a gaint pile of goods standed outside the kidengarden. I wasn't sure to see what happened, but when I laterly pick up kids that day, my wife and I, along with other parents, were awe of what in front of us.",
+      "ai_evaluation": {
+        "score": 65,
+        "corrections": [
+          {
+            "original": "sent parents",
+            "suggestion": "sent the parents",
+            "reason": "缺少定冠词 'the'，导致表达不自然"
+          },
+          {
+            "original": "PVC pipes",
+            "suggestion": "PVC piping",
+            "reason": "原文使用 'piping' 作为不可数名词，用户误用复数形式 'pipes'"
+          },
+          {
+            "original": "gaint",
+            "suggestion": "giant",
+            "reason": "拼写错误，正确拼写为 'giant'"
+          },
+          {
+            "original": "standed",
+            "suggestion": "was standing",
+            "reason": "时态错误，应用过去进行时 'was standing' 描述正在发生的动作"
+          },
+          {
+            "original": "kidengarden",
+            "suggestion": "preschool door",
+            "reason": "拼写错误且用词不准确，原文为 'preschool door'，用户误写为 'kidengarden'"
+          },
+          {
+            "original": "I wasn't sure to see what happened",
+            "suggestion": "I wasn't sure what to expect",
+            "reason": "语义和语法错误，原文表达不确定预期，用户误写为不确定看到发生的事情"
+          },
+          {
+            "original": "laterly",
+            "suggestion": "later",
+            "reason": "词性错误，'laterly' 不是标准英语，应使用副词 'later'"
+          },
+          {
+            "original": "pick up kids",
+            "suggestion": "arrived for pickup",
+            "reason": "用词和表达过于简化，原文使用 'arrived for pickup' 更正式自然"
+          },
+          {
+            "original": "were awe of",
+            "suggestion": "were in awe of",
+            "reason": "缺少介词 'in'，固定搭配为 'in awe of'"
+          },
+          {
+            "original": "what in front of us",
+            "suggestion": "what was standing before us",
+            "reason": "语法和语义错误，用户省略动词导致句子不完整，原文使用过去进行时结构"
+          }
+        ],
+        "overall_feedback": "译文存在大量语法错误、拼写错误和用词不当，严重偏离原文的语义和结构。时态混乱，冠词缺失，介词使用错误，整体表达生硬且不自然。过度简化导致失去原文的细节和流畅性，需彻底重写以提高准确性和地道性。",
+        "is_acceptable": false
+      },
+      "score": 65,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "ef4c09ef-95cd-4656-bb15-dcf1f6bff87c",
+      "timestamp": "2025-09-14T10:32:39.438315",
+      "text_title": "0914_4",
+      "text_content": "Jennifer Vasilis (aka Ms. Jenny) was my son’s preschool teacher. One day after a massive ant infestation forced the students to eat outside in the hot California sun, Ms. Jenny paused the afternoon’s activities to teach her class an important lesson. Together, they brainstormed about what to do. As the kids shouted out their ideas, Ms. Jenny wrote them down on sticky notes and placed them on the whiteboard. Some ideas were impractical, like eating at Chick-fil-A every day, and others were more bizarre, like just eating the ants for lunch. All ideas were welcome with no filters or fears of judgment, which is a sense of freedom we tend to lose as we grow older. After a bit of time, Ms. Jenny steered the discussion toward a consensus: constructing a sun shade.",
+      "chinese_translation": "Jennifer Vasilis (又名 Ms. Jenny) 是我儿子的学前班老师。一天，在一次大规模蚂蚁侵扰迫使学生在炎热的加州阳光下户外用餐后，Ms. Jenny 暂停了下午的活动，来教她的班级一个重要课程。他们一起头脑风暴讨论该怎么做。当孩子们喊出他们的想法时，Ms. Jenny 把它们写在便利贴上并贴在白板上。有些想法不切实际，比如每天在 Chick-fil-A 吃饭，而其他更奇怪，比如干脆吃蚂蚁当午餐。所有想法都受欢迎，没有过滤或害怕评判，这是我们长大后往往会失去的一种自由感。过了一段时间，Ms. Jenny 将讨论引导向一个共识：建造一个遮阳棚。",
+      "user_input": "Jennifer Vasilis (aka Ms.Jenny) was my son's preschool teacher. One day after a massive of ant infestation forced the students eating under the hot California sunshine, Ms. Jenny paused the afternoon activity to teach her class an important lesson. Together, ther brainstormed to discuss what to do. As children shout out their ideas, Ms. Jenny wrote them down on the sticky notes and sticked on the whiteboard. Some ideas were impractical, like eating on Chick-fil-A everyday, and others were more  bizzare, like eating ant as lunch. All of the ideas were welcome, with no filters or fear of judge, which was a sense of freedom to lose after we grow older. After some time, Ms. Jenny steered the discussion to a consensus: build a shade.",
+      "ai_evaluation": {
+        "score": 78,
+        "corrections": [
+          {
+            "original": "a massive of ant infestation",
+            "suggestion": "a massive ant infestation",
+            "reason": "冗余介词 'of'，应为名词短语直接修饰"
+          },
+          {
+            "original": "forced the students eating",
+            "suggestion": "forced the students to eat",
+            "reason": "force 的正确搭配是 force someone to do something"
+          },
+          {
+            "original": "under the hot California sunshine",
+            "suggestion": "in the hot California sun",
+            "reason": "原文使用 'in the sun'，'sunshine' 虽可接受但不够地道；'under' 介词使用不当"
+          },
+          {
+            "original": "afternoon activity",
+            "suggestion": "afternoon's activities",
+            "reason": "原文为复数，且需所有格形式"
+          },
+          {
+            "original": "ther brainstormed",
+            "suggestion": "they brainstormed",
+            "reason": "拼写错误，应为 'they'"
+          },
+          {
+            "original": "to discuss what to do",
+            "suggestion": "about what to do",
+            "reason": "brainstorm 直接接宾语或 about，无需 'to discuss'"
+          },
+          {
+            "original": "As children shout out",
+            "suggestion": "As the kids shouted out",
+            "reason": "时态错误（应为过去时），且 'the kids' 比 'children' 更贴近原文"
+          },
+          {
+            "original": "sticked on the whiteboard",
+            "suggestion": "placed them on the whiteboard",
+            "reason": "'stick' 的过去式是 'stuck'，但原文使用更自然的 'placed'"
+          },
+          {
+            "original": "eating on Chick-fil-A",
+            "suggestion": "eating at Chick-fil-A",
+            "reason": "介词错误，就餐地点用 'at'"
+          },
+          {
+            "original": "everyday",
+            "suggestion": "every day",
+            "reason": "'everyday' 是形容词，此处应为副词短语 'every day'"
+          },
+          {
+            "original": "eating ant as lunch",
+            "suggestion": "eating the ants for lunch",
+            "reason": "缺少冠词，且 'as lunch' 不如 'for lunch' 自然"
+          },
+          {
+            "original": "fear of judge",
+            "suggestion": "fear of judgment",
+            "reason": "'judge' 是动词或指人，此处应为名词 'judgment'"
+          },
+          {
+            "original": "a sense of freedom to lose",
+            "suggestion": "a sense of freedom we tend to lose",
+            "reason": "缺少关系从句，导致语义不完整"
+          },
+          {
+            "original": "build a shade",
+            "suggestion": "constructing a sun shade",
+            "reason": "动词形式应为动名词以保持并列结构，且 'sun shade' 更准确"
+          }
+        ],
+        "overall_feedback": "译文存在大量语法错误（介词、时态、冠词、搭配）和用词不自然问题，严重偏离原文的流畅度和精确性。虽然核心意思尚可理解，但表达生硬，如 'forced the students eating'、'fear of judge' 等低级错误频出。必须加强语法基础训练，尤其注意动词搭配、介词使用和名词单复数。",
+        "is_acceptable": false
+      },
+      "score": 78,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
+      "id": "d4190904-fa51-45a1-bd1f-38b374f7f536",
+      "timestamp": "2025-09-14T10:32:08.055089",
+      "text_title": "0914_4",
+      "text_content": "Jennifer Vasilis (aka Ms. Jenny) was my son’s preschool teacher. One day after a massive ant infestation forced the students to eat outside in the hot California sun, Ms. Jenny paused the afternoon’s activities to teach her class an important lesson. Together, they brainstormed about what to do. As the kids shouted out their ideas, Ms. Jenny wrote them down on sticky notes and placed them on the whiteboard. Some ideas were impractical, like eating at Chick-fil-A every day, and others were more bizarre, like just eating the ants for lunch. All ideas were welcome with no filters or fears of judgment, which is a sense of freedom we tend to lose as we grow older. After a bit of time, Ms. Jenny steered the discussion toward a consensus: constructing a sun shade.",
+      "chinese_translation": "Jennifer Vasilis (又名 Ms. Jenny) 是我儿子的学前班老师。一天，在一次大规模蚂蚁侵扰迫使学生在炎热的加州阳光下户外用餐后，Ms. Jenny 暂停了下午的活动，来教她的班级一个重要课程。他们一起头脑风暴讨论该怎么做。当孩子们喊出他们的想法时，Ms. Jenny 把它们写在便利贴上并贴在白板上。有些想法不切实际，比如每天在 Chick-fil-A 吃饭，而其他更奇怪，比如干脆吃蚂蚁当午餐。所有想法都受欢迎，没有过滤或害怕评判，这是我们长大后往往会失去的一种自由感。过了一段时间，Ms. Jenny 将讨论引导向一个共识：建造一个遮阳棚。",
+      "user_input": "Jennifer Vasilis (aka Ms.Jenny) was my son's preschool teacher. One day after a massive of ant infestation forced the students eating under the hot California sunshine, Ms. Jenny paused the afternoon activity to teach her class an important lesson. Together, ther brainstormed to discuss what to do. As children shout out their ideas, Ms. Jenny wrote them down on the sticky notes and sticked on the whiteboard. Some ideas were impractical, like eating on Chick-fil-A everyday, and others were more  bizzare, like eating ant as lunch. All of the ideas were welcome, with no filters or fear of judge, which was a sense of freedom to lose after we grow older. After some time, Ms. Jenny steered the discussion to a consensus: build a shade.",
+      "ai_evaluation": {
+        "score": 75,
+        "corrections": [
+          {
+            "original": "a massive of ant infestation",
+            "suggestion": "a massive ant infestation",
+            "reason": "冗余使用 'of'，应为名词短语直接修饰"
+          },
+          {
+            "original": "forced the students eating",
+            "suggestion": "forced the students to eat",
+            "reason": "force 的正确结构是 force someone to do something"
+          },
+          {
+            "original": "under the hot California sunshine",
+            "suggestion": "in the hot California sun",
+            "reason": "原文使用 'in the sun'，'sunshine' 虽可接受但稍显不自然；'under' 介词错误"
+          },
+          {
+            "original": "the afternoon activity",
+            "suggestion": "the afternoon's activities",
+            "reason": "原文为复数，且所有格更准确"
+          },
+          {
+            "original": "ther brainstormed",
+            "suggestion": "they brainstormed",
+            "reason": "拼写错误，应为 they"
+          },
+          {
+            "original": "to discuss what to do",
+            "suggestion": "about what to do",
+            "reason": "brainstorm 后接 about 更自然，讨论内容已隐含"
+          },
+          {
+            "original": "As children shout out",
+            "suggestion": "As the kids shouted out",
+            "reason": "时态错误（应为过去时），且 'the kids' 比 'children' 更贴近原文"
+          },
+          {
+            "original": "sticked on the whiteboard",
+            "suggestion": "placed them on the whiteboard",
+            "reason": "stick 的过去式是 stuck，但 'placed' 更准确自然"
+          },
+          {
+            "original": "eating on Chick-fil-A",
+            "suggestion": "eating at Chick-fil-A",
+            "reason": "介词错误，在餐厅用餐应用 at"
+          },
+          {
+            "original": "everyday",
+            "suggestion": "every day",
+            "reason": "everyday 是形容词，every day 是副词短语"
+          },
+          {
+            "original": "eating ant as lunch",
+            "suggestion": "just eating the ants for lunch",
+            "reason": "缺少冠词（应为 the ants），且表达简化，丢失原文语气"
+          },
+          {
+            "original": "fear of judge",
+            "suggestion": "fears of judgment",
+            "reason": "judge 是动词，应为名词 judgment；fear 应为复数以匹配原文"
+          },
+          {
+            "original": "a sense of freedom to lose after we grow older",
+            "suggestion": "a sense of freedom we tend to lose as we grow older",
+            "reason": "句式过度简化，丢失原文的从句结构和自然表达"
+          },
+          {
+            "original": "build a shade",
+            "suggestion": "constructing a sun shade",
+            "reason": "用词不准确（shade 泛指荫凉，应为 sun shade 遮阳棚），且动名词结构更符合原文"
+          }
+        ],
+        "overall_feedback": "译文勉强传达原文大意，但错误密集：介词、冠词、时态、单复数错误频发，用词粗糙（如 'sticked', 'judge'），句式过度简化导致丢失原文细腻语气和结构复杂度。表达生硬，明显受中文思维影响（如 'eating ant as lunch'）。必须加强语法细节敏感度，学习地道搭配，避免逐字翻译。",
+        "is_acceptable": false
+      },
+      "score": 75,
+      "review_count": 0,
+      "last_reviewed": null,
+      "error_patterns": []
+    },
+    {
       "id": "743e1e58-f3c7-4184-ab7f-c088379770e5",
       "timestamp": "2025-09-14T10:31:37.039010",
       "text_title": "0914_4",

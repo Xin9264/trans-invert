@@ -227,6 +227,91 @@
         "steered the discussion toward a consensus"
       ],
       "word_count": 133
+    },
+    "5fbb6e5d-ac48-40bf-8573-b9aaf18f92b7": {
+      "text_id": "5fbb6e5d-ac48-40bf-8573-b9aaf18f92b7",
+      "translation": "在今天的快节奏世界中，有效的沟通已经变得比以往任何时候都更重要。许多学生发现自己在用英语清晰表达想法方面挣扎，特别是在讨论复杂话题时。这篇文章旨在通过持续练习和接触各种情境来提供实用的指导以改进你的语言技能。学习者面临的一个常见挑战是在描述过去事件时保持正确的时态一致性。例如，在分享个人经历时，在整个叙述中一致使用过去形式是至关重要的。另一个值得注意的方面是在不同情况下适当使用介词。许多表达需要特定的介词，这些并不总是从中文直接翻译。为了增强你的学习体验，尝试将英语融入你的日常生活。观看带字幕的英语视频，阅读你感兴趣主题的文章，并与朋友或语言伙伴练习口语。记住进步需要时间，但通过定期努力，你会注意到在流利度和自信心方面的显著改进。不要害怕犯错误——它们是宝贵的学习机会。保持一个笔记本来记录新词汇并定期复习。最重要的是，享受学习和发现用英语表达自己的新方式的过程。",
+      "difficult_words": [
+        {
+          "word": "consistency",
+          "meaning": "一致性"
+        },
+        {
+          "word": "prepositions",
+          "meaning": "介词"
+        },
+        {
+          "word": "exposure",
+          "meaning": "接触；暴露"
+        },
+        {
+          "word": "fluency",
+          "meaning": "流利度"
+        }
+      ],
+      "difficulty": 4,
+      "key_points": [
+        "复习重点",
+        "错误总结",
+        "学习建议"
+      ],
+      "word_count": 193
+    },
+    "c32cbdb6-ca8a-420c-afdf-ef2997ba644c": {
+      "text_id": "c32cbdb6-ca8a-420c-afdf-ef2997ba644c",
+      "translation": "我是通过Ms. Jenny那天晚上发给家长们的电子邮件了解到这个计划的，邮件呼吁捐赠旧毯子、PVC管道和其他材料，并且在第二天早上送孩子时，一大堆物品正在幼儿园门外堆积起来。我不确定会看到什么，但当我那天晚些时候来接孩子时，我和我妻子，以及其他几位家长，都对眼前呈现的景象感到惊叹。",
+      "difficult_words": [
+        {
+          "word": "aware",
+          "meaning": "意识到的，知道的"
+        },
+        {
+          "word": "accumulating",
+          "meaning": "积累，堆积"
+        },
+        {
+          "word": "awe",
+          "meaning": "惊叹，敬畏"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "made aware of",
+        "calling for",
+        "in awe of"
+      ],
+      "word_count": 79
+    },
+    "e711cfe5-045e-4a17-81b2-7982edc05883": {
+      "text_id": "e711cfe5-045e-4a17-81b2-7982edc05883",
+      "translation": "相比之下，我儿子的幼儿园班级以一个明确的问题开始了他们的过程，然后在他们日程中划出专门的时间来解决它，并且他们直接投入并开始工作。孩子们没有被他们对绝对确定性的需求所麻痹——他们愿意在过程中实验和学习。他们不觉得在开始前需要了解关于遮阳篷或建筑的一切——他们只需要知道足够开始。他们，像我们其他人一样，可以在过程中弄清楚其余部分。",
+      "difficult_words": [
+        {
+          "word": "paralyzed",
+          "meaning": "麻痹的；瘫痪的"
+        },
+        {
+          "word": "certainty",
+          "meaning": "确定性；确实"
+        },
+        {
+          "word": "experiment",
+          "meaning": "实验；尝试"
+        },
+        {
+          "word": "construction",
+          "meaning": "建筑；建造"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "in contrast",
+        "dove right in",
+        "got to work",
+        "figure out",
+        "along the way"
+      ],
+      "word_count": 89
     }
   }
 }

@@ -5,7 +5,7 @@
 ## 核心功能
 
 1. 用户上传英文文本
-2. AI语法分析+翻译（DeepSeek V3）
+2. AI语法分析+翻译
 3. 遮盖原文，看中文写英文
 4. AI智能评判，提供改进建议
 
@@ -14,33 +14,39 @@
 
 - **后端**: Python + FastAPI + Jinja2模板
 - **前端**: React + TypeScript + Tailwind CSS
-- **AI**: DeepSeek V3
+- **AI**: DeepSeek V3/火山引擎doubao 1.5pro/OpenAI GPT4.1
 - **部署**: Docker + Docker Compose
 
 ## 快速启动
 
+方式一：一键脚本（推荐）
 ```bash
-# 1. 配置环境变量
-cp backend/.env.example backend/.env
-# 编辑 backend/.env，设置您的 DEEPSEEK_API_KEY
-
-# 2. 启动服务
 ./start.sh
-
-# 3. 访问应用
-# 前端: http://localhost:3000
-# 后端: http://localhost:8000
-# API文档: http://localhost:8000/docs
 ```
 
-⚠️ **重要**: 请确保在 `backend/.env` 文件中设置您的 DeepSeek API 密钥，不要将API密钥提交到代码仓库中！
+方式二：直接使用 docker compose
+```bash
+docker compose up -d --build
+# 或（旧版）
+docker-compose up -d --build
+```
 
+访问地址：
+- 前端: http://localhost:3000
+- 后端: http://localhost:8000
+- API 文档: http://localhost:8000/docs
+
+说明：后端 env 文件不是必须。您可以：
+- 在前端「API 配置」中填写密钥（保存在浏览器本地）
+- 或在运行中通过后端接口 `/api/config/set-api-key` 设置
+- 或在 `docker-compose.yml` 的 backend 环境变量中直接提供（可选）
 ## 项目结构
 
 ```
 trans_invert/
 ├── backend/           # Python FastAPI后端
 ├── frontend/          # React前端
+├── docker-compose.yml  # 一次性启动（生产/开发联调）
 ├── docker-compose.dev.yml
 ├── start.sh
 └── test_api.py

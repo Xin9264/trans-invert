@@ -5,16 +5,28 @@ services:
       dockerfile: Dockerfile
       args:
         PY_BASE: ${PY_BASE_IMAGE:-python:3.11-slim}
-    ports:
-      - "8000:8000"
-    volumes:
-      - ./backend:/app
+    container_name: transinvert-backend
     environment:
       - APP_ENV=dev
       - APP_HOST=0.0.0.0
       - APP_PORT=8000
       - DEBUG=true
       - ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000
+      # 可选：在此直接传入 API 配置（也可以在前端设置或调用 /api/config）
+      # - AI_PROVIDER=deepseek
+      # - DEEPSEEK_API_KEY=
+      # - DEEPSEEK_BASE_URL=https://api.deepseek.com
+      # - DEEPSEEK_MODEL=deepseek-chat
+      # - OPENAI_API_KEY=
+      # - OPENAI_BASE_URL=https://api.openai.com/v1
+      # - OPENAI_MODEL=gpt-4.1
+      # - ARK_API_KEY=
+      # - ARK_BASE_URL=https://ark.cn-beijing.volces.com/api/v3
+      # - ARK_MODEL=doubao-1-5-pro-32k-250115
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
     command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -23,18 +35,19 @@ services:
       retries: 10
 
   frontend:
-    build: 
+    build:
       context: ./frontend
       dockerfile: Dockerfile.dev
       args:
         NODE_BASE: ${NODE_BASE_IMAGE:-node:18-alpine}
+    container_name: transinvert-frontend
+    environment:
+      - NODE_ENV=development
     ports:
       - "3000:3000"
     volumes:
       - ./frontend:/app
       - /app/node_modules
-    environment:
-      - NODE_ENV=development
     depends_on:
       backend:
         condition: service_healthy
@@ -43,3 +56,7 @@ services:
       interval: 15s
       timeout: 5s
       retries: 10
+
+networks:
+  default:
+    name: transinvert-net
