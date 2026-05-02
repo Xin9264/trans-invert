@@ -91,14 +91,24 @@ def get_node_examples(
     limit: int = 20,
     severity: str | None = None,
     source: str | None = None,
+    since: str | datetime | None = None,
+    until: str | datetime | None = None,
+    folder_id: str | None = None,
+    texts_storage: Mapping[str, Mapping[str, Any]] | None = None,
 ) -> NodeExamplesResponse:
     """Return concrete correction examples for a node and its subtree."""
     node_categories = _node_category_index().get(node_id)
     if node_categories is None:
         raise ValueError(f"Unknown grammar map node: {node_id}")
 
+    since_dt = _parse_datetime(since) if since else None
+    until_dt = _parse_datetime(until) if until else None
     examples: list[ErrorExample] = []
     for record in history:
+        record_dt = _parse_datetime(record.timestamp)
+        if not _record_in_scope(record, record_dt, since_dt, until_dt, folder_id, texts_storage):
+            continue
+
         for correction in _iter_correction_dicts(record):
             category = correction.get("category")
             if category not in node_categories:

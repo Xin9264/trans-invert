@@ -165,3 +165,23 @@ def test_node_examples_pagination_and_filter():
     assert critical_examples.total == 1
     assert critical_examples.examples[0].correction.severity == "critical"
     assert "a mistake" in critical_examples.examples[0].user_input_snippet
+
+
+def test_node_examples_respects_time_filter():
+    history = [
+        make_record(
+            "recent",
+            "2026-05-01T12:00:00",
+            [make_correction("grammar.article", severity="critical", original="a mistake")],
+        ),
+        make_record(
+            "older",
+            "2026-04-01T12:00:00",
+            [make_correction("grammar.article", severity="major", original="mistake")],
+        ),
+    ]
+
+    examples = get_node_examples(history, "grammar.article", since="2026-04-20T00:00:00")
+
+    assert examples.total == 1
+    assert examples.examples[0].history_id == "recent"

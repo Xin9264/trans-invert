@@ -51,6 +51,9 @@ async def get_grammar_map_node_examples(
     limit: int = Query(default=20, ge=0, le=100),
     severity: Optional[str] = Query(default=None),
     source: Optional[str] = Query(default=None),
+    since: Optional[str] = Query(default=None),
+    until: Optional[str] = Query(default=None),
+    folder_id: Optional[str] = Query(default=None),
 ):
     """Return concrete error examples for a node and its descendants."""
     if severity and severity not in ALLOWED_SEVERITY:
@@ -65,6 +68,10 @@ async def get_grammar_map_node_examples(
             limit=limit,
             severity=severity,
             source=source,
+            since=since,
+            until=until,
+            folder_id=folder_id,
+            texts_storage=texts_storage,
         )
         return APIResponse(
             success=True,
