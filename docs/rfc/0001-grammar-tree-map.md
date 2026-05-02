@@ -240,11 +240,13 @@ class NodeStats(BaseModel):
 
 **`mastery` 计算规则**（v1，简单可调）：
 
+判定按从严到松的顺序短路：
+
 ```
-unseen   : error_count == 0 AND 该节点对应的 category 从未出现过任何 correction（包括正确的）
 weak     : error_count >= 5  OR  by_severity["critical"] >= 2  OR  trend_7d >= 3
 warning  : 1 <= error_count < 5
-stable   : 该节点近 30 次相关练习均无错误（保留给 v2，v1 暂以 unseen/warning/weak 为主）
+unseen   : error_count == 0  （详见 5.5：v1 简化定义为"累计无错"，不区分"从未触达"与"触达过但未错"）
+stable   : v2 占位，v1 不发出该值
 ```
 
 > 注：v1 的 mastery 是**纯频次**模型，没有掌握度衰减、没有间隔复习权重。够用，先发出去看效果。
@@ -289,21 +291,33 @@ backend/app/
 
 #### `GET /api/grammar-map`
 
+同时注册无尾斜杠（主路由）和带尾斜杠（`include_in_schema=False` 的兼容别名）两条路径，避免前端代理或老链接出现 307 重定向。
+
 **Query 参数：**
 
-| 参数      | 类型    | 默认 | 说明                                                  |
-| --------- | ------- | ---- | ----------------------------------------------------- |
-| `since`   | str     | None | ISO timestamp，只统计该时间之后的练习                 |
-| `until`   | str     | None | ISO timestamp，只统计该时间之前的练习                 |
-| `folder_id` | str   | None | 仅统计该文件夹下的材料对应的练习（可选，便于按主题切片） |
+| 参数        | 类型 | 默认 | 说明                                                       |
+| ----------- | ---- | ---- | ---------------------------------------------------------- |
+| `since`     | str  | None | ISO timestamp，只统计该时间之后的练习                       |
+| `until`     | str  | None | ISO timestamp，只统计该时间之前的练习                       |
+| `folder_id` | str  | None | 仅统计该文件夹下材料对应的练习（实现见 5.5：title+content 反查） |
 
 **响应：** `APIResponse<GrammarMapResponse>`
+
+**`total_practices` 口径：** 包含范围内所有练习记录，**含 0 错误的记录**——便于前端用 `total_errors / total_practices` 估算错误率。
+
+**错误码：**
+
+| 状态 | 含义                          |
+| ---- | ----------------------------- |
+| 200  | 成功（即使历史为空也返回空树） |
+| 500  | 聚合内部异常                  |
 
 **实现要点：**
 
 - 直接读 `practice_history`（已经在内存中），不走 SQL。
 - 单次遍历：对每条记录 → 对每个 `correction` → 找到对应叶子节点 → 累加。
 - 累加完成后递归向上汇总到分支节点。
+- ISO timestamp 解析支持 `Z` 后缀；带时区的会规整成 naive UTC，与无时区的历史时间戳兼容比较。
 
 #### `GET /api/grammar-map/nodes/{node_id}/examples`
 
@@ -311,11 +325,14 @@ backend/app/
 
 **Query 参数：**
 
-| 参数      | 类型 | 默认 | 说明                |
-| --------- | ---- | ---- | ------------------- |
-| `limit`   | int  | 20   | 最多返回多少条样例   |
-| `severity` | str | None | 过滤特定严重程度    |
-| `source`  | str  | None | 过滤特定错误来源    |
+| 参数        | 类型 | 默认 | 说明                                                            |
+| ----------- | ---- | ---- | --------------------------------------------------------------- |
+| `limit`     | int  | 20   | 最多返回多少条样例。`ge=0, le=100`，超界 FastAPI 直接 422        |
+| `severity`  | str  | None | 过滤特定严重程度，必须 ∈ `ALLOWED_SEVERITY`，否则 400            |
+| `source`    | str  | None | 过滤特定错误来源，必须 ∈ `ALLOWED_SOURCE`，否则 400              |
+| `since`     | str  | None | 与主接口一致的时间窗起点，便于详情面板沿用主筛选                 |
+| `until`     | str  | None | 与主接口一致的时间窗终点                                         |
+| `folder_id` | str  | None | 与主接口一致的文件夹过滤                                         |
 
 **响应：**
 
@@ -335,48 +352,67 @@ class NodeExamplesResponse(BaseModel):
 
 **排序：** 默认按 `timestamp DESC`（最近的错误排前面）。
 
+**错误码：**
+
+| 状态 | 含义                                                                   |
+| ---- | ---------------------------------------------------------------------- |
+| 200  | 成功                                                                   |
+| 400  | `severity` / `source` 不在受控词表内                                    |
+| 404  | `node_id` 未在 syllabus 中找到（service 层 raise `ValueError` → 路由层转 404） |
+| 422  | `limit` 越界（FastAPI 默认）                                            |
+| 500  | 内部异常                                                               |
+
 ### 5.3 聚合算法（伪代码）
 
 ```python
-def build_grammar_map(history: list[PracticeHistoryRecord], since=None, until=None) -> GrammarMapResponse:
+def build_grammar_map(
+    history: list[PracticeHistoryRecord],
+    since=None, until=None,
+    folder_id=None, texts_storage=None,
+) -> GrammarMapResponse:
     # 1. 建立 category → 叶子节点 id 的反向索引
     category_to_leaf: dict[str, str] = {}
     for leaf in iter_leaves(SYLLABUS_TREE):
         for cat in leaf["leaf_categories"]:
             category_to_leaf[cat] = leaf["id"]
 
-    # 2. 初始化每个节点的空 stats
+    # 2. 初始化每个节点的空 stats（by_severity / by_source 预填全零）
     stats_map: dict[str, NodeStats] = {
         node["id"]: empty_stats(node["id"])
         for node in iter_nodes(SYLLABUS_TREE)
     }
 
+    now = normalize_to_utc_naive(datetime.now())
+    since_dt = parse_iso(since) if since else None
+    until_dt = parse_iso(until) if until else None
+
     # 3. 单次遍历历史记录
-    now = datetime.now()
     practice_count = 0
     error_count = 0
     for record in history:
-        if since and record.timestamp < since: continue
-        if until and record.timestamp > until: continue
-        practice_count += 1
+        record_dt = parse_iso(record.timestamp)            # 容忍 Z 后缀；带时区会被规整
+        if not in_scope(record, record_dt, since_dt, until_dt, folder_id, texts_storage):
+            continue  # folder 反查见 5.5
+        practice_count += 1                                # 注意：含 0 错误的练习也计入
 
         for corr in record.ai_evaluation.get("corrections", []):
-            cat = corr.get("category")
-            leaf_id = category_to_leaf.get(cat)
+            leaf_id = category_to_leaf.get(corr.get("category"))
             if not leaf_id:
-                continue  # AI 偶发瞎写，归到 grammar.other 已由 normalize_corrections 处理
-            error_count += 1
+                continue  # 兜底已由 normalize_corrections 处理；这里再保险
+            severity = clamp(corr.get("severity"), ALLOWED_SEVERITY, "minor")
+            source   = clamp(corr.get("source"),   ALLOWED_SOURCE,   "intralingual")
             stat = stats_map[leaf_id]
             stat.error_count += 1
-            stat.by_severity[corr["severity"]] += 1
-            stat.by_source[corr["source"]] += 1
-            stat.last_error_at = max(stat.last_error_at, record.timestamp)
-            if days_between(record.timestamp, now) <= 7:
+            stat.by_severity[severity] += 1
+            stat.by_source[source]     += 1
+            stat.last_error_at = latest(stat.last_error_at, record.timestamp)
+            if record_dt and 0 <= (now - record_dt).days <= 7:
                 stat.trend_7d += 1
-            if days_between(record.timestamp, now) <= 30:
+            if record_dt and 0 <= (now - record_dt).days <= 30:
                 stat.trend_30d += 1
+            error_count += 1
 
-    # 4. 自底向上累加到分支节点
+    # 4. 自底向上把叶子统计累加到分支节点
     rollup_stats(SYLLABUS_TREE, stats_map)
 
     # 5. 计算每个节点的 mastery 等级
@@ -392,17 +428,42 @@ def build_grammar_map(history: list[PracticeHistoryRecord], since=None, until=No
     )
 ```
 
+**关键差异点（与第一版伪代码对比）：**
+
+- 时间比较前先把所有时间戳规整为 naive UTC，避免历史记录无时区导致 `<` 抛 `TypeError`
+- 对 `severity` / `source` 二次兜底，防止已落库但当时未走 `normalize_corrections` 的脏数据
+- `total_practices` 计入 0 错误练习，方便前端算错误率
+- trend 区间上下界都是闭区间，且要求 `delta >= 0`，未来时间戳不计入
+
 **复杂度：** O(N × M)，N = 历史记录数，M = 每条记录平均错误数（一般 < 10）。100 条记录的项目下，单次响应 < 5ms。
 
 ### 5.4 启动时校验
 
-服务器启动时（`grammar_map_service` 模块导入时）做一次自检：
+服务器启动时（`grammar_map_service` 模块导入时 + `app.main` 显式调用）做一次自检：
 
 - 遍历 `SYLLABUS_TREE` 的所有叶子，收集 `leaf_categories`
 - 与 `routers/texts.py` 里的 `ALLOWED_CATEGORIES` 比较
-- 若有 category 没被任何叶子覆盖，或被多个叶子重复覆盖，**直接 raise 启动失败**
+- 校验失败维度：缺少 `leaf_categories` 的叶子、重复 category、未知 category（不在受控词表）、缺失 category（受控词表里有但树未覆盖）
+- 任意一项失败，**直接 raise `ValueError` 阻止启动**
 
 这是关键的一致性保证：词表升级时强制双方同步。
+
+### 5.5 已知设计妥协
+
+实现过程中浮现的几处必须显式记录的妥协：
+
+1. **`folder_id` 过滤靠 title + content 反查**
+   - 原因：`PracticeHistoryRecord` 当前没有 `folder_id` 字段，只能用 `texts_storage` 反查"哪些材料属于该文件夹，再看历史记录是否引用了它们"。
+   - 匹配策略：`record.text_title == text.title` **或** `record.text_title.startswith(f"{text.title}（")`（兼容句段模式产生的 `（句 i/N）` 后缀）；同时要求 `record.text_content == text.content` 或包含。
+   - 风险：标题改名后历史记录会脱钩；同名材料会误匹配。**单用户场景下风险低，先接受**。
+   - 根治：见第 10 节 R-007（给 `PracticeHistoryRecord` 加 `folder_id` 字段并在提交时回写）。
+
+2. **`unseen` 简化为「累计错误数为 0」**
+   - 早期 RFC 草案曾设想"该 category 从未在任何 correction 中出现过"，但这需要额外跟踪"练习是否触达过该范畴"，复杂且对用户感知无差别。
+   - 当前实现：`unseen ⇔ error_count == 0`，落地见 4.2。
+
+3. **未来时间戳保护**
+   - `_within_days` 显式要求 `0 <= delta`，避免错误的本地时区或脏数据导致未来时间戳计入 trend。
 
 ---
 
@@ -447,22 +508,32 @@ def build_grammar_map(history: list[PracticeHistoryRecord], since=None, until=No
 
 ```
 GrammarMap.tsx (page)
-├── GrammarMapToolbar          时间范围筛选、文件夹过滤
-├── GrammarTree                左侧树（可折叠、键盘导航）
+├── 顶部工具栏（内嵌于 page）   时间范围分段（all/7d/30d/90d）+ 文件夹下拉
+├── 顶部统计行 stat-row         Practices / Errors / Weak / Last error
+├── GrammarTree                左侧树（可折叠 + 左右方向键展开折叠）
 │   └── GrammarTreeNode        单节点：缩进 + 颜色点 + label + count badge
 └── NodeDetailPanel            右侧详情
-    ├── NodeStatsCard          错误总数、severity 分布饼图、source 分布
-    ├── TrendSparkline         近 30 天错误趋势小图
-    └── ExampleList            错误样例列表，可链接到 History 详情
+    ├── 顶部 stats 网格         累计 / 7d / 30d / 最近出错
+    ├── TrendSparkline         7d vs 30d 对比的紧凑可视化（非时间序列折线）
+    ├── DistributionBars × 2   severity / source 横条分布
+    └── ExampleList            错误样例列表，链接到 `/history?record={id}`
 ```
+
+**键盘导航范围（v1）：** 只支持节点行获焦时的 `←` 折叠 / `→` 展开。`↑↓` 切换节点和 `Enter` 选中留作后续；浏览器原生 `Tab` 焦点链能覆盖大部分需求。
+
+**Sparkline 形态：** 不是按天分桶的真折线（这需要在 NodeStats 里携带分桶序列，会让响应膨胀）。当前仅根据 `trend_7d` / `trend_30d` 两个数渲染对比柱/迷你条形，给一个"近期是否升温"的视觉提示。若日后改回真折线，需扩展 NodeStats 与服务层。
 
 ### 6.4 实现要点
 
-- **不引第三方树库**：用纯 TSX + 递归组件 + Tailwind，避免 react-arborist / rc-tree 这种依赖。受控词表只有 23 项，树深度最多 4 层，自己写 < 100 行。
-- **状态：** 选中节点 id 用 URL query (`?node=grammar.article`)，便于刷新和分享链接。
-- **trend 小图：** 直接用 SVG `<polyline>`，不引 chart 库。
-- **API 调用：** 复用 `src/utils/api.ts`，添加 `apiGrammarMap()` 和 `apiGrammarMapExamples(nodeId)`。
-- **缓存：** 在 Zustand store 里缓存最近一次响应，5 分钟内复用；提交新练习后失效。
+- **不引第三方树库**：用纯 TSX + 递归组件 + 项目内 CSS，避免 react-arborist / rc-tree 这种依赖。受控词表只有 23 项，树深度最多 4 层。
+- **状态：** 选中节点 id、时间范围、文件夹都用 URL query (`?node=…&range=30d&folder=…`)，便于刷新和分享链接。
+- **API 调用：** 复用 `src/utils/api.ts`，导出 `grammarMapAPI.getMap()` 和 `grammarMapAPI.getExamples(nodeId, params)`。详情面板请求 examples 时会沿用工具栏的 `since` / `folder_id`。
+- **默认展开：** 首次渲染展开根节点 + 前两层分支（`collectBranchIds(...).slice(0, 2)`）；选中某节点后自动展开其祖先路径。
+- **缓存：** 在 Zustand store 里缓存最近一次响应，cache key 为 `JSON.stringify({range, folder})`，5 分钟 TTL。失效触发点：
+  - `practiceAPI.submit` 成功
+  - `practiceAPI.submitStream` 收到 complete 帧
+  - `practiceAPI.importHistory` 成功
+  - 用户点击「刷新」按钮（`force=true` 直接绕过缓存）
 
 ---
 
@@ -496,28 +567,35 @@ GrammarMap.tsx (page)
 
 ## 8. 测试计划
 
-### 8.1 后端
+> 项目目前没有 pytest / vitest 落地（参见 `CLAUDE.md`），本节列出的测试用例属于 **R-010 跟进**，不阻塞初版交付。
 
-**`backend/tests/test_grammar_map_service.py`**（新建）：
+### 8.1 后端（计划中，落 `backend/tests/test_grammar_map_service.py`）
 
 - `test_syllabus_covers_all_categories` — 启动校验：每个 `ALLOWED_CATEGORIES` 项有且仅有一个叶子。
 - `test_empty_history_returns_unseen_tree` — 没有练习时，所有节点 mastery=unseen，error_count=0。
 - `test_single_correction_propagates_to_root` — 一条 grammar.article 错误 → 叶子 +1 → grammar.morphology +1 → grammar +1 → root +1。
 - `test_severity_distribution` — 同一节点不同严重度的错误分别累计。
-- `test_trend_window` — 8 天前的错误不计入 trend_7d，但计入 trend_30d。
+- `test_trend_window` — 8 天前的错误不计入 trend_7d，但计入 trend_30d；未来时间戳不计入任何窗口。
 - `test_mastery_thresholds` — 5 条错误 → weak；2 条 critical → weak；3 条 minor → warning。
-- `test_node_examples_pagination_and_filter` — limit、severity 过滤生效。
+- `test_total_practices_counts_zero_error_records` — 范围内 0 错误的练习也计入 `total_practices`。
+- `test_folder_filter_via_title_content_match` — `folder_id` 反查命中含 `（句 i/N）` 后缀的句段记录。
+- `test_node_examples_pagination_and_filter` — limit、severity、source 过滤生效；越界 limit 返回 422。
+- `test_node_examples_unknown_node_404` — service 抛 `ValueError`，路由层转 404。
+- `test_severity_source_validation_400` — 路由层非法 `severity` / `source` 返回 400。
 
 ### 8.2 前端
 
-不写单元测试（项目当前没有前端测试基建），手动验收清单：
+不写单元测试，手动验收清单：
 
 - [ ] 空历史时打开页面，整棵树灰色，无报错
-- [ ] 提交 1 次有错的练习后回到地图，对应叶子和所有祖先节点变色
+- [ ] 提交 1 次有错的练习后回到地图，对应叶子和所有祖先节点变色（`clearGrammarMapCache` 生效）
+- [ ] 导入历史 JSON 后地图自动刷新
 - [ ] 点击叶子节点，右侧出现样例
 - [ ] 点击样例链接能跳到 History 对应记录
-- [ ] 折叠/展开状态在切换节点后保持
-- [ ] URL 带 `?node=xxx` 直接打开能定位
+- [ ] URL 带 `?node=…&range=30d&folder=…` 直接打开能定位
+- [ ] 工具栏切换 range / folder 时 URL 同步且 cache key 区分
+- [ ] 「刷新」按钮强制绕过 5 分钟缓存
+- [ ] 树节点行获焦后 `←` 折叠 / `→` 展开
 
 ---
 
@@ -542,6 +620,10 @@ GrammarMap.tsx (page)
 - **R-004**：错误来源（source）单独视图 —— 把 `L1_transfer` 占比拉出来做一个"母语干扰画像"
 - **R-005**：听力模块（YouTube 导入）—— 独立 RFC
 - **R-006**：syllabus 节点对应学习资源链接（English Grammar in Use 章节、Cambridge Dictionary 词条）
+- **R-007**：给 `PracticeHistoryRecord` 加 `folder_id` 字段，提交时回写，移除 5.5 的 title+content 反查妥协
+- **R-008**：补齐树的键盘导航（↑↓ 切换、Enter 选中、Home/End 跳到首尾），完善无障碍
+- **R-009**：真正的按天分桶 trend 数据，把 sparkline 升级成时间序列折线
+- **R-010**：补齐 8.1 的 pytest 单元测试到 `backend/tests/`
 
 ---
 
@@ -557,3 +639,4 @@ GrammarMap.tsx (page)
 ## 12. 评审记录
 
 - 2026-05-02：syllabus 分组层级、mastery 阈值初始值、RFC 编号与目录约定（`docs/rfc/`）均已确认接受。明确不做"导出地图为图片"功能。
+- 2026-05-02 (rev 2)：对照已落地代码做对齐回填——补全 5.2 路由参数 / 错误码、新增 5.5「已知设计妥协」、修正 4.2 `unseen` 定义、对齐 6.3/6.4 键盘导航与 sparkline 现状、新增 R-007 ~ R-010 跟进项、更新 5.3 伪代码与第 8 节测试用例。
