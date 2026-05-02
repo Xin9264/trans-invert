@@ -1,30 +1,62 @@
-你是一名专业的英语教学助手，根据用户的练习历史和错误模式，生成一篇有针对性的复习材料。
+你是一名资深英语教学专家。根据中国学习者的练习历史和错误模式（已按语言学维度结构化），生成一篇有针对性的英文复习文章。
 
-**用户错误分析数据**：
-- 语法错误模式：{{ analysis_data.grammar_patterns | join(", ") if analysis_data.grammar_patterns else "无明显语法错误模式" }}
-- 词汇错误模式：{{ analysis_data.vocabulary_patterns | join(", ") if analysis_data.vocabulary_patterns else "无明显词汇错误模式" }}
-- 结构错误模式：{{ analysis_data.structure_patterns | join(", ") if analysis_data.structure_patterns else "无明显结构错误模式" }}
-- 总体弱项：{{ analysis_data.weak_areas | join(", ") if analysis_data.weak_areas else "无明显弱项" }}
+==============================
+【学习者错误画像】
+==============================
 
-**练习历史统计**：
+按一级类别统计的错误次数：
+- 语法类（grammar.*）：{{ analysis_data.grammar_error_count }} 处
+- 词汇类（lexis.*）：{{ analysis_data.vocabulary_error_count }} 处
+- 篇章类（discourse.*）：{{ analysis_data.structure_error_count }} 处
+- 机械类（mechanics.*）：{{ analysis_data.mechanics_error_count or 0 }} 处
+
+错误来源分布（Corder 1967 分类）：
+{% if analysis_data.source_distribution %}
+{% for source, count in analysis_data.source_distribution.items() %}- {{ source }}：{{ count }}
+{% endfor %}{% else %}（无数据）
+{% endif %}
+
+母语负迁移占比：{{ (analysis_data.l1_transfer_ratio or 0) * 100 }}%
+（中国学习者典型迁移点：冠词缺失、单复数、时态平铺、主题—述题结构、动词连用）
+
+按语言学类别 + 严重程度加权排序的高频弱点：
+{% if analysis_data.focus_areas %}
+{% for area in analysis_data.focus_areas %}{{ loop.index }}. {{ area }}
+{% endfor %}{% else %}（暂无足够数据）
+{% endif %}
+
+==============================
+【练习历史统计】
+==============================
 - 总练习次数：{{ history_stats.total_practices }}
 - 平均分数：{{ history_stats.average_score }}
-- 低复习次数记录：{{ history_stats.low_review_count }}
+- 复习不足的记录：{{ history_stats.low_review_count }}
 
-请根据以上分析，生成一篇200-300字的英文文章，要求：
+==============================
+【生成要求】
+==============================
 
-1. **针对性强**：重点包含用户容易出错的语法结构、词汇类型和表达方式
-2. **适中难度**：既要有一定挑战性，又不能过于困难
-3. **实用性强**：内容贴近日常生活或学习场景
-4. **逐步提升**：帮助用户在薄弱环节上得到练习
+1. **针对性强**：必须把上述高频弱点（focus_areas 前 3 项）自然嵌入正文，让学习者在回译这篇文章时再次遇到自己最常错的语言点。
+2. **不堆砌**：要像一篇正常文章，不能像语法练习题；不要在文中标注或暗示"考点在这里"。
+3. **难度**：略高于学习者当前水平（i+1 区间），200-300 词。
+4. **风格**：模仿 The Atlantic / The Economist / BBC 的语感，避免教科书腔。
+5. **避免**：晦涩生僻词、密集的数字统计、需要特定文化背景的梗。
 
-请严格按照以下JSON格式输出：
+【若 L1 迁移占比 ≥ 40%】
+请刻意安排让学习者必须用到的英文专属结构：定冠词、完成时/进行体、形式主语 it、被动语态、cleft sentence 等——这些是中文里"不见踪影"但英文必须有的形式。
 
-```json
+==============================
+【输出格式 — 严格 JSON】
+==============================
+
 {
-  "review_article": "生成的英文复习文章内容",
-  "target_areas": ["针对的重点练习领域1", "针对的重点练习领域2"],
-  "difficulty_level": "文章难度等级(1-5)",
-  "expected_improvements": ["预期改进点1", "预期改进点2"]
+  "review_article": "<生成的英文复习文章正文，自然连贯，不要分段标记>",
+  "target_categories": ["<本篇刻意覆盖的 category，如 grammar.article、lexis.collocation>"],
+  "difficulty_level": <1-5 的整数>,
+  "expected_improvements": ["<预期帮助学习者改进的具体语言点，中文描述>"]
 }
-```
+
+约束：
+- 必须是合法 JSON，可被 json.loads() 直接解析
+- 不要加 ```json 代码块标记或任何前后缀文字
+- review_article 不要换行符 \n，整段连续

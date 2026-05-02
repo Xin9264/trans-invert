@@ -10,6 +10,20 @@ class TextUploadRequest(BaseModel):
     topic: Optional[str] = Field(None, description="主题")
     folder_id: Optional[str] = Field(None, description="文件夹ID")
 
+class ContrastiveNote(BaseModel):
+    """汉英对比要点 — 标出中文译文里没显式痕迹、但英文必须有的语言现象"""
+    point: str = Field(..., description="对比类别（受控词表，如 '形合 vs 意合'、'冠词'、'时态体貌'）")
+    en_example: str = Field(..., description="原文中体现该对比的英文片段")
+    zh_in_translation: str = Field(..., description="中文译文里对应的部分")
+    hint: str = Field(..., description="回译时的提醒（一句话）")
+
+
+class AlignedSegment(BaseModel):
+    """句段对齐：原文一句 + 对应中文"""
+    en: str = Field(..., description="英文原文一句")
+    zh: str = Field(..., description="中文译文里对应的一句")
+
+
 class TextAnalysisResponse(BaseModel):
     """AI文本分析响应"""
     text_id: str = Field(..., description="文本唯一标识")
@@ -18,16 +32,48 @@ class TextAnalysisResponse(BaseModel):
     difficulty: int = Field(..., ge=1, le=5, description="难度等级(1-5)")
     key_points: List[str] = Field(..., description="关键词汇或短语")
     word_count: int = Field(..., description="单词数量")
+    contrastive_notes: List[ContrastiveNote] = Field(default_factory=list, description="汉英对比要点")
+    aligned_segments: List[AlignedSegment] = Field(default_factory=list, description="句段对齐结果")
 
 class PracticeSubmitRequest(BaseModel):
     """练习提交请求"""
     text_id: str = Field(..., description="文本ID")
     user_input: str = Field(..., min_length=1, description="用户输入的英文")
+    # 句段对齐模式：如果给了 segment_en/segment_zh，evaluate 只针对单句对比
+    segment_en: Optional[str] = Field(default=None, description="单句模式下当前英文原句")
+    segment_zh: Optional[str] = Field(default=None, description="单句模式下当前中文译句")
+    segment_index: Optional[int] = Field(default=None, description="单句序号(从1开始)")
+    segment_total: Optional[int] = Field(default=None, description="单句总数")
+
+class Correction(BaseModel):
+    """单条纠错建议（含语言学标签）"""
+    original: str = Field(..., description="用户写错的部分")
+    suggestion: str = Field(..., description="建议的正确写法")
+    reason: str = Field(..., description="错误原因说明（中文）")
+    category: str = Field(
+        ...,
+        description=(
+            "语言学类别。受控词表，形如 'grammar.article'、'lexis.collocation'。"
+            "粗分为 grammar.* / lexis.* / discourse.* / mechanics.* 四类。"
+        ),
+    )
+    severity: str = Field(
+        ...,
+        description="错误严重程度: minor | major | critical",
+    )
+    source: str = Field(
+        ...,
+        description=(
+            "错误来源（Corder 分类）: "
+            "L1_transfer（母语负迁移） | overgeneralization（规则过度泛化） | "
+            "intralingual（语内错误） | performance_slip（偶发笔误）"
+        ),
+    )
 
 class PracticeEvaluationResponse(BaseModel):
     """练习评估响应"""
     score: int = Field(..., ge=0, le=100, description="得分(0-100)")
-    corrections: List[Dict[str, str]] = Field(..., description="纠错建议")
+    corrections: List[Correction] = Field(..., description="纠错建议")
     overall_feedback: str = Field(..., description="整体评价")
     is_acceptable: bool = Field(..., description="是否可接受（语法和语义基本正确）")
 
@@ -44,7 +90,9 @@ class PracticeHistoryRecord(BaseModel):
     # 复习相关字段
     review_count: int = Field(default=0, description="复习次数")
     last_reviewed: Optional[str] = Field(default=None, description="最后复习时间")
-    error_patterns: List[str] = Field(default_factory=list, description="错误模式标记")
+    error_patterns: List[str] = Field(default_factory=list, description="错误模式标记（category 列表）")
+    next_review_at: Optional[str] = Field(default=None, description="下次复习时间（间隔重复调度结果）")
+    ease_factor: float = Field(default=2.0, description="SM-2 风格的难度系数，越大间隔越长")
 
 class PracticeHistoryExport(BaseModel):
     """练习历史导出格式"""

@@ -32,6 +32,18 @@ export interface DifficultWord {
   meaning: string;
 }
 
+export interface ContrastiveNote {
+  point: string;
+  en_example: string;
+  zh_in_translation: string;
+  hint: string;
+}
+
+export interface AlignedSegment {
+  en: string;
+  zh: string;
+}
+
 export interface TextAnalysis {
   id: string;
   textId: string;
@@ -39,6 +51,8 @@ export interface TextAnalysis {
   difficulty: number;
   translation: string;
   keyPoints: string[];
+  contrastiveNotes: ContrastiveNote[];
+  alignedSegments: AlignedSegment[];
   createdAt: string;
 }
 

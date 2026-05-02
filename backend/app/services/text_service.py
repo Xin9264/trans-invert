@@ -12,6 +12,43 @@ def count_words(text: str) -> int:
     return len((text or "").strip().split())
 
 
+def _normalize_contrastive_notes(raw: Any) -> list:
+    """把 AI 返回的对比要点过滤到结构稳定的形态，缺字段就丢弃。"""
+    if not isinstance(raw, list):
+        return []
+    out = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        point = str(item.get("point", "")).strip()
+        en_example = str(item.get("en_example", "")).strip()
+        if not point or not en_example:
+            continue
+        out.append({
+            "point": point,
+            "en_example": en_example,
+            "zh_in_translation": str(item.get("zh_in_translation", "")).strip(),
+            "hint": str(item.get("hint", "")).strip(),
+        })
+    return out
+
+
+def _normalize_aligned_segments(raw: Any) -> list:
+    """把 AI 返回的句段对齐过滤到结构稳定的形态。en/zh 任一为空就丢弃。"""
+    if not isinstance(raw, list):
+        return []
+    out = []
+    for item in raw:
+        if not isinstance(item, dict):
+            continue
+        en = str(item.get("en", "")).strip()
+        zh = str(item.get("zh", "")).strip()
+        if not en or not zh:
+            continue
+        out.append({"en": en, "zh": zh})
+    return out
+
+
 def normalize_analysis_result(analysis_result: Dict[str, Any], content: str) -> Dict[str, Any]:
     """Validate and normalize the JSON returned by the text-analysis prompt."""
     required_fields = ["translation", "difficult_words", "difficulty", "key_points"]
@@ -33,6 +70,8 @@ def normalize_analysis_result(analysis_result: Dict[str, Any], content: str) -> 
         "difficulty": analysis_result["difficulty"],
         "key_points": analysis_result["key_points"],
         "word_count": count_words(content),
+        "contrastive_notes": _normalize_contrastive_notes(analysis_result.get("contrastive_notes")),
+        "aligned_segments": _normalize_aligned_segments(analysis_result.get("aligned_segments")),
     }
 
 

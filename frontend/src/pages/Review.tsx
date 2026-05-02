@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AlertCircle, Brain, CheckCircle, RefreshCw, Target } from 'lucide-react';
-import { reviewAPI, ReviewMaterial, ReviewStats } from '../utils/api';
+import { AlertCircle, Brain, CheckCircle, RefreshCw, Target, Clock } from 'lucide-react';
+import { reviewAPI, ReviewMaterial, ReviewStats, DueReviewItem } from '../utils/api';
 
 const Review: React.FC = () => {
   const [stats, setStats] = useState<ReviewStats | null>(null);
@@ -9,15 +9,24 @@ const Review: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [generatedMaterial, setGeneratedMaterial] = useState<ReviewMaterial | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [dueItems, setDueItems] = useState<DueReviewItem[]>([]);
+  const [dueTotal, setDueTotal] = useState(0);
 
   const fetchStats = async () => {
     setIsLoadingStats(true);
     try {
-      const response = await reviewAPI.getStats();
-      if (response.success && response.data) {
-        setStats(response.data);
+      const [statsResp, dueResp] = await Promise.all([
+        reviewAPI.getStats(),
+        reviewAPI.getDue(10),
+      ]);
+      if (statsResp.success && statsResp.data) {
+        setStats(statsResp.data);
       } else {
-        throw new Error(response.error || '获取统计失败');
+        throw new Error(statsResp.error || '获取统计失败');
+      }
+      if (dueResp.success && dueResp.data) {
+        setDueItems(dueResp.data.due);
+        setDueTotal(dueResp.data.total);
       }
     } catch (requestError) {
       console.error('获取复习统计失败:', requestError);
@@ -86,9 +95,9 @@ const Review: React.FC = () => {
             <div className="delta">已练习材料</div>
           </div>
           <div className="stat">
-            <div className="label">Need review</div>
-            <div className="value">{stats.need_review}</div>
-            <div className="delta down">需要回炉</div>
+            <div className="label">Due today</div>
+            <div className="value">{dueTotal}</div>
+            <div className="delta down">到期复习</div>
           </div>
           <div className="stat">
             <div className="label">Mastered</div>
@@ -99,6 +108,40 @@ const Review: React.FC = () => {
             <div className="label">Focus areas</div>
             <div className="value">{stats.focus_areas.length}</div>
             <div className="delta">重点领域</div>
+          </div>
+        </div>
+      )}
+
+      {dueItems.length > 0 && (
+        <div className="panel" style={{ marginTop: 28 }}>
+          <div className="panel-head">
+            <span className="eyebrow"><Clock size={14} style={{ verticalAlign: -2, marginRight: 6 }} />到期复习</span>
+            <span className="tag accent">{dueTotal} 条到期</span>
+          </div>
+          <div className="panel-body">
+            <div className="due-list">
+              {dueItems.map((item) => (
+                <div className="due-item" key={item.id}>
+                  <div className="due-head">
+                    <span className="due-title">{item.text_title}</span>
+                    <span className={`score ${item.score >= 85 ? 'good' : item.score >= 70 ? 'warn' : 'bad'}`}>{item.score}</span>
+                  </div>
+                  <div className="due-meta dim tiny">
+                    {item.overdue_days > 0
+                      ? `逾期 ${item.overdue_days} 天`
+                      : '今日到期'} · 已复习 {item.review_count} 次
+                    {item.error_categories.length > 0 && (
+                      <> · 弱点：{item.error_categories.slice(0, 3).join('、')}</>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {dueTotal > dueItems.length && (
+              <div className="dim tiny" style={{ marginTop: 12 }}>
+                还有 {dueTotal - dueItems.length} 条未列出
+              </div>
+            )}
           </div>
         </div>
       )}

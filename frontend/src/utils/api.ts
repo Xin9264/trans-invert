@@ -110,6 +110,18 @@ export interface DifficultWord {
   meaning: string;
 }
 
+export interface ContrastiveNote {
+  point: string;
+  en_example: string;
+  zh_in_translation: string;
+  hint: string;
+}
+
+export interface AlignedSegment {
+  en: string;
+  zh: string;
+}
+
 export interface TextAnalysis {
   text_id: string;
   translation: string;
@@ -117,20 +129,39 @@ export interface TextAnalysis {
   difficulty: number;
   key_points: string[];
   word_count: number;
+  contrastive_notes?: ContrastiveNote[];
+  aligned_segments?: AlignedSegment[];
 }
 
 export interface PracticeSubmitRequest {
   text_id: string;
   user_input: string;
+  // 句段对齐模式：传给后端，让 evaluate 只针对单句
+  segment_en?: string;
+  segment_zh?: string;
+  segment_index?: number;
+  segment_total?: number;
+}
+
+export type CorrectionSeverity = 'minor' | 'major' | 'critical';
+export type CorrectionSource =
+  | 'L1_transfer'
+  | 'overgeneralization'
+  | 'intralingual'
+  | 'performance_slip';
+
+export interface Correction {
+  original: string;
+  suggestion: string;
+  reason: string;
+  category: string;          // grammar.* / lexis.* / discourse.* / mechanics.*
+  severity: CorrectionSeverity;
+  source: CorrectionSource;
 }
 
 export interface PracticeEvaluation {
   score: number;
-  corrections: Array<{
-    original: string;
-    suggestion: string;
-    reason: string;
-  }>;
+  corrections: Correction[];
   overall_feedback: string;
   is_acceptable: boolean;
 }
@@ -144,11 +175,7 @@ export interface PracticeHistoryRecord {
   user_input: string;
   ai_evaluation: {
     score: number;
-    corrections: Array<{
-      original: string;
-      suggestion: string;
-      reason: string;
-    }>;
+    corrections: Correction[];
     overall_feedback: string;
     is_acceptable: boolean;
   };
@@ -635,6 +662,24 @@ export interface ReviewStats {
   recent_errors: any[];
 }
 
+export interface DueReviewItem {
+  id: string;
+  timestamp: string;
+  text_title: string;
+  score: number;
+  review_count: number;
+  last_reviewed: string | null;
+  next_review_at: string | null;
+  overdue_days: number;
+  error_categories: string[];
+  overall_feedback: string;
+}
+
+export interface DueReviewsResponse {
+  due: DueReviewItem[];
+  total: number;
+}
+
 export interface ReviewMaterial {
   text_id: string;
   review_article: string;
@@ -655,6 +700,12 @@ export const reviewAPI = {
   // 生成复习材料
   generate: async (): Promise<APIResponse<ReviewMaterial>> => {
     const response = await api.post('/api/review/generate') as APIResponse<ReviewMaterial>;
+    return response;
+  },
+
+  // 到期复习列表
+  getDue: async (limit = 20): Promise<APIResponse<DueReviewsResponse>> => {
+    const response = await api.get(`/api/review/due?limit=${limit}`) as APIResponse<DueReviewsResponse>;
     return response;
   },
 

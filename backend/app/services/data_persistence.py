@@ -24,15 +24,8 @@ class DataPersistenceService:
         self.data_dir = Path(data_dir)
         self.db_file = self.data_dir / "trans_invert.sqlite3"
 
-        # 旧版 JSON 文件仅用于首次迁移，不再作为运行时存储。
-        self.practice_history_file = self.data_dir / "practice_history.json"
-        self.texts_data_file = self.data_dir / "texts_data.json"
-        self.analyses_data_file = self.data_dir / "analyses_data.json"
-        self.folders_data_file = self.data_dir / "folders_data.json"
-
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self._init_db()
-        self._migrate_json_if_needed()
 
     def _connect(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_file, timeout=30)
@@ -56,10 +49,26 @@ class DataPersistenceService:
                     score INTEGER NOT NULL,
                     review_count INTEGER NOT NULL DEFAULT 0,
                     last_reviewed TEXT,
-                    error_patterns TEXT NOT NULL DEFAULT '[]'
+                    error_patterns TEXT NOT NULL DEFAULT '[]',
+                    next_review_at TEXT,
+                    ease_factor REAL NOT NULL DEFAULT 2.0
                 )
                 """
             )
+            # 老库可能没有 next_review_at / ease_factor 列。SQLite 不支持
+            # ADD COLUMN IF NOT EXISTS，先 PRAGMA 检查再 ALTER。
+            existing_cols = {
+                row["name"]
+                for row in conn.execute("PRAGMA table_info(practice_history)").fetchall()
+            }
+            if "next_review_at" not in existing_cols:
+                conn.execute("ALTER TABLE practice_history ADD COLUMN next_review_at TEXT")
+                print("🔧 已为 practice_history 添加 next_review_at 列")
+            if "ease_factor" not in existing_cols:
+                conn.execute(
+                    "ALTER TABLE practice_history ADD COLUMN ease_factor REAL NOT NULL DEFAULT 2.0"
+                )
+                print("🔧 已为 practice_history 添加 ease_factor 列")
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS texts (
@@ -84,78 +93,6 @@ class DataPersistenceService:
                 )
                 """
             )
-
-    def _table_count(self, table_name: str) -> int:
-        with self._connect() as conn:
-            row = conn.execute(f"SELECT COUNT(*) AS count FROM {table_name}").fetchone()
-            return int(row["count"] if row else 0)
-
-    def _database_has_data(self) -> bool:
-        return any(
-            self._table_count(table) > 0
-            for table in ("practice_history", "texts", "analyses", "folders")
-        )
-
-    def _read_json_payload(self, path: Path) -> Dict[str, Any]:
-        if not path.exists():
-            return {}
-        try:
-            with open(path, "r", encoding="utf-8") as f:
-                return json.load(f)
-        except Exception as exc:
-            print(f"⚠️ 读取旧 JSON 文件失败，已跳过 {path}: {exc}")
-            return {}
-
-    def _load_practice_history_json(self) -> List[PracticeHistoryRecord]:
-        data = self._read_json_payload(self.practice_history_file)
-        records = data.get("records", [])
-        practice_records: List[PracticeHistoryRecord] = []
-        for record in records:
-            try:
-                practice_records.append(PracticeHistoryRecord(**record))
-            except Exception as exc:
-                print(f"⚠️ 跳过无效的旧历史记录: {exc}")
-        return practice_records
-
-    def _load_texts_data_json(self) -> Dict[str, Dict[str, Any]]:
-        data = self._read_json_payload(self.texts_data_file)
-        texts = data.get("texts", {})
-        if not isinstance(texts, dict):
-            return {}
-        self._normalize_texts(texts)
-        return texts
-
-    def _load_analyses_data_json(self) -> Dict[str, Dict[str, Any]]:
-        data = self._read_json_payload(self.analyses_data_file)
-        analyses = data.get("analyses", {})
-        return analyses if isinstance(analyses, dict) else {}
-
-    def _load_folders_data_json(self) -> Dict[str, Dict[str, Any]]:
-        data = self._read_json_payload(self.folders_data_file)
-        folders = data.get("folders", {})
-        return folders if isinstance(folders, dict) else {}
-
-    def _migrate_json_if_needed(self) -> None:
-        """首次启动时把旧 JSON 数据导入 SQLite。"""
-        legacy_files = [
-            self.practice_history_file,
-            self.texts_data_file,
-            self.analyses_data_file,
-            self.folders_data_file,
-        ]
-        if self._database_has_data() or not any(path.exists() for path in legacy_files):
-            return
-
-        practice_history = self._load_practice_history_json()
-        texts_storage = self._load_texts_data_json()
-        analyses_storage = self._load_analyses_data_json()
-        folders_storage = self._load_folders_data_json()
-
-        if not any([practice_history, texts_storage, analyses_storage, folders_storage]):
-            return
-
-        if self.save_all_data(practice_history, texts_storage, analyses_storage, folders_storage):
-            print(f"✅ 已将旧 JSON 数据迁移到 SQLite: {self.db_file}")
 
     def _serialize_record(self, record: PracticeHistoryRecord | Dict[str, Any]) -> Dict[str, Any]:
         if hasattr(record, "model_dump"):
@@ -202,8 +139,8 @@ class DataPersistenceService:
                     INSERT OR REPLACE INTO practice_history (
                         id, timestamp, text_title, text_content, chinese_translation,
                         user_input, ai_evaluation, score, review_count, last_reviewed,
-                        error_patterns
-                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        error_patterns, next_review_at, ease_factor
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     [
                         (
@@ -218,6 +155,8 @@ class DataPersistenceService:
                             int(row.get("review_count", 0) or 0),
                             row.get("last_reviewed"),
                             json.dumps(row.get("error_patterns", []), ensure_ascii=False),
+                            row.get("next_review_at"),
+                            float(row.get("ease_factor", 2.0) or 2.0),
                         )
                         for row in rows
                     ],
@@ -241,7 +180,7 @@ class DataPersistenceService:
                     """
                     SELECT id, timestamp, text_title, text_content, chinese_translation,
                            user_input, ai_evaluation, score, review_count, last_reviewed,
-                           error_patterns
+                           error_patterns, next_review_at, ease_factor
                     FROM practice_history
                     ORDER BY timestamp DESC
                     """
@@ -263,6 +202,8 @@ class DataPersistenceService:
                             review_count=int(row["review_count"] or 0),
                             last_reviewed=row["last_reviewed"],
                             error_patterns=json.loads(row["error_patterns"] or "[]"),
+                            next_review_at=row["next_review_at"] if "next_review_at" in row.keys() else None,
+                            ease_factor=float(row["ease_factor"]) if "ease_factor" in row.keys() and row["ease_factor"] is not None else 2.0,
                         )
                     )
                 except Exception as exc:

@@ -34,6 +34,60 @@ analyses_storage: Dict[str, Dict[str, Any]] = {}
 practice_history: List[PracticeHistoryRecord] = []
 folders_storage: Dict[str, Dict[str, Any]] = {}
 
+
+# 受控词表 — 必须与 templates/evaluate_answer.j2 保持一致
+ALLOWED_CATEGORIES = {
+    "grammar.article", "grammar.tense", "grammar.aspect", "grammar.number",
+    "grammar.agreement", "grammar.voice", "grammar.mood", "grammar.preposition",
+    "grammar.conjunction", "grammar.word_order", "grammar.nonfinite", "grammar.other",
+    "lexis.word_choice", "lexis.collocation", "lexis.register",
+    "lexis.semantic_prosody", "lexis.derivation",
+    "discourse.cohesion", "discourse.information_structure", "discourse.reference",
+    "mechanics.spelling", "mechanics.punctuation", "mechanics.capitalization",
+}
+ALLOWED_SEVERITY = {"minor", "major", "critical"}
+ALLOWED_SOURCE = {"L1_transfer", "overgeneralization", "intralingual", "performance_slip"}
+
+
+def extract_error_categories(corrections: List[Dict[str, Any]]) -> List[str]:
+    """从规范化后的 corrections 里抽出 category 列表。
+    去重 + 保持出现顺序，作为 PracticeHistoryRecord.error_patterns 的内容。"""
+    seen: Dict[str, None] = {}
+    for item in corrections or []:
+        cat = item.get("category") if isinstance(item, dict) else None
+        if cat and cat not in seen:
+            seen[cat] = None
+    return list(seen.keys())
+
+
+def normalize_corrections(corrections: Any) -> List[Dict[str, Any]]:
+    """把 AI 返回的 corrections 规范化：补默认字段、把不在受控词表里的值兜底为 *.other / minor / intralingual。
+    AI 偶尔会漏字段或瞎写标签，这一层让前端永远拿到结构稳定的数据。"""
+    if not isinstance(corrections, list):
+        return []
+    cleaned: List[Dict[str, Any]] = []
+    for item in corrections:
+        if not isinstance(item, dict):
+            continue
+        category = item.get("category") or "grammar.other"
+        if category not in ALLOWED_CATEGORIES:
+            category = "grammar.other"
+        severity = item.get("severity") or "minor"
+        if severity not in ALLOWED_SEVERITY:
+            severity = "minor"
+        source = item.get("source") or "intralingual"
+        if source not in ALLOWED_SOURCE:
+            source = "intralingual"
+        cleaned.append({
+            "original": str(item.get("original", "")),
+            "suggestion": str(item.get("suggestion", "")),
+            "reason": str(item.get("reason", "")),
+            "category": category,
+            "severity": severity,
+            "source": source,
+        })
+    return cleaned
+
 def initialize_data():
     """初始化数据，从 SQLite 加载"""
     global practice_history, texts_storage, analyses_storage, folders_storage
@@ -334,54 +388,64 @@ async def submit_practice(request: PracticeSubmitRequest, http_request: Request)
         if request.text_id not in analyses_storage:
             raise HTTPException(status_code=400, detail="文本分析尚未完成，请稍后重试")
         
-        # 获取原文和翻译
-        original_text = texts_storage[request.text_id]["content"]
+        # 获取原文和翻译；句段模式下用单句替换
+        full_text = texts_storage[request.text_id]["content"]
         analysis = analyses_storage[request.text_id]
-        translation = analysis["translation"]
-        
+        full_translation = analysis["translation"]
+        is_segment_mode = bool(request.segment_en and request.segment_zh)
+        original_text = request.segment_en if is_segment_mode else full_text
+        translation = request.segment_zh if is_segment_mode else full_translation
+
         # 使用用户的AI配置创建临时服务
         user_ai_service = create_user_ai_service(user_config)
-        
+
         # 使用模板渲染提示词
         prompt = template_service.render_evaluate_answer_prompt(
             original_text=original_text,
             translation=translation,
             user_input=request.user_input
         )
-        
+
         # 调用统一API
         response = await user_ai_service.call_ai_api(prompt)
-        
+
         # 解析JSON响应
         evaluation = user_ai_service.extract_json_from_response(response)
-        
+
         # 验证必要字段
         required_fields = ["score", "corrections", "overall_feedback", "is_acceptable"]
         for field in required_fields:
             if field not in evaluation:
                 raise Exception(f"AI响应缺少必要字段: {field}")
-        
+
         # 确保数据类型正确
         evaluation["score"] = int(evaluation["score"])
         evaluation["score"] = max(0, min(100, evaluation["score"]))  # 限制在0-100范围内
-        
-        if not isinstance(evaluation["corrections"], list):
-            evaluation["corrections"] = []
-        
+        evaluation["corrections"] = normalize_corrections(evaluation.get("corrections"))
         evaluation["is_acceptable"] = bool(evaluation["is_acceptable"])
-        
+
         response_data = PracticeEvaluationResponse(
             score=evaluation["score"],
             corrections=evaluation["corrections"],
             overall_feedback=evaluation["overall_feedback"],
             is_acceptable=evaluation["is_acceptable"]
         )
-        
-        # 保存练习历史
+
+        # 保存练习历史；句段模式下标题加 "(句 i/N)" 后缀，方便历史辨识
+        title_suffix = (
+            f"（句 {request.segment_index}/{request.segment_total}）"
+            if is_segment_mode and request.segment_index and request.segment_total
+            else ""
+        )
+        from app.routers.review import schedule_next_review
+        now_iso = datetime.now().isoformat()
+        next_at, ease = schedule_next_review(
+            score=evaluation["score"], review_count=0, prev_ease=None, prev_last_reviewed=None
+        )
         history_record = PracticeHistoryRecord(
             id=str(uuid.uuid4()),
-            timestamp=datetime.now().isoformat(),
-            text_title=texts_storage[request.text_id]["title"],
+            timestamp=now_iso,
+            text_title=texts_storage[request.text_id]["title"] + title_suffix,
             text_content=original_text,
             chinese_translation=translation,
             user_input=request.user_input,
@@ -391,7 +455,11 @@ async def submit_practice(request: PracticeSubmitRequest, http_request: Request)
                 "overall_feedback": evaluation["overall_feedback"],
                 "is_acceptable": evaluation["is_acceptable"]
             },
-            score=evaluation["score"]
+            score=evaluation["score"],
+            error_patterns=extract_error_categories(evaluation["corrections"]),
+            last_reviewed=now_iso,
+            next_review_at=next_at,
+            ease_factor=ease,
         )
         practice_history.append(history_record)
         
@@ -539,11 +607,14 @@ async def submit_practice_stream(request: PracticeSubmitRequest, http_request: R
         if request.text_id not in analyses_storage:
             raise HTTPException(status_code=400, detail="文本分析尚未完成，请稍后重试")
         
-        # 获取原文和翻译
-        original_text = texts_storage[request.text_id]["content"]
+        # 获取原文和翻译；句段模式下用单句替换
+        full_text = texts_storage[request.text_id]["content"]
         analysis = analyses_storage[request.text_id]
-        translation = analysis["translation"]
-        
+        full_translation = analysis["translation"]
+        is_segment_mode = bool(request.segment_en and request.segment_zh)
+        original_text = request.segment_en if is_segment_mode else full_text
+        translation = request.segment_zh if is_segment_mode else full_translation
+
         async def generate_stream():
             """生成流式响应"""
             evaluation_result = None
@@ -618,10 +689,7 @@ async def submit_practice_stream(request: PracticeSubmitRequest, http_request: R
                         
                         result["score"] = int(result["score"])
                         result["score"] = max(0, min(100, result["score"]))
-                        
-                        if not isinstance(result["corrections"], list):
-                            result["corrections"] = []
-                        
+                        result["corrections"] = normalize_corrections(result.get("corrections"))
                         result["is_acceptable"] = bool(result["is_acceptable"])
                         
                         chunk = {
@@ -665,15 +733,32 @@ async def submit_practice_stream(request: PracticeSubmitRequest, http_request: R
                 
                 # 在流式响应完成后保存历史记录
                 if evaluation_result:
+                    title_suffix = (
+                        f"(句 {request.segment_index}/{request.segment_total})"
+                        if is_segment_mode and request.segment_index and request.segment_total
+                        else ""
+                    )
+                    from app.routers.review import schedule_next_review
+                    now_iso = datetime.now().isoformat()
+                    next_at, ease = schedule_next_review(
+                        score=evaluation_result["score"], review_count=0,
+                        prev_ease=None, prev_last_reviewed=None
+                    )
                     history_record = PracticeHistoryRecord(
                         id=str(uuid.uuid4()),
-                        timestamp=datetime.now().isoformat(),
-                        text_title=texts_storage[request.text_id]["title"],
+                        timestamp=now_iso,
+                        text_title=texts_storage[request.text_id]["title"] + title_suffix,
                         text_content=original_text,
                         chinese_translation=translation,
                         user_input=request.user_input,
                         ai_evaluation=evaluation_result,
-                        score=evaluation_result["score"]
+                        score=evaluation_result["score"],
+                        error_patterns=extract_error_categories(
+                            evaluation_result.get("corrections", [])
+                        ),
+                        last_reviewed=now_iso,
+                        next_review_at=next_at,
+                        ease_factor=ease,
                     )
                     practice_history.append(history_record)
                     

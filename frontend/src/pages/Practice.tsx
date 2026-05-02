@@ -3,9 +3,51 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { ArrowLeft, Check, Columns, History, Layers, RotateCcw } from 'lucide-react';
 import { practiceAPI, textAPI } from '../utils/api';
 import { Text, TextAnalysis } from '../types';
+import type { CorrectionSeverity, CorrectionSource } from '../utils/api';
 
 type PracticeMode = 'study' | 'practice' | 'completed';
 type CompareView = 'split' | 'layered';
+type PracticeFlow = 'whole' | 'segment';
+
+// category -> 中文标签。后端已用受控词表，这里只负责本地化。
+const CATEGORY_LABELS: Record<string, string> = {
+  'grammar.article': '冠词',
+  'grammar.tense': '时态',
+  'grammar.aspect': '体',
+  'grammar.number': '单复数',
+  'grammar.agreement': '主谓一致',
+  'grammar.voice': '语态',
+  'grammar.mood': '语气',
+  'grammar.preposition': '介词',
+  'grammar.conjunction': '连词',
+  'grammar.word_order': '语序',
+  'grammar.nonfinite': '非谓语',
+  'grammar.other': '语法',
+  'lexis.word_choice': '选词',
+  'lexis.collocation': '搭配',
+  'lexis.register': '语域',
+  'lexis.semantic_prosody': '语义韵',
+  'lexis.derivation': '构词',
+  'discourse.cohesion': '衔接',
+  'discourse.information_structure': '信息结构',
+  'discourse.reference': '指代',
+  'mechanics.spelling': '拼写',
+  'mechanics.punctuation': '标点',
+  'mechanics.capitalization': '大小写',
+};
+
+const SEVERITY_LABELS: Record<CorrectionSeverity, string> = {
+  minor: '细节',
+  major: '明显',
+  critical: '严重',
+};
+
+const SOURCE_LABELS: Record<CorrectionSource, string> = {
+  L1_transfer: '母语迁移',
+  overgeneralization: '规则泛化',
+  intralingual: '语内混淆',
+  performance_slip: '偶发笔误',
+};
 
 const compareViews: Array<{
   key: CompareView;
@@ -135,6 +177,8 @@ const Practice: React.FC = () => {
   const [analysis, setAnalysis] = useState<TextAnalysis | null>(null);
   const [mode, setMode] = useState<PracticeMode>('study');
   const [view, setView] = useState<CompareView>('split');
+  const [flow, setFlow] = useState<PracticeFlow>('whole');
+  const [segmentIndex, setSegmentIndex] = useState(0);
   const [input, setInput] = useState('');
   const [feedback, setFeedback] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -162,6 +206,8 @@ const Practice: React.FC = () => {
             difficulty: analysisResponse.data.difficulty,
             translation: analysisResponse.data.translation,
             keyPoints: analysisResponse.data.key_points || [],
+            contrastiveNotes: analysisResponse.data.contrastive_notes || [],
+            alignedSegments: analysisResponse.data.aligned_segments || [],
             createdAt: new Date().toISOString(),
           });
           setText({
@@ -203,9 +249,23 @@ const Practice: React.FC = () => {
     setSubmitting(true);
     setProgress(4);
 
+    const segments = analysis?.alignedSegments || [];
+    const inSegmentMode = flow === 'segment' && segments.length > 0;
+    const currentSegment = inSegmentMode ? segments[segmentIndex] : undefined;
+    const payload = {
+      text_id: id,
+      user_input: input,
+      ...(currentSegment ? {
+        segment_en: currentSegment.en,
+        segment_zh: currentSegment.zh,
+        segment_index: segmentIndex + 1,
+        segment_total: segments.length,
+      } : {}),
+    };
+
     try {
       await practiceAPI.submitStream(
-        { text_id: id, user_input: input },
+        payload,
         (nextProgress) => setProgress(nextProgress),
         (result) => {
           setFeedback({
@@ -227,7 +287,7 @@ const Practice: React.FC = () => {
       );
     } catch (streamError: any) {
       try {
-        const response = await practiceAPI.submit({ text_id: id, user_input: input });
+        const response = await practiceAPI.submit(payload);
         if (response.success && response.data) {
           setFeedback({
             score: response.data.score,
@@ -288,8 +348,33 @@ const Practice: React.FC = () => {
           </div>
         </div>
         <div className="actions">
+          {mode === 'completed' && flow === 'segment' && analysis
+            && segmentIndex < analysis.alignedSegments.length - 1 && (
+            <button
+              className="btn accent"
+              type="button"
+              onClick={() => {
+                setSegmentIndex(segmentIndex + 1);
+                setInput('');
+                setFeedback(null);
+                setMode('practice');
+              }}
+            >
+              下一句 →
+            </button>
+          )}
           {mode === 'completed' && (
-            <button className="btn" type="button" onClick={() => { setMode('study'); setInput(''); setFeedback(null); }}>
+            <button
+              className="btn"
+              type="button"
+              onClick={() => {
+                setMode('study');
+                setInput('');
+                setFeedback(null);
+                setSegmentIndex(0);
+                setFlow('whole');
+              }}
+            >
               <RotateCcw size={14} /> 再来一次
             </button>
           )}
@@ -340,28 +425,94 @@ const Practice: React.FC = () => {
             </>
           )}
 
-          <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center' }}>
-            <button className="btn accent lg" type="button" onClick={() => setMode('practice')}>
-              <Check size={14} /> 遮住原文，开始回译
+          {analysis.contrastiveNotes.length > 0 && (
+            <>
+              <div className="section-head" style={{ marginTop: 36 }}>
+                <div>
+                  <div className="eyebrow">Contrastive notes</div>
+                  <h2>汉英对比要点</h2>
+                </div>
+                <div className="dim tiny">中文里看不见、英文必须有的</div>
+              </div>
+              <div className="contrast-list">
+                {analysis.contrastiveNotes.map((note, index) => (
+                  <div className="contrast-card" key={index}>
+                    <div className="contrast-point">{note.point}</div>
+                    <div className="contrast-pair">
+                      <div className="contrast-en">{note.en_example}</div>
+                      <div className="contrast-zh">{note.zh_in_translation}</div>
+                    </div>
+                    {note.hint && <div className="contrast-hint">💡 {note.hint}</div>}
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+
+          <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <button
+              className="btn accent lg"
+              type="button"
+              onClick={() => { setFlow('whole'); setMode('practice'); }}
+            >
+              <Check size={14} /> 整篇回译
+            </button>
+            <button
+              className="btn lg"
+              type="button"
+              disabled={analysis.alignedSegments.length === 0}
+              title={analysis.alignedSegments.length === 0 ? '该文本未提供句段对齐' : '逐句对照中文，一句一评分'}
+              onClick={() => {
+                setFlow('segment');
+                setSegmentIndex(0);
+                setInput('');
+                setFeedback(null);
+                setMode('practice');
+              }}
+            >
+              <Check size={14} /> 逐句回译（{analysis.alignedSegments.length} 句）
             </button>
           </div>
         </>
       )}
 
-      {mode === 'practice' && (
+      {mode === 'practice' && (() => {
+        const segments = analysis.alignedSegments;
+        const inSegment = flow === 'segment' && segments.length > 0;
+        const currentSeg = inSegment ? segments[segmentIndex] : null;
+        const targetWords = inSegment && currentSeg
+          ? currentSeg.en.trim().split(/\s+/).length
+          : text.wordCount;
+        return (
         <div className="compare split">
           <div className="panel">
             <div className="panel-head">
-              <span className="eyebrow">中文译文 · 仅此可见</span>
-              <span className="tag accent">回译模式</span>
+              <span className="eyebrow">
+                {inSegment ? `中文译文 · 第 ${segmentIndex + 1}/${segments.length} 句` : '中文译文 · 仅此可见'}
+              </span>
+              <span className="tag accent">{inSegment ? '逐句模式' : '回译模式'}</span>
             </div>
             <div className="panel-body">
-              <div className="prose zh">{analysis.translation.split('\n').map((line, index) => <p key={index}>{line}</p>)}</div>
+              {inSegment ? (
+                <div className="prose zh segment-zh">
+                  {segments.map((seg, i) => (
+                    <p key={i} className={i === segmentIndex ? 'seg-active' : 'seg-inactive'}>
+                      {seg.zh}
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <div className="prose zh">
+                  {analysis.translation.split('\n').map((line, index) => <p key={index}>{line}</p>)}
+                </div>
+              )}
             </div>
           </div>
           <div className="panel typewriter-shell">
             <div className="panel-head">
-              <span className="eyebrow">你的英文回译</span>
+              <span className="eyebrow">
+                {inSegment ? `回写第 ${segmentIndex + 1} 句` : '你的英文回译'}
+              </span>
               <span className="tag">原文已遮蔽</span>
             </div>
             <div className="stats">
@@ -369,11 +520,13 @@ const Practice: React.FC = () => {
               <span className="sep">·</span>
               <span className="stat"><strong>{input.trim() ? input.trim().split(/\s+/).length : 0}</strong> words</span>
               <span className="sep">·</span>
-              <span className="stat">target ≈ <strong>{text.wordCount}</strong></span>
+              <span className="stat">target ≈ <strong>{targetWords}</strong></span>
             </div>
             <textarea
               className="tw-input"
-              placeholder="Begin writing in English. Don't aim for perfect recall — aim for grammatical, natural prose that carries the meaning across…"
+              placeholder={inSegment
+                ? '只针对这一句回写，不要超出当前句的内容…'
+                : "Begin writing in English. Don't aim for perfect recall — aim for grammatical, natural prose that carries the meaning across…"}
               value={input}
               onChange={(event) => setInput(event.target.value)}
               disabled={submitting}
@@ -389,7 +542,9 @@ const Practice: React.FC = () => {
                 </>
               ) : (
                 <>
-                  <span className="dim tiny">提交后会保存到历史记录</span>
+                  <span className="dim tiny">
+                    {inSegment ? `还剩 ${segments.length - segmentIndex - 1} 句 · 提交后保存到历史` : '提交后会保存到历史记录'}
+                  </span>
                   <span className="spacer" />
                   <button className="btn" type="button" onClick={() => setMode('study')}>放弃</button>
                   <button className="btn accent" type="button" onClick={submitPractice} disabled={!input.trim()}>
@@ -400,7 +555,8 @@ const Practice: React.FC = () => {
             </div>
           </div>
         </div>
-      )}
+        );
+      })()}
 
       {mode === 'completed' && (
         <>
@@ -433,16 +589,26 @@ const Practice: React.FC = () => {
           <div className="correction-list">
             {corrections.length === 0 ? (
               <div className="card" style={{ padding: 20 }}>暂无具体修订建议。</div>
-            ) : corrections.map((correction: any, index: number) => (
-              <div className="correction" key={index}>
-                <div className="swap">
-                  <span className="from">{correction.original}</span>
-                  <span className="arrow">→</span>
-                  <span className="to">{correction.suggestion}</span>
+            ) : corrections.map((correction: any, index: number) => {
+              const categoryLabel = CATEGORY_LABELS[correction.category] || correction.category || '语法';
+              const severity: CorrectionSeverity = correction.severity || 'minor';
+              const source: CorrectionSource = correction.source || 'intralingual';
+              return (
+                <div className="correction" key={index}>
+                  <div className="swap">
+                    <span className="from">{correction.original}</span>
+                    <span className="arrow">→</span>
+                    <span className="to">{correction.suggestion}</span>
+                  </div>
+                  <div className="tags">
+                    <span className={`tag tag-cat tag-cat-${(correction.category || '').split('.')[0]}`}>{categoryLabel}</span>
+                    <span className={`tag tag-sev tag-sev-${severity}`}>{SEVERITY_LABELS[severity]}</span>
+                    <span className={`tag tag-src tag-src-${source}`}>{SOURCE_LABELS[source]}</span>
+                  </div>
+                  <div className="why">{correction.reason}</div>
                 </div>
-                <div className="why">{correction.reason}</div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </>
       )}

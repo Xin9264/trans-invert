@@ -1314,6 +1314,86 @@ input, textarea, select { font: inherit; color: inherit; }
   line-height: 1.55;
   font-style: italic;
 }
+.correction .tags {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin: 4px 0 8px;
+}
+.correction .tag {
+  font-size: 11px;
+  font-family: var(--ff-mono);
+  padding: 1px 7px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  letter-spacing: 0.02em;
+}
+/* category 颜色按一级类别分 */
+.correction .tag-cat-grammar    { background: var(--accent-soft); color: var(--accent-ink); }
+.correction .tag-cat-lexis      { background: var(--warn-soft);   color: var(--warn); }
+.correction .tag-cat-discourse  { background: var(--bg-sunk);     color: var(--ink-2); border-color: var(--ink-4); }
+.correction .tag-cat-mechanics  { background: var(--bg-soft);     color: var(--ink-3); }
+/* severity */
+.correction .tag-sev-minor    { background: transparent;        color: var(--ink-3); border-color: var(--ink-4); }
+.correction .tag-sev-major    { background: var(--warn-soft);   color: var(--warn); }
+.correction .tag-sev-critical { background: var(--bad-soft);    color: var(--bad); }
+/* source */
+.correction .tag-src-L1_transfer       { background: var(--bad-soft);    color: var(--bad); }
+.correction .tag-src-overgeneralization{ background: var(--warn-soft);   color: var(--warn); }
+.correction .tag-src-intralingual      { background: var(--bg-sunk);     color: var(--ink-2); border-color: var(--ink-4); }
+.correction .tag-src-performance_slip  { background: transparent;        color: var(--ink-3); border-color: var(--ink-4); }
+
+/* contrastive notes — 汉英对比要点 */
+.contrast-list { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.contrast-card {
+  background: var(--bg-card);
+  border: 1px solid var(--bg-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 14px 18px;
+}
+.contrast-point {
+  font-family: var(--ff-mono);
+  font-size: 12px;
+  color: var(--accent-ink);
+  background: var(--accent-soft);
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  margin-bottom: 8px;
+  letter-spacing: 0.02em;
+}
+.contrast-pair { display: flex; flex-direction: column; gap: 6px; margin-bottom: 6px; }
+.contrast-en { font-family: var(--ff-serif); font-size: 14px; color: var(--ink-2); line-height: 1.5; }
+.contrast-zh { font-size: 13.5px; color: var(--ink-3); line-height: 1.5; padding-left: 12px; border-left: 2px solid var(--bg-soft); }
+.contrast-hint { font-size: 12.5px; color: var(--warn); font-style: italic; margin-top: 4px; }
+
+/* 句段对齐 - 当前句高亮 */
+.segment-zh .seg-active {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  padding: 6px 12px;
+  border-radius: 4px;
+  border-left: 3px solid var(--accent);
+  margin: 6px -8px;
+}
+.segment-zh .seg-inactive {
+  color: var(--ink-4);
+  opacity: 0.55;
+}
+
+/* 到期复习列表 */
+.due-list { display: flex; flex-direction: column; gap: 10px; }
+.due-item {
+  padding: 12px 16px;
+  background: var(--bg-soft);
+  border-radius: 6px;
+  border-left: 3px solid var(--warn);
+}
+.due-head {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4px;
+}
+.due-title { font-weight: 500; color: var(--ink-2); font-size: 14px; }
+.due-meta { font-size: 12px; }
 
 /* compare-mode toggle */
 .view-toggle {

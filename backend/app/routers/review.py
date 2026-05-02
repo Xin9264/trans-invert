@@ -1,9 +1,8 @@
 """复习相关的路由和业务逻辑"""
 import uuid
-import re
 from collections import Counter
-from typing import Dict, Any, List
-from datetime import datetime
+from typing import Dict, Any, List, Optional, Tuple
+from datetime import datetime, timedelta
 from fastapi import APIRouter, HTTPException, Request
 from app.schemas.text import (
     APIResponse,
@@ -223,51 +222,184 @@ async def get_review_stats():
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"获取复习统计失败: {str(e)}")
 
-@router.post("/mark/{text_id}", response_model=APIResponse)
-async def mark_reviewed(text_id: str):
-    """标记复习完成"""
+@router.post("/mark/{record_id}", response_model=APIResponse)
+async def mark_reviewed(record_id: str):
+    """标记复习完成，并按 SM-2 算法刷新下次复习时间。"""
     try:
-        # 加载练习历史
         history_data = data_persistence.load_practice_history()
-        
-        # 查找对应的练习记录
-        updated = False
+
+        target = None
         for record in history_data:
-            if hasattr(record, 'id') and record.id == text_id:
-                # 增加复习次数
-                if not hasattr(record, 'review_count'):
-                    record.review_count = 0
-                record.review_count += 1
-                record.last_reviewed = datetime.now().isoformat()
-                updated = True
+            if getattr(record, "id", None) == record_id:
+                target = record
                 break
-        
-        if not updated:
+
+        if target is None:
             raise HTTPException(status_code=404, detail="练习记录不存在")
-        
-        # 保存数据
+
+        prev_ease = getattr(target, "ease_factor", 2.0)
+        prev_last = getattr(target, "last_reviewed", None)
+        prev_count = getattr(target, "review_count", 0) or 0
+
+        next_at, new_ease = schedule_next_review(
+            score=int(getattr(target, "score", 0)),
+            review_count=prev_count,
+            prev_ease=prev_ease,
+            prev_last_reviewed=prev_last,
+        )
+
+        target.review_count = prev_count + 1
+        target.last_reviewed = datetime.now().isoformat()
+        target.next_review_at = next_at
+        target.ease_factor = new_ease
+
         data_persistence.save_practice_history(history_data)
-        
+
         return APIResponse(
             success=True,
+            data={
+                "next_review_at": next_at,
+                "ease_factor": new_ease,
+                "review_count": target.review_count,
+            },
             message="复习记录更新成功"
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"更新复习记录失败: {str(e)}")
 
-ERROR_KEYWORDS = [
-    "冠词", "时态", "介词", "单复数", "主谓一致", "词汇", "搭配", "语序", "句子结构",
-    "从句", "虚拟语气", "过去式", "完成时", "被动语态", "动词形式", "名词", "形容词",
-    "副词", "逻辑", "语义", "自然度", "表达", "不地道", "过度简化", "复杂度"
-]
 
-ENGLISH_STOPWORDS = {
-    "the", "and", "for", "with", "that", "this", "from", "into", "should", "would",
-    "could", "because", "use", "used", "word", "words", "sentence", "grammar",
+@router.get("/due", response_model=APIResponse)
+async def list_due_reviews(limit: int = 20):
+    """返回到期复习列表（next_review_at <= now）。
+    没有 next_review_at 的旧记录用 timestamp + 1 天作兜底视为'到期'。"""
+    try:
+        history_data = data_persistence.load_practice_history()
+        now = datetime.now()
+        due: List[Dict[str, Any]] = []
+
+        for record in history_data:
+            next_at = getattr(record, "next_review_at", None)
+            try:
+                due_at = (
+                    datetime.fromisoformat(next_at) if next_at
+                    else datetime.fromisoformat(record.timestamp) + timedelta(days=1)
+                )
+            except (ValueError, TypeError):
+                continue
+
+            if due_at <= now:
+                evaluation = getattr(record, "ai_evaluation", {}) or {}
+                due.append({
+                    "id": record.id,
+                    "timestamp": record.timestamp,
+                    "text_title": record.text_title,
+                    "score": record.score,
+                    "review_count": getattr(record, "review_count", 0),
+                    "last_reviewed": getattr(record, "last_reviewed", None),
+                    "next_review_at": next_at,
+                    "overdue_days": round((now - due_at).total_seconds() / 86400.0, 1),
+                    "error_categories": getattr(record, "error_patterns", []),
+                    "overall_feedback": evaluation.get("overall_feedback", ""),
+                })
+
+        # 越逾期越靠前
+        due.sort(key=lambda r: r["overdue_days"], reverse=True)
+        return APIResponse(
+            success=True,
+            data={"due": due[:limit], "total": len(due)},
+            message=f"到期复习 {len(due)} 条"
+        )
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"获取到期复习失败: {str(e)}")
+
+# category -> 中文展示名。与前端 Practice.tsx 的 CATEGORY_LABELS 保持同步。
+CATEGORY_LABELS_ZH: Dict[str, str] = {
+    "grammar.article": "冠词",
+    "grammar.tense": "时态",
+    "grammar.aspect": "体（进行/完成）",
+    "grammar.number": "单复数",
+    "grammar.agreement": "主谓一致",
+    "grammar.voice": "语态",
+    "grammar.mood": "语气",
+    "grammar.preposition": "介词",
+    "grammar.conjunction": "连词/从句",
+    "grammar.word_order": "语序",
+    "grammar.nonfinite": "非谓语动词",
+    "grammar.other": "其他语法",
+    "lexis.word_choice": "选词",
+    "lexis.collocation": "搭配",
+    "lexis.register": "语域",
+    "lexis.semantic_prosody": "语义韵",
+    "lexis.derivation": "构词",
+    "discourse.cohesion": "衔接",
+    "discourse.information_structure": "信息结构",
+    "discourse.reference": "指代",
+    "mechanics.spelling": "拼写",
+    "mechanics.punctuation": "标点",
+    "mechanics.capitalization": "大小写",
 }
+
+SEVERITY_WEIGHT = {"critical": 3, "major": 2, "minor": 1}
+
+SOURCE_LABELS_ZH = {
+    "L1_transfer": "母语迁移",
+    "overgeneralization": "规则泛化",
+    "intralingual": "语内混淆",
+    "performance_slip": "偶发笔误",
+}
+
+# ====== 间隔重复调度（SM-2 风格简化版）======
+# 首次提交后的初始间隔（天），按当次得分分档
+INITIAL_INTERVAL_DAYS = {"high": 7, "mid": 3, "low": 1}
+# 复习时根据本次得分对 ease_factor 的乘法调整
+EASE_DELTA = {"high": 1.3, "mid": 1.0, "low": 0.6}
+EASE_MIN = 1.3
+EASE_MAX = 4.0
+INTERVAL_CAP_DAYS = 90
+
+
+def _score_band(score: int) -> str:
+    if score >= 85:
+        return "high"
+    if score >= 70:
+        return "mid"
+    return "low"
+
+
+def schedule_next_review(
+    score: int,
+    review_count: int,
+    prev_ease: Optional[float],
+    prev_last_reviewed: Optional[str],
+    now: Optional[datetime] = None,
+) -> Tuple[str, float]:
+    """根据本次得分算出下次复习时间和新的 ease_factor。
+    review_count == 0 视为首次：用 INITIAL_INTERVAL_DAYS。
+    之后按 SM-2 简化：next_interval = (now - last_reviewed) * adjusted_ease，封顶 90d。"""
+    now = now or datetime.now()
+    band = _score_band(int(score))
+
+    if review_count <= 0 or not prev_last_reviewed:
+        days = INITIAL_INTERVAL_DAYS[band]
+        new_ease = float(prev_ease or 2.0)
+    else:
+        try:
+            last = datetime.fromisoformat(prev_last_reviewed)
+            elapsed = max(1.0, (now - last).total_seconds() / 86400.0)
+        except (ValueError, TypeError):
+            elapsed = float(INITIAL_INTERVAL_DAYS[band])
+
+        ease = float(prev_ease or 2.0) * EASE_DELTA[band]
+        ease = max(EASE_MIN, min(EASE_MAX, ease))
+        new_ease = ease
+        days = min(INTERVAL_CAP_DAYS, max(1, int(round(elapsed * ease))))
+
+    next_at = now + timedelta(days=days)
+    return next_at.isoformat(), new_ease
 
 
 def build_generation_history_stats(history_data: List) -> Dict[str, Any]:
@@ -300,29 +432,31 @@ def iter_history_corrections(history_data: List):
 
 
 def summarize_focus_areas_from_history(history_data: List, limit: int = 5) -> List[str]:
-    """Summarize frequent weakness areas from correction reasons with a local Counter."""
-    counter: Counter[str] = Counter()
+    """从 corrections 的 category 标签按 severity 加权统计，找出最该重练的语言点。
+    输出形如 "冠词（grammar.article, 12 次, 偏母语迁移）"，prompt 直接用。"""
+    weighted: Counter = Counter()
+    source_per_cat: Dict[str, Counter] = {}
+    raw_count: Counter = Counter()
 
     for _, correction in iter_history_corrections(history_data):
-        reason = str(correction.get("reason", "")).strip()
-        if not reason:
-            continue
+        category = correction.get("category") or "grammar.other"
+        severity = correction.get("severity") or "minor"
+        source = correction.get("source") or "intralingual"
 
-        matched = False
-        for keyword in ERROR_KEYWORDS:
-            if keyword in reason:
-                counter[keyword] += 1
-                matched = True
+        weight = SEVERITY_WEIGHT.get(severity, 1)
+        weighted[category] += weight
+        raw_count[category] += 1
+        source_per_cat.setdefault(category, Counter())[source] += 1
 
-        for token in re.findall(r"[A-Za-z]{3,}", reason.lower()):
-            if token not in ENGLISH_STOPWORDS:
-                counter[token] += 1
-                matched = True
-
-        if not matched:
-            counter[reason[:40]] += 1
-
-    return [f"{area}（{count}次）" for area, count in counter.most_common(limit)]
+    out: List[str] = []
+    for category, _ in weighted.most_common(limit):
+        label = CATEGORY_LABELS_ZH.get(category, category)
+        count = raw_count[category]
+        sources = source_per_cat.get(category, Counter())
+        top_source, _ = sources.most_common(1)[0] if sources else ("intralingual", 0)
+        source_hint = SOURCE_LABELS_ZH.get(top_source, top_source)
+        out.append(f"{label}（{category}, {count} 次, 偏{source_hint}）")
+    return out
 
 
 def extract_recent_errors(history_data: List, limit: int = 8) -> List[Dict[str, Any]]:
@@ -350,47 +484,44 @@ def extract_recent_errors(history_data: List, limit: int = 8) -> List[Dict[str, 
     return recent_errors
 
 def analyze_user_patterns(history_data: List) -> Dict[str, Any]:
-    """分析用户的错误模式"""
-    # 按复习次数分组
-    low_review = [r for r in history_data if getattr(r, 'review_count', 0) <= 2]
-    medium_review = [r for r in history_data if 3 <= getattr(r, 'review_count', 0) <= 5]
-    
-    # 提取错误模式
-    grammar_errors = []
-    vocabulary_errors = []
-    structure_errors = []
-    
-    for record in low_review[-10:]:  # 只分析最近10条低复习记录
-        if hasattr(record, 'ai_evaluation') and record.ai_evaluation:
-            corrections = record.ai_evaluation.get('corrections', [])
-            for correction in corrections:
-                # 分类错误类型
-                reason = correction.get('reason', '').lower()
-                if any(word in reason for word in ['grammar', 'tense', '语法', '时态']):
-                    grammar_errors.append(correction)
-                elif any(word in reason for word in ['vocabulary', 'word', '词汇', '单词']):
-                    vocabulary_errors.append(correction)
-                elif any(word in reason for word in ['structure', 'sentence', '结构', '句子']):
-                    structure_errors.append(correction)
-    
+    """按 corrections 的 category 一级类别（grammar/lexis/discourse/mechanics）分组统计，
+    并分析 source 分布——L1_transfer 占比是中国学习者最值得跟踪的诊断信号。"""
+    family_buckets: Dict[str, List[Dict[str, Any]]] = {
+        "grammar": [], "lexis": [], "discourse": [], "mechanics": []
+    }
+    source_counter: Counter = Counter()
+    severity_counter: Counter = Counter()
+
+    for _, correction in iter_history_corrections(history_data):
+        category = correction.get("category") or "grammar.other"
+        family = category.split(".", 1)[0] if "." in category else "grammar"
+        if family not in family_buckets:
+            family = "grammar"
+        family_buckets[family].append(correction)
+        source_counter[correction.get("source") or "intralingual"] += 1
+        severity_counter[correction.get("severity") or "minor"] += 1
+
+    total_corrections = sum(len(v) for v in family_buckets.values())
+    low_review = [r for r in history_data if getattr(r, "review_count", 0) <= 2]
+
     return {
         "total_records": len(history_data),
         "low_review_count": len(low_review),
-        "grammar_error_count": len(grammar_errors),
-        "vocabulary_error_count": len(vocabulary_errors),
-        "structure_error_count": len(structure_errors),
-        "recent_errors": grammar_errors + vocabulary_errors + structure_errors,
-        "focus_areas": determine_focus_areas(grammar_errors, vocabulary_errors, structure_errors)
+        "grammar_error_count": len(family_buckets["grammar"]),
+        "vocabulary_error_count": len(family_buckets["lexis"]),
+        "structure_error_count": len(family_buckets["discourse"]),
+        "mechanics_error_count": len(family_buckets["mechanics"]),
+        "source_distribution": dict(source_counter),
+        "severity_distribution": dict(severity_counter),
+        "l1_transfer_ratio": (
+            round(source_counter.get("L1_transfer", 0) / total_corrections, 2)
+            if total_corrections else 0.0
+        ),
+        # recent_errors 给 prompt 用：从所有 family 各取一些代表错误
+        "recent_errors": (
+            family_buckets["grammar"][:6]
+            + family_buckets["lexis"][:6]
+            + family_buckets["discourse"][:4]
+        ),
+        "focus_areas": summarize_focus_areas_from_history(history_data),
     }
-
-def determine_focus_areas(grammar_errors, vocabulary_errors, structure_errors) -> List[str]:
-    """确定重点复习领域"""
-    areas = []
-    if len(grammar_errors) >= 3:
-        areas.append("语法和时态运用")
-    if len(vocabulary_errors) >= 3:
-        areas.append("词汇选择和搭配")
-    if len(structure_errors) >= 3:
-        areas.append("句子结构组织")
-    
-    return areas if areas else ["基础语言表达"]
