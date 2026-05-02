@@ -2,7 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Network, RefreshCcw } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import GrammarTree from '../components/grammar-map/GrammarTree';
-import { grammarMapAPI, GrammarMapNode, GrammarMapResponse } from '../utils/api';
+import NodeDetailPanel from '../components/grammar-map/NodeDetailPanel';
+import { grammarMapAPI, GrammarMapNode, GrammarMapResponse, NodeExamplesResponse } from '../utils/api';
 
 const flattenNodes = (node: GrammarMapNode): GrammarMapNode[] => [
   node,
@@ -23,6 +24,9 @@ const GrammarMap: React.FC = () => {
   const [data, setData] = useState<GrammarMapResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [examples, setExamples] = useState<NodeExamplesResponse | null>(null);
+  const [isLoadingExamples, setIsLoadingExamples] = useState(false);
+  const [examplesError, setExamplesError] = useState<string | null>(null);
   const [searchParams, setSearchParams] = useSearchParams();
 
   const loadMap = async () => {
@@ -69,6 +73,32 @@ const GrammarMap: React.FC = () => {
     params.set('node', nodeId);
     setSearchParams(params);
   };
+
+  useEffect(() => {
+    if (!selectedNode) return;
+
+    let cancelled = false;
+    const loadExamples = async () => {
+      setIsLoadingExamples(true);
+      setExamplesError(null);
+      try {
+        const response = await grammarMapAPI.getExamples(selectedNode.id, { limit: 20 });
+        if (!response.success || !response.data) {
+          throw new Error(response.error || response.message || '错误样例加载失败');
+        }
+        if (!cancelled) setExamples(response.data);
+      } catch (err) {
+        if (!cancelled) setExamplesError(err instanceof Error ? err.message : '错误样例加载失败');
+      } finally {
+        if (!cancelled) setIsLoadingExamples(false);
+      }
+    };
+
+    loadExamples();
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedNode]);
 
   if (isLoading) {
     return (
@@ -141,40 +171,14 @@ const GrammarMap: React.FC = () => {
               />
             </div>
 
-            <div className="grammar-detail-panel">
-              {selectedNode && (
-                <>
-                  <div className="grammar-panel-head">
-                    <div>
-                      <div className="eyebrow">Selected Node</div>
-                      <h3>{selectedNode.label}</h3>
-                    </div>
-                    <span className={`tag ${selectedNode.stats.mastery === 'weak' ? 'bad' : selectedNode.stats.mastery === 'warning' ? 'warn' : ''}`}>
-                      {selectedNode.stats.mastery}
-                    </span>
-                  </div>
-                  <div className="grammar-detail-grid">
-                    <div>
-                      <span>累计错误</span>
-                      <strong>{selectedNode.stats.error_count}</strong>
-                    </div>
-                    <div>
-                      <span>近 7 天</span>
-                      <strong>{selectedNode.stats.trend_7d}</strong>
-                    </div>
-                    <div>
-                      <span>近 30 天</span>
-                      <strong>{selectedNode.stats.trend_30d}</strong>
-                    </div>
-                    <div>
-                      <span>最近出错</span>
-                      <strong>{formatDateTime(selectedNode.stats.last_error_at)}</strong>
-                    </div>
-                  </div>
-                  {selectedNode.tip && <p className="grammar-node-tip">{selectedNode.tip}</p>}
-                </>
-              )}
-            </div>
+            {selectedNode && (
+              <NodeDetailPanel
+                node={selectedNode}
+                examples={examples}
+                isLoadingExamples={isLoadingExamples}
+                examplesError={examplesError}
+              />
+            )}
           </div>
         </>
       )}
