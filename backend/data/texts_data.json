@@ -76,7 +76,7 @@
       "practice_type": "translation",
       "topic": null,
       "folder_id": null,
-      "last_opened": "2025-09-14T10:18:44.438694"
+      "last_opened": "2026-05-02T19:20:12.685411"
     },
     "5fbb6e5d-ac48-40bf-8573-b9aaf18f92b7": {
       "id": "5fbb6e5d-ac48-40bf-8573-b9aaf18f92b7",
@@ -87,7 +87,8 @@
       "practice_type": "review",
       "source": "ai_generated_review",
       "folder_id": null,
-      "last_opened": "2025-09-14T10:38:40.389287"
+      "last_opened": "2025-09-14T10:38:40.389287",
+      "topic": null
     },
     "c32cbdb6-ca8a-420c-afdf-ef2997ba644c": {
       "id": "c32cbdb6-ca8a-420c-afdf-ef2997ba644c",
@@ -109,7 +110,40 @@
       "practice_type": "translation",
       "topic": null,
       "folder_id": null,
-      "last_opened": "2025-09-17T11:45:37.996474"
+      "last_opened": "2026-05-02T18:48:57.257993"
+    },
+    "7d8101f2-3d90-4c2a-b546-689b9ad85bb4": {
+      "id": "7d8101f2-3d90-4c2a-b546-689b9ad85bb4",
+      "title": "1212",
+      "content": "hello , i am wangxin. This is a test.",
+      "word_count": 9,
+      "created_at": "2026-05-02T18:58:12.873386",
+      "practice_type": "translation",
+      "topic": null,
+      "folder_id": null,
+      "last_opened": "2026-05-02T18:58:12.932295"
+    },
+    "b32b615e-bb72-46c8-b2b4-6500ed6f5154": {
+      "id": "b32b615e-bb72-46c8-b2b4-6500ed6f5154",
+      "title": "test_context",
+      "content": "Jennifer Vasilis (aka Ms. Jenny) was my son’s preschool teacher. One day after a massive ant infestation forced the students to eat outside in the hot California sun, Ms. Jenny paused the afternoon’s activities to teach her class an important lesson. Together, they brainstormed about what to do. As the kids shouted out their ideas, Ms. Jenny wrote them down on sticky notes and placed them on the whiteboard. Some ideas were impractical, like eating at Chick-fil-A every day, and others were more bizarre, like just eating the ants for lunch. All ideas were welcome with no filters or fears of judgment, which is a sense of freedom we tend to lose as we grow older. After a bit of time, Ms. Jenny steered the discussion toward a consensus: constructing a sun shade.",
+      "word_count": 133,
+      "created_at": "2026-05-02T19:14:41.396066",
+      "practice_type": "translation",
+      "topic": null,
+      "folder_id": null,
+      "last_opened": "2026-05-02T19:22:59.131089"
+    },
+    "a744d6bc-cba5-4b14-8975-e4cc28b6cddf": {
+      "id": "a744d6bc-cba5-4b14-8975-e4cc28b6cddf",
+      "title": "111",
+      "content": "Jennifer Vasilis (aka Ms. Jenny) was my son’s preschool teacher. One day after a massive ant infestation forced the students to eat outside in the hot California sun, Ms. Jenny paused the afternoon’s activities to teach her class an important lesson. Together, they brainstormed about what to do. As the kids shouted out their ideas, Ms. Jenny wrote them down on sticky notes and placed them on the whiteboard. Some ideas were impractical, like eating at Chick-fil-A every day, and others were more bizarre, like just eating the ants for lunch. All ideas were welcome with no filters or fears of judgment, which is a sense of freedom we tend to lose as we grow older. After a bit of time, Ms. Jenny steered the discussion toward a consensus: constructing a sun shade.",
+      "word_count": 133,
+      "created_at": "2026-05-02T19:23:09.622530",
+      "practice_type": "translation",
+      "topic": null,
+      "folder_id": null,
+      "last_opened": "2026-05-02T19:23:36.698993"
     }
   }
 }

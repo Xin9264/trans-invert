@@ -12,10 +12,10 @@ router = APIRouter(prefix="/api/folders", tags=["folders"])
 folders_storage: Dict[str, Dict[str, Any]] = {}
 
 def initialize_folders_data():
-    """初始化文件夹数据，从本地文件加载"""
+    """初始化文件夹数据，从 SQLite 加载"""
     global folders_storage
     try:
-        print("🔄 正在从本地文件加载文件夹数据...")
+        print("🔄 正在从 SQLite 加载文件夹数据...")
         loaded_folders = data_persistence.load_folders_data()
         folders_storage = loaded_folders
         print(f"✅ 文件夹数据加载完成: {len(folders_storage)} 个文件夹")
@@ -23,10 +23,10 @@ def initialize_folders_data():
         print(f"❌ 文件夹数据加载失败: {e}")
 
 def save_folders_data():
-    """保存文件夹数据到本地文件"""
+    """保存文件夹数据到 SQLite"""
     try:
         data_persistence.save_folders_data(folders_storage)
-        print("💾 文件夹数据已自动保存到本地文件")
+        print("💾 文件夹数据已自动保存到 SQLite")
     except Exception as e:
         print(f"❌ 文件夹数据保存失败: {e}")
 

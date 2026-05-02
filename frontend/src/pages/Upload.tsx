@@ -1,18 +1,81 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FileText, Upload as UploadIcon } from 'lucide-react';
 import { textAPI } from '../utils/api';
-import { Upload as UploadIcon, FileText } from 'lucide-react';
+
+// 从尚未闭合的 JSON 流里尽力提取 "translation" 字段的当前值
+const extractStreamingTranslation = (raw: string): string => {
+  if (!raw) return '';
+  const keyIndex = raw.indexOf('"translation"');
+  if (keyIndex < 0) return '';
+
+  // 找到键之后的第一个 "
+  const colonIndex = raw.indexOf(':', keyIndex);
+  if (colonIndex < 0) return '';
+  const valueStart = raw.indexOf('"', colonIndex + 1);
+  if (valueStart < 0) return '';
+
+  let result = '';
+  let i = valueStart + 1;
+  while (i < raw.length) {
+    const ch = raw[i];
+    if (ch === '\\' && i + 1 < raw.length) {
+      const next = raw[i + 1];
+      if (next === 'n') result += '\n';
+      else if (next === 't') result += '\t';
+      else if (next === 'r') result += '\r';
+      else if (next === '"' || next === '\\' || next === '/') result += next;
+      else if (next === 'u' && i + 5 < raw.length) {
+        const hex = raw.slice(i + 2, i + 6);
+        if (/^[0-9a-fA-F]{4}$/.test(hex)) {
+          result += String.fromCharCode(parseInt(hex, 16));
+          i += 6;
+          continue;
+        }
+        return result;
+      } else {
+        result += next;
+      }
+      i += 2;
+      continue;
+    }
+    if (ch === '"') break; // 字符串结束
+    result += ch;
+    i += 1;
+  }
+  return result;
+};
 
 const Upload: React.FC = () => {
   const [content, setContent] = useState('');
   const [title, setTitle] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [progress, setProgress] = useState(0);
+  const [stage, setStage] = useState<string>('');
+  const [streamingTranslation, setStreamingTranslation] = useState('');
   const navigate = useNavigate();
+  const previewRef = useRef<HTMLDivElement | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
+
+  useEffect(() => {
+    if (previewRef.current) {
+      previewRef.current.scrollTop = previewRef.current.scrollHeight;
+    }
+  }, [streamingTranslation]);
+
+  const stageFor = (p: number) => {
+    if (p < 10) return '正在唤醒 AI…';
+    if (p < 35) return '生成中文译文…';
+    if (p < 60) return '挑选难词与释义…';
+    if (p < 90) return '评估难度与关键表达…';
+    if (p < 100) return '收尾整理…';
+    return '分析完成';
+  };
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault();
     if (!content.trim()) {
       setError('请输入英文文本内容');
       return;
@@ -20,187 +83,173 @@ const Upload: React.FC = () => {
 
     setIsLoading(true);
     setError(null);
+    setProgress(0);
+    setStreamingTranslation('');
+    setStage('准备上传…');
 
-    try {
-      const response = await textAPI.upload({
-        content: content.trim(),
-        title: title.trim() || undefined
-      });
-      if (response.success && response.data) {
-        navigate(`/practice/${response.data.text_id}`);
-      } else {
-        setError(response.message || response.error || '上传失败');
+    await textAPI.uploadStream(
+      { content: content.trim(), title: title.trim() || undefined },
+      (nextProgress, fullContent) => {
+        setProgress(nextProgress);
+        setStage(stageFor(nextProgress));
+        const t = extractStreamingTranslation(fullContent);
+        if (t) setStreamingTranslation(t);
+      },
+      (textId) => {
+        setProgress(100);
+        setStage('分析完成');
+        navigate(`/practice/${textId}`);
+      },
+      (message) => {
+        setError(message || '分析失败，请重试');
+        setIsLoading(false);
       }
-    } catch (error: any) {
-      setError(error.response?.data?.error || error.message || '上传失败，请重试');
-    } finally {
-      setIsLoading(false);
-    }
+    );
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file && file.type === 'text/plain') {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const text = e.target?.result as string;
-        setContent(text);
-        setTitle(file.name.replace('.txt', ''));
-      };
-      reader.readAsText(file);
-    }
+  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file || file.type !== 'text/plain') return;
+
+    const reader = new FileReader();
+    reader.onload = (loadEvent) => {
+      setContent(loadEvent.target?.result as string);
+      setTitle(file.name.replace(/\.txt$/i, ''));
+    };
+    reader.readAsText(file);
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="py-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">上传练习文本</h1>
-        <p className="text-gray-600 mb-8">
-          上传一段英文文本，AI将自动分析并生成中文翻译供您练习
-        </p>
+    <div className="page">
+      <div className="section-head" style={{ marginTop: 0, borderBottom: 'none', paddingBottom: 0 }}>
+        <div>
+          <div className="eyebrow">New material</div>
+          <h2 className="page-title" style={{ marginTop: 6 }}>上传练习文本</h2>
+          <p className="page-sub">粘贴一段英文，AI 会生成中文译文、难词和回译练习入口。</p>
+        </div>
+      </div>
 
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* 上传表单 */}
-          <div className="card">
+      <div className="compare split" style={{ marginTop: 32 }}>
+        <div className="panel">
+          <div className="panel-head">
+            <span className="eyebrow">英文材料</span>
+            <span className="tag">{wordCount} words</span>
+          </div>
+          <div className="panel-body">
             <form onSubmit={handleSubmit}>
-              <div className="mb-6">
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
-                  文本标题 (可选)
-                </label>
-                <input
-                  type="text"
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
-                  placeholder="为您的练习文本起个名字"
-                />
-              </div>
+              <label className="eyebrow" htmlFor="title">文本标题</label>
+              <input
+                id="title"
+                value={title}
+                onChange={(event) => setTitle(event.target.value)}
+                placeholder="为这篇练习起个名字"
+                disabled={isLoading}
+                style={{
+                  width: '100%',
+                  margin: '8px 0 22px',
+                  padding: '11px 12px',
+                  border: '1px solid var(--line)',
+                  borderRadius: 6,
+                  background: 'var(--bg-card)',
+                }}
+              />
 
-              <div className="mb-6">
-                <label htmlFor="content" className="block text-sm font-medium text-gray-700 mb-2">
-                  英文文本 *
-                </label>
-                <textarea
-                  id="content"
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={12}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent english-text"
-                  placeholder="粘贴或输入您想要练习的英文文本..."
-                  required
-                />
-                <div className="mt-2 text-sm text-gray-500">
-                  字符数: {content.length} | 单词数: {content.trim().split(/\s+/).filter(word => word).length}
-                </div>
-              </div>
+              <label className="eyebrow" htmlFor="content">英文文本</label>
+              <textarea
+                id="content"
+                value={content}
+                onChange={(event) => setContent(event.target.value)}
+                rows={14}
+                disabled={isLoading}
+                className="tw-input"
+                style={{ minHeight: 360, border: '1px solid var(--line)', borderRadius: 8, marginTop: 8, background: 'var(--bg)' }}
+                placeholder="Paste the English passage you want to rewrite from translation…"
+                required
+              />
 
-              {/* 文件上传 */}
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  或上传文本文件
+              <div className="row" style={{ marginTop: 14 }}>
+                <span className="dim tiny">字符数 {content.length} · 单词数 {wordCount}</span>
+                <span className="spacer" />
+                <label className="btn" style={{ opacity: isLoading ? 0.5 : 1, pointerEvents: isLoading ? 'none' : 'auto' }}>
+                  <FileText size={14} /> 选择 TXT
+                  <input type="file" className="hidden" accept=".txt" onChange={handleFileUpload} disabled={isLoading} />
                 </label>
-                <div className="flex items-center justify-center w-full">
-                  <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
-                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                      <FileText className="w-8 h-8 mb-2 text-gray-500" />
-                      <p className="mb-2 text-sm text-gray-500">
-                        <span className="font-semibold">点击上传</span> 或拖拽文件
-                      </p>
-                      <p className="text-xs text-gray-500">仅支持 TXT 文件</p>
-                    </div>
-                    <input
-                      type="file"
-                      className="hidden"
-                      accept=".txt"
-                      onChange={handleFileUpload}
-                    />
-                  </label>
-                </div>
               </div>
 
               {error && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
-                  <p className="text-red-600 text-sm">{error}</p>
+                <div className="card" style={{ marginTop: 16, padding: 14, color: 'var(--bad)', background: 'var(--bad-soft)' }}>
+                  {error}
+                </div>
+              )}
+
+              {isLoading && (
+                <div className="card" style={{ marginTop: 16, padding: '14px 16px' }}>
+                  <div className="row" style={{ marginBottom: 8 }}>
+                    <span className="dim tiny">{stage}</span>
+                    <span className="spacer" />
+                    <span className="mono tiny dim">{progress}%</span>
+                  </div>
+                  <div className="progress"><div className="bar" style={{ width: `${progress}%` }} /></div>
                 </div>
               )}
 
               <button
                 type="submit"
+                className="btn accent lg"
                 disabled={isLoading || !content.trim()}
-                className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                style={{ marginTop: 22, width: '100%', justifyContent: 'center' }}
               >
-                {isLoading ? (
-                  <>
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                    <span>分析中...</span>
-                  </>
-                ) : (
-                  <>
-                    <UploadIcon size={18} />
-                    <span>上传并开始练习</span>
-                  </>
-                )}
+                <UploadIcon size={16} /> {isLoading ? '分析中…' : '上传并开始练习'}
               </button>
             </form>
           </div>
+        </div>
 
-          {/* 使用指南 */}
-          <div className="space-y-6">
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">使用指南</h3>
-              <div className="space-y-4 text-sm text-gray-600">
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-semibold">
-                    1
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">选择文本</p>
-                    <p>上传您想要练习的英文文本，建议长度在100-500词之间</p>
-                  </div>
+        {isLoading ? (
+          <aside className="panel">
+            <div className="panel-head">
+              <span className="eyebrow">实时译文 · Streaming</span>
+              <span className="tag accent">{progress}%</span>
+            </div>
+            <div className="panel-body" ref={previewRef} style={{ maxHeight: 520, overflowY: 'auto' }}>
+              {streamingTranslation ? (
+                <div className="prose zh">
+                  {streamingTranslation.split('\n').map((line, index) => (
+                    <p key={index}>{line || ' '}</p>
+                  ))}
+                  <span className="caret" />
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-semibold">
-                    2
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">AI分析</p>
-                    <p>系统将自动分析语法结构并生成准确的中文翻译</p>
-                  </div>
+              ) : (
+                <div className="dim" style={{ padding: '8px 4px' }}>
+                  AI 正在思考，译文很快就会出现在这里…
                 </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-semibold">
-                    3
+              )}
+            </div>
+          </aside>
+        ) : (
+          <aside className="panel">
+            <div className="panel-head">
+              <span className="eyebrow">Workflow</span>
+              <span className="tag accent">4 steps</span>
+            </div>
+            <div className="panel-body">
+              <div className="method-row" style={{ display: 'block', margin: 0, borderTop: 0 }}>
+                {[
+                  ['i.', '选择文本', '建议 100-500 词，主题清楚，句式有一定变化。'],
+                  ['ii.', 'AI 分析', '系统生成中文译文、难词解释与难度评估。'],
+                  ['iii.', '遮蔽原文', '只看中文译文，尝试还原英文表达。'],
+                  ['iv.', '获得反馈', '提交后比对原文，沉淀到历史记录。'],
+                ].map(([n, heading, body]) => (
+                  <div className="step" key={n} style={{ borderRight: 0, borderBottom: '1px solid var(--line-soft)' }}>
+                    <span className="n">{n}</span>
+                    <h4>{heading}</h4>
+                    <p>{body}</p>
                   </div>
-                  <div>
-                    <p className="font-medium text-gray-900">开始练习</p>
-                    <p>看着中文翻译，尝试写出对应的英文表达</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-3">
-                  <div className="w-6 h-6 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-xs font-semibold">
-                    4
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">获得反馈</p>
-                    <p>AI将评估您的答案并提供改进建议</p>
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
-
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">文本建议</h3>
-              <ul className="space-y-2 text-sm text-gray-600">
-                <li>• 选择您感兴趣的主题，提高学习动力</li>
-                <li>• 难度适中，避免过于复杂的专业术语</li>
-                <li>• 语法结构清晰，句式多样化</li>
-                <li>• 长度适中，建议100-500词</li>
-                <li>• 内容完整，避免片段化文本</li>
-              </ul>
-            </div>
-          </div>
-        </div>
+          </aside>
+        )}
       </div>
     </div>
   );

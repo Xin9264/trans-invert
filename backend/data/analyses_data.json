@@ -312,6 +312,95 @@
         "along the way"
       ],
       "word_count": 89
+    },
+    "7d8101f2-3d90-4c2a-b546-689b9ad85bb4": {
+      "text_id": "7d8101f2-3d90-4c2a-b546-689b9ad85bb4",
+      "translation": "分析失败，请重试",
+      "difficult_words": [
+        {
+          "word": "分析失败",
+          "meaning": "请稍后重试"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "分析失败"
+      ],
+      "word_count": 9
+    },
+    "b32b615e-bb72-46c8-b2b4-6500ed6f5154": {
+      "text_id": "b32b615e-bb72-46c8-b2b4-6500ed6f5154",
+      "translation": "Jennifer Vasilis (aka Ms. Jenny) 是我儿子的学前班老师。一天，在一次大规模的蚂蚁侵扰迫使学生在炎热的加州阳光下在外面吃午饭后，Ms. Jenny 暂停了下午的活动来给她的班级上一堂重要的课。他们一起头脑风暴该做什么。当孩子们喊出他们的想法时，Ms. Jenny 把它们写在便利贴上并贴在白板上。一些想法不切实际，比如每天在 Chick-fil-A 吃饭，而其他想法更离奇，比如只是把蚂蚁当午餐吃。所有的想法都受欢迎，没有过滤或害怕评判，这是一种我们随着年龄增长往往会失去的自由感。过了一会儿，Ms. Jenny 引导讨论达成共识：建造一个遮阳棚。",
+      "difficult_words": [
+        {
+          "word": "infestation",
+          "meaning": "侵扰，出没（昆虫、动物等大量出现并造成危害）"
+        },
+        {
+          "word": "impractical",
+          "meaning": "不切实际的，不现实的"
+        },
+        {
+          "word": "bizarre",
+          "meaning": "奇异的，古怪的"
+        },
+        {
+          "word": "consensus",
+          "meaning": "共识，一致的意见"
+        },
+        {
+          "word": "steered",
+          "meaning": "引导；驾驶（此处指引导讨论方向）"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "massive ant infestation",
+        "brainstormed about what to do",
+        "sticky notes",
+        "no filters or fears of judgment",
+        "sense of freedom",
+        "steered the discussion",
+        "constructing a sun shade"
+      ],
+      "word_count": 133
+    },
+    "a744d6bc-cba5-4b14-8975-e4cc28b6cddf": {
+      "text_id": "a744d6bc-cba5-4b14-8975-e4cc28b6cddf",
+      "translation": "Jennifer Vasilis (又名Ms. Jenny) 是我儿子的学前班老师。一天，在严重的蚂蚁侵扰迫使学生在炎热的加利福尼亚阳光下在外面吃饭之后，Ms. Jenny暂停了下午的活动来教她的班级一堂重要的课。一起，他们头脑风暴了该做什么。当孩子们喊出自己的想法时，Ms. Jenny把它们写在便利贴上并贴在白板上。一些想法不切实际，比如每天在Chick-fil-A吃饭，其他则更离奇，比如午饭就吃蚂蚁。所有想法都被欢迎，没有过滤或害怕评判，这是一种随着我们长大往往失去的自由感。过了一会儿，Ms. Jenny将讨论引向一个共识：建造一个遮阳棚。",
+      "difficult_words": [
+        {
+          "word": "massive",
+          "meaning": "巨大的，严重的"
+        },
+        {
+          "word": "infestation",
+          "meaning": "侵扰（尤指害虫、老鼠等大量出没）"
+        },
+        {
+          "word": "impractical",
+          "meaning": "不切实际的，不现实的"
+        },
+        {
+          "word": "bizarre",
+          "meaning": "离奇的，古怪的"
+        },
+        {
+          "word": "consensus",
+          "meaning": "共识，一致意见"
+        }
+      ],
+      "difficulty": 3,
+      "key_points": [
+        "preschool teacher",
+        "ant infestation",
+        "brainstormed about what to do",
+        "sticky notes",
+        "filters or fears of judgment",
+        "sense of freedom",
+        "steered the discussion toward a consensus"
+      ],
+      "word_count": 133
     }
   }
 }

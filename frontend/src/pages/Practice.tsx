@@ -1,136 +1,185 @@
-import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { textAPI, practiceAPI } from '../utils/api';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
+import { ArrowLeft, Check, Columns, History, Layers, RotateCcw } from 'lucide-react';
+import { practiceAPI, textAPI } from '../utils/api';
 import { Text, TextAnalysis } from '../types';
-import TypingComponent from '../components/TypingComponent';
-import TextHighlighter from '../components/TextHighlighter';
-import { ArrowLeft, RotateCcw, History } from 'lucide-react';
+
+type PracticeMode = 'study' | 'practice' | 'completed';
+type CompareView = 'split' | 'layered';
+
+const compareViews: Array<{
+  key: CompareView;
+  label: string;
+  description: string;
+  Icon: typeof Columns;
+}> = [
+  { key: 'split', label: '双栏', description: '中文与英文并排阅读', Icon: Columns },
+  { key: 'layered', label: '浮层', description: '点击英文句子查看译文', Icon: Layers },
+];
+
+const pips = (difficulty: number) => (
+  <span className="pips">
+    {[1, 2, 3, 4, 5].map((level) => (
+      <span key={level} className={`pip${level <= difficulty ? ' on' : ''}`} />
+    ))}
+  </span>
+);
+
+const splitSentences = (text: string, zh = false) => {
+  const pattern = zh ? /(?<=[。！？；])/ : /(?<=[.!?;])\s+/;
+  return text.split(pattern).map((item) => item.trim()).filter(Boolean);
+};
+
+const StreamingText: React.FC<{ text: string; speed?: number }> = ({ text, speed = 14 }) => {
+  const chars = useMemo(() => Array.from(text), [text]);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    setCount(0);
+    let index = 0;
+    const timer = window.setInterval(() => {
+      index += 1;
+      setCount(index);
+      if (index >= chars.length) window.clearInterval(timer);
+    }, speed);
+    return () => window.clearInterval(timer);
+  }, [chars, speed]);
+
+  return (
+    <div className="stream">
+      {chars.slice(0, count).map((char, index) => (
+        <span key={index} className="ch">{char}</span>
+      ))}
+      {count < chars.length && <span className="caret" />}
+    </div>
+  );
+};
+
+const CompareSplit: React.FC<{ text: Text; analysis: TextAnalysis }> = ({ text, analysis }) => (
+  <div className="compare split">
+    <div className="panel">
+      <div className="panel-head">
+        <span className="eyebrow">中文译文</span>
+        <span className="tag">参考</span>
+      </div>
+      <div className="panel-body">
+        <div className="prose zh">{analysis.translation.split('\n').map((line, index) => <p key={index}>{line}</p>)}</div>
+      </div>
+    </div>
+    <div className="panel">
+      <div className="panel-head">
+        <span className="eyebrow">英文原文</span>
+        <span className="tag">学习态</span>
+      </div>
+      <div className="panel-body">
+        <div className="prose">{text.content.split('\n').map((line, index) => <p key={index}>{line}</p>)}</div>
+      </div>
+    </div>
+  </div>
+);
+
+const CompareLayered: React.FC<{ text: Text; analysis: TextAnalysis }> = ({ text, analysis }) => {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const zh = splitSentences(analysis.translation, true);
+  const en = splitSentences(text.content);
+  const length = Math.max(zh.length, en.length);
+
+  return (
+    <div className="compare layered">
+      <div className="panel">
+        <div className="panel-head"><span className="eyebrow">原文为底 · 点击查看译文</span></div>
+        <div className="panel-body layered-doc">
+          {Array.from({ length }).map((_, index) => (
+            <span
+              key={index}
+              className={`source-line${openIndex === index ? ' show' : ''}`}
+              onClick={() => setOpenIndex(openIndex === index ? null : index)}
+            >
+              {en[index] || text.content}{' '}
+              {openIndex === index && <span className="floating">{zh[index] || analysis.translation}</span>}
+            </span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const CompareViewPicker: React.FC<{
+  value: CompareView;
+  onChange: (view: CompareView) => void;
+}> = ({ value, onChange }) => (
+  <div className="compare-picker" aria-label="对照视图">
+    {compareViews.map(({ key, label, description, Icon }) => (
+      <button
+        key={key}
+        type="button"
+        aria-pressed={value === key}
+        onClick={() => onChange(key)}
+      >
+        <Icon size={16} />
+        <span>
+          <strong>{label}</strong>
+          <small>{description}</small>
+        </span>
+      </button>
+    ))}
+  </div>
+);
 
 const Practice: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
+
   const [text, setText] = useState<Text | null>(null);
   const [analysis, setAnalysis] = useState<TextAnalysis | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [mode, setMode] = useState<PracticeMode>('study');
+  const [view, setView] = useState<CompareView>('split');
+  const [input, setInput] = useState('');
   const [feedback, setFeedback] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [progress, setProgress] = useState(0);
   const [error, setError] = useState<string | null>(null);
-  const [practiceMode, setPracticeMode] = useState<'study' | 'practice' | 'completed'>('study'); // 新增练习模式状态
-  const [highlights, setHighlights] = useState<any[]>([]); // 文本高亮数据
-  const [showHistoryModal, setShowHistoryModal] = useState(false); // 历史回译模态框
-  const [practiceHistory, setPracticeHistory] = useState<any[]>([]); // 练习历史记录
-  const [countdown, setCountdown] = useState<number | null>(null); // 倒计时状态
-  const [userInput, setUserInput] = useState<string>(''); // 用户输入内容
-
-  // 高亮数据的存储键
-  const getHighlightStorageKey = (textId: string) => `highlights_${textId}`;
-
-  // 保存高亮数据到localStorage
-  const saveHighlights = (textId: string, highlightData: any[]) => {
-    try {
-      localStorage.setItem(getHighlightStorageKey(textId), JSON.stringify(highlightData));
-    } catch (error) {
-      console.warn('Failed to save highlights to localStorage:', error);
-    }
-  };
-
-  // 从localStorage加载高亮数据
-  const loadHighlights = (textId: string): any[] => {
-    try {
-      const saved = localStorage.getItem(getHighlightStorageKey(textId));
-      return saved ? JSON.parse(saved) : [];
-    } catch (error) {
-      console.warn('Failed to load highlights from localStorage:', error);
-      return [];
-    }
-  };
-
-  // 处理高亮变化
-  const handleHighlightChange = (newHighlights: any[]) => {
-    setHighlights(newHighlights);
-    if (id) {
-      saveHighlights(id, newHighlights);
-    }
-  };
-
-  // 启动倒计时
-  const startCountdown = () => {
-    setCountdown(5);
-  };
-
-  // 倒计时效果
-  useEffect(() => {
-    if (countdown === null) return;
-    
-    if (countdown === 0) {
-      navigate('/');
-      return;
-    }
-
-    const timer = setTimeout(() => {
-      setCountdown(countdown - 1);
-    }, 1000);
-
-    return () => clearTimeout(timer);
-  }, [countdown, navigate]);
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [practiceHistory, setPracticeHistory] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
       if (!id) return;
-      
       try {
         setIsLoading(true);
-        
-        // 获取分析结果和原文内容
         const [analysisResponse, textResponse] = await Promise.all([
           textAPI.getAnalysis(id),
-          textAPI.getById(id, true) // 获取包含原文的内容
+          textAPI.getById(id, true),
         ]);
-        
-        if (analysisResponse.success && analysisResponse.data) {
-          const analysisData = analysisResponse.data;
-          
-          // 设置分析结果
-          setAnalysis({
-            id: analysisData.text_id,
-            textId: analysisData.text_id,
-            difficultWords: analysisData.difficult_words || [],
-            difficulty: analysisData.difficulty,
-            translation: analysisData.translation,
-            keyPoints: analysisData.key_points,
-            createdAt: new Date().toISOString()
-          });
-          
-          // 设置文本信息（包含原文用于练习）
-          if (textResponse.success && textResponse.data) {
-            const textData = {
-              id: analysisData.text_id,
-              title: textResponse.data.title || `练习文本`,
-              content: textResponse.data.content || '', // 用于TypingComponent
-              difficultyLevel: analysisData.difficulty,
-              wordCount: analysisData.word_count,
-              createdAt: new Date().toISOString(),
-              createdBy: '',
-              type: 'translation' as const, // 设置类型
-              // topic: textResponse.data.topic // 保存题目信息
-            };
-            setText(textData);
-          }
 
-          // 加载保存的高亮数据
-          const savedHighlights = loadHighlights(id);
-          setHighlights(savedHighlights);
+        if (analysisResponse.success && analysisResponse.data && textResponse.success && textResponse.data) {
+          setAnalysis({
+            id: analysisResponse.data.text_id,
+            textId: analysisResponse.data.text_id,
+            difficultWords: analysisResponse.data.difficult_words || [],
+            difficulty: analysisResponse.data.difficulty,
+            translation: analysisResponse.data.translation,
+            keyPoints: analysisResponse.data.key_points || [],
+            createdAt: new Date().toISOString(),
+          });
+          setText({
+            id: analysisResponse.data.text_id,
+            title: textResponse.data.title || '练习文本',
+            content: textResponse.data.content || '',
+            difficultyLevel: analysisResponse.data.difficulty,
+            wordCount: analysisResponse.data.word_count,
+            createdAt: textResponse.data.created_at || new Date().toISOString(),
+            createdBy: '',
+            type: 'translation',
+            folder_id: textResponse.data.folder_id,
+          });
         } else {
-          const errorMessage = analysisResponse.message || '文本分析尚未完成，请稍后重试';
-          setError(errorMessage);
-          
-          // 如果是分析进行中的消息，启动倒计时
-          if (errorMessage.includes('分析正在进行中') || errorMessage.includes('稍安勿躁')) {
-            startCountdown();
-          }
+          setError(analysisResponse.message || textResponse.message || '文本分析尚未完成，请稍后重试');
         }
-      } catch (error: any) {
-        setError(error.response?.data?.error || error.message || '加载失败');
+      } catch (requestError: any) {
+        setError(requestError.response?.data?.error || requestError.message || '加载失败');
       } finally {
         setIsLoading(false);
       }
@@ -139,445 +188,285 @@ const Practice: React.FC = () => {
     fetchData();
   }, [id]);
 
-  // 加载特定文本的练习历史
   const loadPracticeHistory = async () => {
     if (!id) return;
-    
     try {
       const response = await practiceAPI.getTextHistory(id);
-      if (response.success && response.data) {
-        setPracticeHistory(response.data);
-      }
-    } catch (error) {
-      console.error('Failed to load practice history:', error);
+      if (response.success && response.data) setPracticeHistory(response.data);
+    } catch (historyError) {
+      console.error('Failed to load practice history:', historyError);
     }
   };
 
-  // 显示历史回译模态框
-  const handleShowHistory = () => {
-    setShowHistoryModal(true);
-    loadPracticeHistory();
-  };
-
-  const handlePracticeComplete = async (userInput: string) => {
-    if (!id) return;
+  const submitPractice = async () => {
+    if (!id || !input.trim()) return;
+    setSubmitting(true);
+    setProgress(4);
 
     try {
-      // 保存用户输入
-      setUserInput(userInput);
-
-      const response = await practiceAPI.submit({
-        text_id: id,
-        user_input: userInput
-      });
-      if (response.success && response.data) {
-        setFeedback({
-          score: response.data.score,
-          aiFeedback: {
-            score: response.data.score,
-            corrections: response.data.corrections,
-            overall: response.data.overall_feedback
-          }
-        });
-        setPracticeMode('completed');
-      } else {
-        setError(response.message || response.error || '提交失败');
-      }
-    } catch (error: any) {
-      setError(error.response?.data?.error || error.message || '提交失败');
-    }
-  };
-
-  // 流式提交处理函数
-  const handleStreamSubmit = async (userInput: string, onProgress: (progress: number) => void) => {
-    if (!id) return;
-
-    // 保存用户输入
-    setUserInput(userInput);
-
-    return new Promise<void>((resolve, reject) => {
-      practiceAPI.submitStream(
-        {
-          text_id: id,
-          user_input: userInput
-        },
-        // onProgress
-        (progress: number) => {
-          onProgress(progress);
-        },
-        // onComplete
+      await practiceAPI.submitStream(
+        { text_id: id, user_input: input },
+        (nextProgress) => setProgress(nextProgress),
         (result) => {
           setFeedback({
             score: result.score,
             aiFeedback: {
               score: result.score,
               corrections: result.corrections,
-              overall: result.overall_feedback
-            }
+              overall: result.overall_feedback,
+            },
           });
-          setPracticeMode('completed');
-          resolve();
+          setProgress(100);
+          setMode('completed');
+          setSubmitting(false);
         },
-        // onError
-        (error: string) => {
-          console.error('流式提交失败:', error);
-          setError(error);
-          reject(new Error(error));
+        (message) => {
+          setError(message);
+          setSubmitting(false);
         }
       );
-    });
-  };
-
-  const handleStartPractice = () => {
-    setPracticeMode('practice');
-  };
-
-  const handleRestart = () => {
-    setPracticeMode('study');
-    setFeedback(null);
-    setUserInput(''); // 清除用户输入
+    } catch (streamError: any) {
+      try {
+        const response = await practiceAPI.submit({ text_id: id, user_input: input });
+        if (response.success && response.data) {
+          setFeedback({
+            score: response.data.score,
+            aiFeedback: {
+              score: response.data.score,
+              corrections: response.data.corrections,
+              overall: response.data.overall_feedback,
+            },
+          });
+          setProgress(100);
+          setMode('completed');
+        } else {
+          setError(response.message || response.error || '提交失败');
+        }
+      } catch (fallbackError: any) {
+        setError(fallbackError.response?.data?.error || fallbackError.message || streamError.message || '提交失败');
+      } finally {
+        setSubmitting(false);
+      }
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="page">
+        <div className="card" style={{ padding: 36, textAlign: 'center' }}>正在载入练习…</div>
       </div>
     );
   }
 
   if (error || !text || !analysis) {
     return (
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">{error || '文本不存在'}</p>
-          
-          {/* 倒计时显示 */}
-          {countdown !== null && (
-            <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <p className="text-yellow-800 mb-2">
-                {countdown > 0 
-                  ? `${countdown} 秒后自动返回首页...` 
-                  : '正在返回首页...'
-                }
-              </p>
-              <div className="w-full bg-yellow-200 rounded-full h-2">
-                <div 
-                  className="bg-yellow-600 h-2 rounded-full transition-all duration-1000 ease-linear"
-                  style={{ width: `${((5 - countdown) / 5) * 100}%` }}
-                ></div>
-              </div>
-            </div>
-          )}
-          
-          <button 
-            onClick={() => {
-              setCountdown(null); // 停止倒计时
-              navigate('/');
-            }} 
-            className="btn-primary"
-            disabled={countdown === 0}
-          >
-            {countdown !== null ? '立即返回首页' : '返回首页'}
-          </button>
+      <div className="page">
+        <div className="card" style={{ padding: 36, textAlign: 'center' }}>
+          <p style={{ color: 'var(--bad)', marginBottom: 16 }}>{error || '文本不存在'}</p>
+          <button type="button" className="btn accent" onClick={() => navigate('/')}>返回首页</button>
         </div>
       </div>
     );
   }
 
+  const corrections = feedback?.aiFeedback?.corrections || [];
+
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center space-x-4">
-          <button
-            onClick={() => navigate('/')}
-            className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeft size={20} />
-            <span>返回</span>
+    <div className="page">
+      <div className="practice-head">
+        <div>
+          <button className="btn ghost sm" onClick={() => navigate('/')} type="button" style={{ marginBottom: 8 }}>
+            <ArrowLeft size={13} /> 返回材料
           </button>
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {text.title || '练习文本'}
-            </h1>
-            <p className="text-gray-600">
-              难度: {text.difficultyLevel}/5 | {text.wordCount} 词
-            </p>
+          <div className="eyebrow">Translation inversion</div>
+          <h1>{text.title || '练习文本'}</h1>
+          <div className="meta">
+            {pips(text.difficultyLevel)}
+            <span>难度 {text.difficultyLevel}/5</span>
+            <span>·</span>
+            <span>{text.wordCount} 词</span>
           </div>
         </div>
-        
-        <div className="flex items-center space-x-2">
-          {/* 练习完成后显示重新开始按钮 */}
-          {practiceMode === 'completed' && (
-            <button
-              onClick={handleRestart}
-              className="flex items-center space-x-2 px-3 py-2 bg-primary-100 text-primary-700 rounded-md hover:bg-primary-200 transition-colors"
-            >
-              <RotateCcw size={18} />
-              <span>重新学习</span>
+        <div className="actions">
+          {mode === 'completed' && (
+            <button className="btn" type="button" onClick={() => { setMode('study'); setInput(''); setFeedback(null); }}>
+              <RotateCcw size={14} /> 再来一次
             </button>
           )}
-
-          {/* 练习模式显示返回学习按钮 */}
-          {practiceMode === 'practice' && (
-            <button
-              onClick={() => setPracticeMode('study')}
-              className="flex items-center space-x-2 px-3 py-2 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 transition-colors"
-            >
-              <ArrowLeft size={18} />
-              <span>返回学习</span>
+          {mode === 'practice' && (
+            <button className="btn" type="button" onClick={() => setMode('study')}>
+              <ArrowLeft size={14} /> 返回学习
             </button>
           )}
-
-          {/* 历史回译按钮 */}
           <button
-            onClick={handleShowHistory}
-            className="flex items-center space-x-2 px-3 py-2 bg-purple-100 text-purple-700 rounded-md hover:bg-purple-200 transition-colors"
+            className="btn ghost"
+            type="button"
+            onClick={() => {
+              setShowHistoryModal(true);
+              loadPracticeHistory();
+            }}
           >
-            <History size={18} />
-            <span>历史回译</span>
+            <History size={14} /> 历史回译
           </button>
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-5 gap-8">
-        {/* 左侧：中文翻译 */}
-        <div className="lg:col-span-2 space-y-6">
-          {/* 作文题目显示框 - 仅当类型为作文且有题目时显示 */}
-          <div className="card">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">
-              中文翻译
-            </h2>
-            <div className="prose prose-gray max-w-none">
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {analysis.translation}
-              </p>
-            </div>
-          </div>
+      {mode === 'study' && (
+        <>
+          <CompareViewPicker value={view} onChange={setView} />
 
-          {/* 难词解释 */}
-          {analysis.difficultWords && analysis.difficultWords.length > 0 && (
-            <div className="card">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">难词解释</h3>
-              <div className="space-y-3">
-                {analysis.difficultWords.map((word, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 bg-gray-50 rounded-lg">
-                    <div className="flex-shrink-0">
-                      <span className="inline-flex items-center justify-center w-6 h-6 bg-primary-600 text-white text-xs font-medium rounded-full">
-                        {index + 1}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium text-gray-900">
-                        {word.word}
-                      </div>
-                      <div className="text-sm text-gray-600 mt-1">
-                        {word.meaning}
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+          {view === 'split' && <CompareSplit text={text} analysis={analysis} />}
+          {view === 'layered' && <CompareLayered text={text} analysis={analysis} />}
 
-        </div>
-
-        {/* 右侧：练习区域 */}
-        <div className="lg:col-span-3 space-y-6">
-          {practiceMode === 'study' && (
-            // 学习模式：显示原文和开始练习按钮
-            <div className="space-y-6">
-              <div className="card">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">英文原文</h2>
-                <div className="mb-6">
-                  <div className="w-full max-w-none prose prose-lg prose-gray leading-relaxed">
-                    <TextHighlighter 
-                      text={text.content}
-                      highlights={highlights}
-                      onHighlightChange={handleHighlightChange}
-                      className="mb-4 text-base leading-loose whitespace-pre-wrap"
-                    />
-                  </div>
+          {analysis.difficultWords.length > 0 && (
+            <>
+              <div className="section-head" style={{ marginTop: 36 }}>
+                <div>
+                  <div className="eyebrow">Difficult words</div>
+                  <h2>难词与搭配</h2>
                 </div>
-                <div className="border-t pt-4">
-                  <p className="text-sm text-gray-600 mb-4">
-                    📖 请仔细阅读上面的英文原文和左侧的中文翻译，理解文本的含义和语法结构。你可以选中文本并添加高亮标记重点内容。
-                  </p>
-                  <button
-                    onClick={handleStartPractice}
-                    className="w-full bg-primary-600 hover:bg-primary-700 text-white px-6 py-3 rounded-lg font-medium transition-colors duration-200 flex items-center justify-center space-x-2"
-                  >
-                    <span>🚀 开始练习</span>
-                  </button>
-                </div>
+                <div className="dim tiny">进入练习后原文会被遮蔽</div>
               </div>
-            </div>
-          )}
-
-          {practiceMode === 'practice' && (
-            // 练习模式：隐藏原文，显示打字练习
-            <div className="card">
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">回译练习</h2>
-              <div className="mb-4 p-4 bg-blue-50 rounded-lg">
-                <p className="text-blue-800 text-sm">
-                  💡 现在请根据左侧的中文翻译，尝试写出对应的英文表达。不要求完全一致，重点是语法正确、语义清楚。
-                </p>
-              </div>
-              <TypingComponent
-                targetText={text.content}
-                onComplete={handlePracticeComplete}
-                onSubmit={handleStreamSubmit}
-                showTargetText={false}
-              />
-            </div>
-          )}
-
-          {practiceMode === 'completed' && (
-            // 完成模式：显示结果
-            <div className="space-y-6">
-              <div className="card">
-                <h2 className="text-lg font-semibold text-gray-900 mb-4">练习结果</h2>
-                {feedback && (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-between p-4 bg-gray-50 rounded-lg">
-                      <span className="font-medium">得分</span>
-                      <span className={`text-2xl font-bold ${
-                        feedback.score >= 80 ? 'text-green-600' :
-                        feedback.score >= 60 ? 'text-yellow-600' : 'text-red-600'
-                      }`}>
-                        {feedback.score}/100
-                      </span>
-                    </div>
-
-                    {/* 原文内容 */}
-                    <div className="p-4 bg-blue-50 rounded-lg">
-                      <h4 className="font-medium text-blue-900 mb-2">原文内容</h4>
-                      <p className="text-blue-800 leading-relaxed whitespace-pre-wrap">{text.content}</p>
-                    </div>
-
-                    {/* 您的回译 */}
-                    <div className="p-4 bg-purple-50 rounded-lg">
-                      <h4 className="font-medium text-purple-900 mb-2">您的回译</h4>
-                      <p className="text-purple-800 leading-relaxed whitespace-pre-wrap">{userInput}</p>
-                    </div>
-
-                    {feedback.aiFeedback?.overall && (
-                      <div className="p-4 bg-green-50 rounded-lg">
-                        <h4 className="font-medium text-green-900 mb-2">AI 评价</h4>
-                        <p className="text-green-800">{feedback.aiFeedback.overall}</p>
-                      </div>
-                    )}
-
-                    {feedback.aiFeedback?.corrections && feedback.aiFeedback.corrections.length > 0 && (
-                      <div className="p-4 bg-yellow-50 rounded-lg">
-                        <h4 className="font-medium text-yellow-900 mb-3">建议改进</h4>
-                        <div className="space-y-2">
-                          {feedback.aiFeedback.corrections.map((correction: any, index: number) => (
-                            <div key={index} className="text-sm">
-                              <div className="flex items-start space-x-2">
-                                <span className="text-red-600 english-text bg-red-100 px-2 py-1 rounded">
-                                  {correction.original}
-                                </span>
-                                <span className="text-gray-500">→</span>
-                                <span className="text-green-600 english-text bg-green-100 px-2 py-1 rounded">
-                                  {correction.suggestion}
-                                </span>
-                              </div>
-                              <p className="text-yellow-800 mt-1 ml-2">{correction.reason}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* 历史回译模态框 */}
-      {showHistoryModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-white rounded-lg shadow-lg max-w-4xl w-full mx-4 max-h-[80vh] overflow-hidden">
-            <div className="flex justify-between items-center p-6 border-b">
-              <h2 className="text-xl font-semibold text-gray-900">历史回译记录</h2>
-              <button
-                onClick={() => setShowHistoryModal(false)}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
-              >
-                ×
-              </button>
-            </div>
-            
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-              {practiceHistory.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">该文本还没有练习历史记录</p>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {practiceHistory.map((record) => (
-                    <div key={record.id} className="border rounded-lg p-4 bg-gray-50">
-                      <div className="flex justify-between items-start mb-3">
-                        <div className="text-sm text-gray-600">
-                          练习时间: {new Date(record.timestamp).toLocaleString('zh-CN')}
-                        </div>
-                        <div className={`px-2 py-1 rounded text-sm font-medium ${
-                          record.score >= 80 ? 'bg-green-100 text-green-700' : 
-                          record.score >= 60 ? 'bg-yellow-100 text-yellow-700' : 
-                          'bg-red-100 text-red-700'
-                        }`}>
-                          {record.score}分
-                        </div>
-                      </div>
-                      
-                      <div className="space-y-3">
-                        <div>
-                          <h4 className="font-medium text-gray-900 mb-1">您的回译：</h4>
-                          <p className="text-gray-700 bg-white p-3 rounded border">
-                            {record.user_input}
-                          </p>
-                        </div>
-                        
-                        {record.ai_evaluation.overall_feedback && (
-                          <div>
-                            <h4 className="font-medium text-gray-900 mb-1">AI评价：</h4>
-                            <p className="text-gray-700 bg-blue-50 p-3 rounded border">
-                              {record.ai_evaluation.overall_feedback}
-                            </p>
-                          </div>
-                        )}
-                        
-                        {record.ai_evaluation.corrections && record.ai_evaluation.corrections.length > 0 && (
-                          <div>
-                            <h4 className="font-medium text-gray-900 mb-2">建议改进：</h4>
-                            <div className="space-y-2">
-                              {record.ai_evaluation.corrections.map((correction: any, corrIndex: number) => (
-                                <div key={corrIndex} className="bg-yellow-50 p-2 rounded border">
-                                  <div className="flex items-center space-x-2 text-sm">
-                                    <span className="bg-red-100 text-red-700 px-2 py-1 rounded english-text">
-                                      {correction.original}
-                                    </span>
-                                    <span>→</span>
-                                    <span className="bg-green-100 text-green-700 px-2 py-1 rounded english-text">
-                                      {correction.suggestion}
-                                    </span>
-                                  </div>
-                                  <p className="text-gray-600 text-sm mt-1">{correction.reason}</p>
-                                </div>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                      </div>
+              <div className="card" style={{ padding: '8px 24px' }}>
+                <div className="difficult-words">
+                  {analysis.difficultWords.map((word, index) => (
+                    <div className="dw" key={index}>
+                      <div className="word">{word.word}</div>
+                      <div className="meaning">{word.meaning}</div>
                     </div>
                   ))}
                 </div>
+              </div>
+            </>
+          )}
+
+          <div style={{ marginTop: 28, display: 'flex', justifyContent: 'center' }}>
+            <button className="btn accent lg" type="button" onClick={() => setMode('practice')}>
+              <Check size={14} /> 遮住原文，开始回译
+            </button>
+          </div>
+        </>
+      )}
+
+      {mode === 'practice' && (
+        <div className="compare split">
+          <div className="panel">
+            <div className="panel-head">
+              <span className="eyebrow">中文译文 · 仅此可见</span>
+              <span className="tag accent">回译模式</span>
+            </div>
+            <div className="panel-body">
+              <div className="prose zh">{analysis.translation.split('\n').map((line, index) => <p key={index}>{line}</p>)}</div>
+            </div>
+          </div>
+          <div className="panel typewriter-shell">
+            <div className="panel-head">
+              <span className="eyebrow">你的英文回译</span>
+              <span className="tag">原文已遮蔽</span>
+            </div>
+            <div className="stats">
+              <span className="stat"><strong>{input.length}</strong> chars</span>
+              <span className="sep">·</span>
+              <span className="stat"><strong>{input.trim() ? input.trim().split(/\s+/).length : 0}</strong> words</span>
+              <span className="sep">·</span>
+              <span className="stat">target ≈ <strong>{text.wordCount}</strong></span>
+            </div>
+            <textarea
+              className="tw-input"
+              placeholder="Begin writing in English. Don't aim for perfect recall — aim for grammatical, natural prose that carries the meaning across…"
+              value={input}
+              onChange={(event) => setInput(event.target.value)}
+              disabled={submitting}
+            />
+            <div style={{ padding: '14px 20px', borderTop: '1px solid var(--line-soft)', display: 'flex', gap: 12, alignItems: 'center' }}>
+              {submitting ? (
+                <>
+                  <div className="dim tiny">AI 正在比对你的版本与原文 …</div>
+                  <div style={{ flex: 1 }}>
+                    <div className="progress"><div className="bar" style={{ width: `${progress}%` }} /></div>
+                  </div>
+                  <span className="mono tiny dim">{progress}%</span>
+                </>
+              ) : (
+                <>
+                  <span className="dim tiny">提交后会保存到历史记录</span>
+                  <span className="spacer" />
+                  <button className="btn" type="button" onClick={() => setMode('study')}>放弃</button>
+                  <button className="btn accent" type="button" onClick={submitPractice} disabled={!input.trim()}>
+                    <Check size={14} /> 提交回译
+                  </button>
+                </>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {mode === 'completed' && (
+        <>
+          <div className="score-plate">
+            <div className="score-big">{feedback?.score ?? 0}<small> / 100</small></div>
+            <div className="judge">
+              <span className="label">AI 评价 · Streaming</span>
+              <StreamingText text={feedback?.aiFeedback?.overall || '暂无评价'} />
+            </div>
+          </div>
+
+          <div className="compare split" style={{ marginTop: 28 }}>
+            <div className="panel">
+              <div className="panel-head"><span className="eyebrow">英文原文</span><span className="tag good">参考答案</span></div>
+              <div className="panel-body">
+                <div className="prose">{text.content.split('\n').map((line, index) => <p key={index}>{line}</p>)}</div>
+              </div>
+            </div>
+            <div className="panel">
+              <div className="panel-head"><span className="eyebrow">你的回译</span><span className="tag accent">作答</span></div>
+              <div className="panel-body">
+                <div className="prose">{input.split('\n').map((line, index) => <p key={index}>{line || <span className="dim">…</span>}</p>)}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="section-head">
+            <div><div className="eyebrow">Corrections</div><h2>修订建议 · {corrections.length} 处</h2></div>
+          </div>
+          <div className="correction-list">
+            {corrections.length === 0 ? (
+              <div className="card" style={{ padding: 20 }}>暂无具体修订建议。</div>
+            ) : corrections.map((correction: any, index: number) => (
+              <div className="correction" key={index}>
+                <div className="swap">
+                  <span className="from">{correction.original}</span>
+                  <span className="arrow">→</span>
+                  <span className="to">{correction.suggestion}</span>
+                </div>
+                <div className="why">{correction.reason}</div>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {showHistoryModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">
+          <div className="panel" style={{ width: 'min(920px, calc(100vw - 32px))', maxHeight: '82vh' }}>
+            <div className="panel-head">
+              <span className="eyebrow">历史回译记录</span>
+              <button className="icon-btn" type="button" onClick={() => setShowHistoryModal(false)}>×</button>
+            </div>
+            <div className="panel-body" style={{ overflowY: 'auto' }}>
+              {practiceHistory.length === 0 ? (
+                <p className="dim">该文本还没有练习历史记录</p>
+              ) : practiceHistory.map((record) => (
+                <div key={record.id} className="tl-card" style={{ marginBottom: 14 }}>
+                  <div className="head">
+                    <h4>{new Date(record.timestamp).toLocaleString('zh-CN')}</h4>
+                    <span className={`score ${record.score >= 85 ? 'good' : record.score >= 70 ? 'warn' : 'bad'}`}>{record.score}</span>
+                  </div>
+                  <div className="preview">「{record.user_input}」</div>
+                  {record.ai_evaluation?.overall_feedback && <div className="feedback">— {record.ai_evaluation.overall_feedback}</div>}
+                </div>
+              ))}
             </div>
           </div>
         </div>

@@ -17,7 +17,7 @@ from app.schemas.text import (
     APIResponse
 )
 from app.services.ai_config_service import create_user_ai_service, get_user_ai_config
-from app.services.ai_service import ai_service
+from app.services.ai_service import ai_service, DEEPSEEK_MODEL_FLASH
 from app.services.template_service import template_service
 from app.services.data_persistence import data_persistence
 from app.services.text_service import (
@@ -28,17 +28,17 @@ from app.services.text_service import (
 
 router = APIRouter(prefix="/api/texts", tags=["texts"])
 
-# 内存存储（简化版，生产环境应使用数据库）
+# 运行时内存缓存，持久化由 SQLite 负责
 texts_storage: Dict[str, Dict[str, Any]] = {}
 analyses_storage: Dict[str, Dict[str, Any]] = {}
 practice_history: List[PracticeHistoryRecord] = []
 folders_storage: Dict[str, Dict[str, Any]] = {}
 
 def initialize_data():
-    """初始化数据，从本地文件加载"""
+    """初始化数据，从 SQLite 加载"""
     global practice_history, texts_storage, analyses_storage, folders_storage
     try:
-        print("🔄 正在从本地文件加载数据...")
+        print("🔄 正在从 SQLite 加载数据...")
         loaded_history, loaded_texts, loaded_analyses, loaded_folders = data_persistence.load_all_data()
         
         practice_history = loaded_history
@@ -51,10 +51,10 @@ def initialize_data():
         print(f"❌ 数据加载失败: {e}")
 
 def save_data():
-    """保存所有数据到本地文件"""
+    """保存所有数据到 SQLite"""
     try:
-        data_persistence.save_all_data(practice_history, texts_storage, analyses_storage, folders_storage)
-        print("💾 数据已自动保存到本地文件")
+        data_persistence.save_all_data(practice_history, texts_storage, analyses_storage)
+        print("💾 数据已自动保存到 SQLite")
     except Exception as e:
         print(f"❌ 数据保存失败: {e}")
 
@@ -66,27 +66,35 @@ initialize_data()
 # 注意：原有的AI配置路由（/ai/status, /ai/configure, /ai/providers, /ai/switch）
 # 已被移除，因为现在使用浏览器本地存储来管理用户的DeepSeek API key配置
 
-def calculate_json_progress(content: str) -> int:
+EVALUATE_FIELD_WEIGHTS = {
+    '"score"': 25,
+    '"corrections"': 25,
+    '"overall_feedback"': 25,
+    '"is_acceptable"': 25,
+}
+
+ANALYZE_FIELD_WEIGHTS = {
+    '"translation"': 35,
+    '"difficult_words"': 25,
+    '"difficulty"': 15,
+    '"key_points"': 15,
+}
+
+
+def calculate_json_progress(content: str, field_weights: Optional[Dict[str, int]] = None) -> int:
     """根据JSON字段的出现情况计算进度"""
+    weights = field_weights if field_weights is not None else EVALUATE_FIELD_WEIGHTS
     progress = 0
-    
-    # 定义关键字段及其权重
-    key_fields = {
-        '"score"': 25,
-        '"corrections"': 25, 
-        '"overall_feedback"': 25,
-        '"is_acceptable"': 25
-    }
-    
-    for field, weight in key_fields.items():
+
+    for field, weight in weights.items():
         if field in content:
             progress += weight
-    
+
     # 如果包含完整的JSON结构，给予额外分数
     if content.count('{') > 0 and content.count('}') > 0:
         if content.count('{') == content.count('}'):
             progress = min(100, progress + 10)
-    
+
     return min(100, progress)
 
 @router.post("/upload", response_model=APIResponse)
@@ -126,6 +134,95 @@ async def upload_text(request: TextUploadRequest, http_request: Request, backgro
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"文本上传失败: {str(e)}")
+
+@router.post("/upload-stream")
+async def upload_text_stream(request: TextUploadRequest, http_request: Request):
+    """流式上传文本：边写入材料边推送 AI 分析进度（SSE）。"""
+    user_config = get_user_ai_config(http_request)
+    if not user_config:
+        raise HTTPException(
+            status_code=400,
+            detail="请先在浏览器中配置DeepSeek API密钥"
+        )
+
+    created = create_text_record(
+        content=request.content,
+        title=request.title,
+        practice_type=request.practice_type or "translation",
+        topic=request.topic,
+        folder_id=getattr(request, 'folder_id', None),
+        texts_storage=texts_storage,
+        save_callback=save_data
+    )
+    text_id = created["text_id"]
+    word_count = created["word_count"]
+
+    async def generate_stream():
+        try:
+            user_ai_service = create_user_ai_service(user_config)
+            prompt = template_service.render_analyze_text_prompt(request.content)
+
+            init_chunk = {
+                "type": "init",
+                "text_id": text_id,
+                "word_count": word_count,
+                "progress": 5,
+            }
+            yield f"data: {json.dumps(init_chunk, ensure_ascii=False)}\n\n"
+
+            collected = ""
+            async for delta in user_ai_service.call_ai_api_stream(prompt, model=DEEPSEEK_MODEL_FLASH):
+                collected += delta
+                progress = calculate_json_progress(collected, ANALYZE_FIELD_WEIGHTS)
+                progress_chunk = {
+                    "type": "progress",
+                    "progress": min(90, progress),
+                    "content": delta,
+                    "full_content": collected,
+                }
+                yield f"data: {json.dumps(progress_chunk, ensure_ascii=False)}\n\n"
+
+            if not collected.strip():
+                raise Exception("AI响应为空")
+
+            analysis_result = user_ai_service.extract_json_from_response(collected)
+            from app.services.text_service import normalize_analysis_result
+            normalized = normalize_analysis_result(analysis_result, request.content)
+            stored = {"text_id": text_id, **normalized}
+            analyses_storage[text_id] = stored
+            save_data()
+
+            complete_chunk = {
+                "type": "complete",
+                "text_id": text_id,
+                "progress": 100,
+                "result": stored,
+            }
+            yield f"data: {json.dumps(complete_chunk, ensure_ascii=False)}\n\n"
+            yield "data: [DONE]\n\n"
+
+        except Exception as exc:
+            # 分析失败时回滚材料记录，避免遗留无分析的文本
+            texts_storage.pop(text_id, None)
+            analyses_storage.pop(text_id, None)
+            save_data()
+            error_chunk = {
+                "type": "error",
+                "error": str(exc),
+                "progress": 0,
+            }
+            yield f"data: {json.dumps(error_chunk, ensure_ascii=False)}\n\n"
+
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        },
+    )
+
 
 async def analyze_text_background(text_id: str, content: str, user_config: Dict[str, str]):
     """后台分析文本"""
@@ -169,7 +266,7 @@ async def re_analyze_imported_text(text_id: str, content: str, existing_translat
         # 保持原有的简化分析结果
 
 @router.get("/{text_id}/analysis", response_model=APIResponse)
-async def get_text_analysis(text_id: str):
+async def get_text_analysis(text_id: str, http_request: Request):
     """获取文本分析结果"""
     try:
         # 检查文本是否存在
@@ -187,6 +284,26 @@ async def get_text_analysis(text_id: str):
             )
         
         analysis = analyses_storage[text_id]
+        if analysis.get("translation") == "分析失败，请重试":
+            user_config = get_user_ai_config(http_request)
+            if user_config:
+                try:
+                    user_ai_service = create_user_ai_service(user_config)
+                    analysis = await analyze_text_into_storage(
+                        text_id=text_id,
+                        content=texts_storage[text_id].get("content", ""),
+                        user_ai_service=user_ai_service,
+                        analyses_storage=analyses_storage,
+                        save_callback=save_data,
+                        fallback_on_error=False
+                    )
+                    print(f"✅ 文本 {text_id} 重新分析完成")
+                except Exception as retry_error:
+                    print(f"❌ 文本 {text_id} 重新分析失败: {retry_error}")
+                    return APIResponse(
+                        success=False,
+                        message=f"文本重新分析失败: {retry_error}"
+                    )
         
         return APIResponse(
             success=True,

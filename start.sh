@@ -9,19 +9,38 @@ FRONTEND_DIR="$ROOT_DIR/frontend"
 LOG_DIR="$ROOT_DIR/.logs"
 mkdir -p "$LOG_DIR"
 
+if command -v python3.12 >/dev/null 2>&1; then
+  PYTHON_BIN="$(command -v python3.12)"
+elif command -v python3.11 >/dev/null 2>&1; then
+  PYTHON_BIN="$(command -v python3.11)"
+else
+  echo "❌ 需要 Python 3.11 或 3.12。当前依赖不兼容 Python 3.13。"
+  exit 1
+fi
+PYTHON_VERSION="$("$PYTHON_BIN" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")')"
+
 echo "🚀 启动 Trans Invert 回译法语言练习平台（本地模式）"
 
 # ---------- 后端 ----------
 echo "🐍 准备后端环境..."
 cd "$BACKEND_DIR"
 
+if [ -d ".venv" ]; then
+  VENV_VERSION="$(".venv/bin/python" -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}")' 2>/dev/null || true)"
+  if [ "$VENV_VERSION" != "$PYTHON_VERSION" ]; then
+    echo "   当前 .venv 使用 Python ${VENV_VERSION}，重建为 Python ${PYTHON_VERSION}"
+    rm -rf .venv
+  fi
+fi
+
 if [ ! -d ".venv" ]; then
   echo "   创建虚拟环境 .venv"
-  python3 -m venv .venv
+  "$PYTHON_BIN" -m venv .venv
 fi
 
 # shellcheck disable=SC1091
 source .venv/bin/activate
+echo "   使用 Python $(python -c 'import sys; print(f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}")')"
 pip install --quiet --upgrade pip
 pip install --quiet -r requirements.txt
 

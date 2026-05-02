@@ -1,4 +1,4 @@
-"""统一备份/恢复服务（基于文件存储）"""
+"""统一备份/恢复服务（基于持久化存储）"""
 from __future__ import annotations
 
 import hashlib
@@ -231,4 +231,3 @@ class BackupService:
 
 
 backup_service = BackupService()
-

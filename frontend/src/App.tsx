@@ -9,7 +9,7 @@ import Review from './pages/Review';
 function App() {
   // 简化版本：移除认证系统，直接显示主要功能
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div>
       <Routes>
         <Route path="/" element={<Layout />}>
           <Route index element={<Home />} />

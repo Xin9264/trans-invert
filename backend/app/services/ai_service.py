@@ -3,13 +3,14 @@ import json
 import os
 import re
 from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from openai import AsyncOpenAI, OpenAI
 
 
 DEEPSEEK_BASE_URL = "https://api.deepseek.com"
 DEEPSEEK_MODEL = "deepseek-v4-pro"
+DEEPSEEK_MODEL_FLASH = "deepseek-v4-flash"
 
 
 class AIProvider(str, Enum):
@@ -228,11 +229,11 @@ class AIService:
             },
         }
 
-    async def call_ai_api(self, prompt: str, json_mode: bool = True) -> str:
+    async def call_ai_api(self, prompt: str, json_mode: bool = True, model: Optional[str] = None) -> str:
         """Call DeepSeek Chat Completions API."""
         try:
             api_params: Dict[str, Any] = {
-                "model": DEEPSEEK_MODEL,
+                "model": model or DEEPSEEK_MODEL,
                 "messages": [
                     {
                         "role": "system",
@@ -243,7 +244,6 @@ class AIService:
                         "content": prompt,
                     },
                 ],
-                "reasoning_effort": "high",
                 "extra_body": {"thinking": {"type": "enabled"}},
             }
             if json_mode:
@@ -259,11 +259,11 @@ class AIService:
         except Exception as e:
             raise Exception(f"DeepSeek API请求失败: {str(e)}")
 
-    async def call_ai_api_stream(self, prompt: str, json_mode: bool = True):
+    async def call_ai_api_stream(self, prompt: str, json_mode: bool = True, model: Optional[str] = None):
         """Stream DeepSeek Chat Completions API."""
         try:
             stream_params: Dict[str, Any] = {
-                "model": DEEPSEEK_MODEL,
+                "model": model or DEEPSEEK_MODEL,
                 "messages": [
                     {
                         "role": "system",
@@ -275,7 +275,6 @@ class AIService:
                     },
                 ],
                 "stream": True,
-                "reasoning_effort": "high",
                 "extra_body": {"thinking": {"type": "enabled"}},
             }
             if json_mode:

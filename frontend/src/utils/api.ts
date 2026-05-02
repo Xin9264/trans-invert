@@ -259,6 +259,79 @@ export const textAPI = {
   deleteMaterial: async (textId: string): Promise<APIResponse<any>> => {
     const response = await api.delete(`/api/texts/${textId}`) as APIResponse<any>;
     return response;
+  },
+
+  // 流式上传：实时返回分析进度
+  uploadStream: async (
+    request: TextUploadRequest,
+    onProgress: (progress: number, fullContent: string) => void,
+    onComplete: (textId: string) => void,
+    onError: (error: string) => void,
+    onInit?: (textId: string, wordCount: number) => void
+  ): Promise<void> => {
+    try {
+      const aiConfig = localStorageManager.getAIConfig();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (aiConfig) {
+        headers['X-AI-Provider'] = DEEPSEEK_PROVIDER;
+        headers['X-AI-Key'] = aiConfig.api_key;
+        if (aiConfig.base_url) headers['X-AI-Base-URL'] = aiConfig.base_url;
+        headers['X-AI-Model'] = DEEPSEEK_MODEL;
+      }
+
+      const response = await fetch(`${API_BASE_URL}/api/texts/upload-stream`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        const text = await response.text().catch(() => '');
+        throw new Error(text || `HTTP ${response.status}`);
+      }
+
+      const reader = response.body?.getReader();
+      if (!reader) throw new Error('无法获取响应流');
+
+      const decoder = new TextDecoder();
+      let buffer = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || '';
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          const data = line.slice(6);
+          if (data.trim() === '[DONE]') return;
+
+          try {
+            const parsed = JSON.parse(data);
+            if (parsed.type === 'init') {
+              onInit?.(parsed.text_id, parsed.word_count);
+              onProgress(parsed.progress || 0, '');
+            } else if (parsed.type === 'progress') {
+              onProgress(parsed.progress || 0, parsed.full_content || '');
+            } else if (parsed.type === 'complete') {
+              onProgress(100, parsed.full_content || '');
+              onComplete(parsed.text_id);
+              return;
+            } else if (parsed.type === 'error') {
+              onError(parsed.error || '分析失败');
+              return;
+            }
+          } catch (parseErr) {
+            console.warn('解析流式数据失败:', parseErr, data);
+          }
+        }
+      }
+    } catch (err) {
+      onError(err instanceof Error ? err.message : '未知错误');
+    }
   }
 };
 

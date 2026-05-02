@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Brain, BookOpen, Target, TrendingUp, RefreshCw, CheckCircle, AlertCircle } from 'lucide-react';
-import { reviewAPI, ReviewStats, ReviewMaterial } from '../utils/api';
+import { AlertCircle, Brain, CheckCircle, RefreshCw, Target } from 'lucide-react';
+import { reviewAPI, ReviewMaterial, ReviewStats } from '../utils/api';
 
 const Review: React.FC = () => {
   const [stats, setStats] = useState<ReviewStats | null>(null);
@@ -10,43 +10,38 @@ const Review: React.FC = () => {
   const [generatedMaterial, setGeneratedMaterial] = useState<ReviewMaterial | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  // 获取复习统计
   const fetchStats = async () => {
     setIsLoadingStats(true);
     try {
       const response = await reviewAPI.getStats();
-      
       if (response.success && response.data) {
         setStats(response.data);
       } else {
         throw new Error(response.error || '获取统计失败');
       }
-    } catch (error) {
-      console.error('获取复习统计失败:', error);
+    } catch (requestError) {
+      console.error('获取复习统计失败:', requestError);
       setError('获取复习统计失败');
     } finally {
       setIsLoadingStats(false);
     }
   };
 
-  // 生成复习材料
   const generateReviewMaterial = async () => {
     setIsGenerating(true);
     setError(null);
-    
+
     try {
       const response = await reviewAPI.generate();
-      
       if (response.success && response.data) {
         setGeneratedMaterial(response.data);
-        // 刷新统计数据
         fetchStats();
       } else {
         throw new Error(response.error || '生成复习材料失败');
       }
-    } catch (error) {
-      console.error('生成复习材料失败:', error);
-      setError(error instanceof Error ? error.message : '生成失败');
+    } catch (requestError) {
+      console.error('生成复习材料失败:', requestError);
+      setError(requestError instanceof Error ? requestError.message : '生成失败');
     } finally {
       setIsGenerating(false);
     }
@@ -58,189 +53,129 @@ const Review: React.FC = () => {
 
   if (isLoadingStats) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      <div className="page">
+        <div className="card" style={{ padding: 36, textAlign: 'center' }}>正在读取复习统计…</div>
       </div>
     );
   }
 
   return (
-    <div className="px-4 sm:px-6 lg:px-8 py-8">
-      {/* Header */}
-      <div className="text-center mb-12">
-        <div className="flex justify-center mb-4">
-          <div className="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center">
-            <Brain className="text-purple-600" size={32} />
-          </div>
+    <div className="page">
+      <div className="section-head" style={{ marginTop: 0, borderBottom: 'none', paddingBottom: 0 }}>
+        <div>
+          <div className="eyebrow">Adaptive review</div>
+          <h2 className="page-title" style={{ marginTop: 6 }}>智能复习</h2>
+          <p className="page-sub">基于历史薄弱处生成新材料，重点练搭配、句法和表达精度。</p>
         </div>
-        <h1 className="text-4xl font-bold text-gray-900 mb-4">
-          智能复习
-        </h1>
-        <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-          基于您的练习历史，AI 为您生成个性化复习材料，针对性地改善薄弱环节
-        </p>
+        <button className="btn accent" type="button" onClick={generateReviewMaterial} disabled={isGenerating || !stats || stats.total_practiced === 0}>
+          <Brain size={14} /> {isGenerating ? '生成中…' : '生成复习材料'}
+        </button>
       </div>
 
-      {/* Error Message */}
       {error && (
-        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start space-x-3">
-          <AlertCircle className="text-red-500 mt-0.5" size={20} />
-          <div>
-            <h3 className="font-medium text-red-800">生成失败</h3>
-            <p className="text-red-600 text-sm">{error}</p>
-          </div>
+        <div className="card" style={{ marginTop: 24, padding: 16, color: 'var(--bad)', background: 'var(--bad-soft)' }}>
+          <div className="row"><AlertCircle size={18} /> {error}</div>
         </div>
       )}
 
-      {/* Stats Overview */}
       {stats && (
-        <div className="grid md:grid-cols-4 gap-6 mb-12">
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="bg-blue-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-              <BookOpen className="text-blue-600" size={24} />
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{stats.total_practiced}</div>
-            <div className="text-sm text-gray-500">已练习材料</div>
+        <div className="stat-row" style={{ marginTop: 32 }}>
+          <div className="stat">
+            <div className="label">Practiced</div>
+            <div className="value">{stats.total_practiced}</div>
+            <div className="delta">已练习材料</div>
           </div>
-          
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="bg-orange-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-              <RefreshCw className="text-orange-600" size={24} />
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{stats.need_review}</div>
-            <div className="text-sm text-gray-500">需要复习</div>
+          <div className="stat">
+            <div className="label">Need review</div>
+            <div className="value">{stats.need_review}</div>
+            <div className="delta down">需要回炉</div>
           </div>
-          
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="bg-green-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-              <CheckCircle className="text-green-600" size={24} />
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{stats.mastered}</div>
-            <div className="text-sm text-gray-500">已掌握</div>
+          <div className="stat">
+            <div className="label">Mastered</div>
+            <div className="value">{stats.mastered}</div>
+            <div className="delta">稳定掌握</div>
           </div>
-          
-          <div className="bg-white rounded-lg shadow p-6 text-center">
-            <div className="bg-purple-100 w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-3">
-              <Target className="text-purple-600" size={24} />
-            </div>
-            <div className="text-2xl font-bold text-gray-900">{stats.focus_areas.length}</div>
-            <div className="text-sm text-gray-500">重点领域</div>
+          <div className="stat">
+            <div className="label">Focus areas</div>
+            <div className="value">{stats.focus_areas.length}</div>
+            <div className="delta">重点领域</div>
           </div>
         </div>
       )}
 
-      {/* Focus Areas */}
-      {stats && stats.focus_areas.length > 0 && (
-        <div className="bg-white rounded-lg shadow mb-8">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-              <Target className="mr-2" size={20} />
-              需要重点复习的领域
-            </h2>
+      <div className="compare split" style={{ marginTop: 34 }}>
+        <div className="panel">
+          <div className="panel-head">
+            <span className="eyebrow">重点领域</span>
+            <span className="tag">{stats?.focus_areas.length || 0} items</span>
           </div>
-          <div className="p-6">
-            <div className="flex flex-wrap gap-2">
-              {stats.focus_areas.map((area, index) => (
-                <span
-                  key={index}
-                  className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium"
-                >
-                  {area}
-                </span>
-              ))}
-            </div>
+          <div className="panel-body">
+            {stats && stats.focus_areas.length > 0 ? (
+              <div className="row" style={{ flexWrap: 'wrap' }}>
+                {stats.focus_areas.map((area, index) => (
+                  <span className="tag accent" key={index}>{area}</span>
+                ))}
+              </div>
+            ) : (
+              <p className="dim">还没有足够的历史记录来判断重点领域。</p>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Generate Review Material */}
-      <div className="bg-white rounded-lg shadow mb-8">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-            <Brain className="mr-2" size={20} />
-            生成个性化复习材料
-          </h2>
-        </div>
-        <div className="p-6">
-          {stats && stats.total_practiced === 0 ? (
-            <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">
-                您还没有练习记录，无法生成个性化复习材料
-              </p>
-              <Link to="/upload" className="btn-primary">
-                开始练习
-              </Link>
-            </div>
-          ) : (
-            <div className="text-center">
-              <p className="text-gray-600 mb-6">
-                基于您的练习历史和错误模式，AI 将为您生成针对性的复习文章
-              </p>
-              <button
-                onClick={generateReviewMaterial}
-                disabled={isGenerating}
-                className={`btn-primary ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
-              >
-                {isGenerating ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
-                    AI 正在生成中...
-                  </div>
-                ) : (
-                  '生成复习材料'
-                )}
-              </button>
-            </div>
-          )}
+        <div className="panel">
+          <div className="panel-head">
+            <span className="eyebrow">下一步</span>
+            <span className="tag good">review loop</span>
+          </div>
+          <div className="panel-body">
+            {stats && stats.total_practiced === 0 ? (
+              <div>
+                <p className="dim" style={{ marginBottom: 18 }}>你还没有练习记录，无法生成个性化复习材料。</p>
+                <Link to="/upload" className="btn accent">开始练习</Link>
+              </div>
+            ) : (
+              <div className="correction-list">
+                <div className="correction" style={{ borderLeftColor: 'var(--accent)' }}>
+                  <div className="swap"><Target size={15} /> <span>从最近错误中抽取主题</span></div>
+                  <div className="why">生成的材料会刻意包含你容易写偏的句式或搭配。</div>
+                </div>
+                <div className="correction" style={{ borderLeftColor: 'var(--good)' }}>
+                  <div className="swap"><CheckCircle size={15} /> <span>完成后回到历史记录</span></div>
+                  <div className="why">复习材料与普通材料一样，会进入练习与评分流程。</div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Generated Material */}
       {generatedMaterial && (
-        <div className="bg-white rounded-lg shadow">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900 flex items-center">
-              <TrendingUp className="mr-2" size={20} />
-              您的个性化复习材料
-            </h2>
+        <div className="panel" style={{ marginTop: 34 }}>
+          <div className="panel-head">
+            <span className="eyebrow">个性化复习材料</span>
+            <span className="tag accent">generated</span>
           </div>
-          <div className="p-6">
-            <div className="bg-gray-50 rounded-lg p-6 mb-6">
-              <h3 className="font-medium text-gray-900 mb-3">复习文章</h3>
-              <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
-                {generatedMaterial.review_article}
-              </p>
+          <div className="panel-body">
+            <div className="prose">
+              {generatedMaterial.review_article.split('\n').map((line, index) => <p key={index}>{line}</p>)}
             </div>
-
-            {/* Analysis Summary */}
-            <div className="bg-blue-50 rounded-lg p-4 mb-6">
-              <h4 className="font-medium text-blue-900 mb-2">分析摘要</h4>
-              <div className="text-sm text-blue-700">
-                <p>基于您的 {generatedMaterial.analysis_summary.total_records} 次练习记录生成</p>
-                {generatedMaterial.analysis_summary.focus_areas.length > 0 && (
-                  <p>重点关注: {generatedMaterial.analysis_summary.focus_areas.join('、')}</p>
-                )}
+            <div className="card" style={{ marginTop: 22, padding: 16, background: 'var(--bg-soft)' }}>
+              <div className="row">
+                <RefreshCw size={16} />
+                <span className="dim tiny">
+                  基于 {generatedMaterial.analysis_summary.total_records} 次练习生成
+                  {generatedMaterial.analysis_summary.focus_areas.length > 0
+                    ? ` · 重点关注 ${generatedMaterial.analysis_summary.focus_areas.join('、')}`
+                    : ''}
+                </span>
               </div>
             </div>
-
-            <div className="flex justify-center">
-              <Link
-                to={`/practice/${generatedMaterial.text_id}`}
-                className="btn-primary"
-              >
-                开始练习这篇复习材料
-              </Link>
+            <div style={{ marginTop: 22 }}>
+              <Link to={`/practice/${generatedMaterial.text_id}`} className="btn accent">开始练习这篇复习材料</Link>
             </div>
           </div>
         </div>
       )}
-
-      {/* Help Text */}
-      <div className="mt-12 text-center">
-        <p className="text-gray-500 text-sm">
-          复习材料会根据您的错误模式和薄弱环节动态生成，建议定期使用以获得最佳学习效果
-        </p>
-      </div>
     </div>
   );
 };

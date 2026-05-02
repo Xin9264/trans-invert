@@ -1,6 +1,8 @@
 # Dependencies
 node_modules/
 */node_modules/
+.venv/
+*/.venv/
 
 # Python cache
 __pycache__/
@@ -41,6 +43,7 @@ coverage/
 # Database
 *.db
 *.sqlite
+*.sqlite3
 
 # OS generated files
 .DS_Store

@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Callable, Dict, Optional
 
-from app.services.ai_service import AIService
+from app.services.ai_service import AIService, DEEPSEEK_MODEL_FLASH
 from app.services.template_service import template_service
 
 
@@ -39,7 +39,7 @@ def normalize_analysis_result(analysis_result: Dict[str, Any], content: str) -> 
 async def analyze_text_content(content: str, user_ai_service: AIService) -> Dict[str, Any]:
     """Run the existing analyze prompt against text content."""
     prompt = template_service.render_analyze_text_prompt(content)
-    response = await user_ai_service.call_ai_api(prompt)
+    response = await user_ai_service.call_ai_api(prompt, model=DEEPSEEK_MODEL_FLASH)
     analysis_result = user_ai_service.extract_json_from_response(response)
     return normalize_analysis_result(analysis_result, content)
 
