@@ -182,6 +182,49 @@ export interface PracticeHistoryRecord {
   score: number;
 }
 
+export type MasteryLevel = 'unseen' | 'weak' | 'warning' | 'stable';
+
+export interface NodeStats {
+  node_id: string;
+  error_count: number;
+  by_severity: Record<string, number>;
+  by_source: Record<string, number>;
+  last_error_at: string | null;
+  trend_7d: number;
+  trend_30d: number;
+  mastery: MasteryLevel;
+}
+
+export interface GrammarMapNode {
+  id: string;
+  label: string;
+  tip?: string | null;
+  leaf_categories?: string[] | null;
+  children: GrammarMapNode[];
+  stats: NodeStats;
+}
+
+export interface GrammarMapResponse {
+  generated_at: string;
+  total_practices: number;
+  total_errors: number;
+  tree: GrammarMapNode;
+}
+
+export interface ErrorExample {
+  history_id: string;
+  timestamp: string;
+  text_title: string;
+  correction: Correction;
+  user_input_snippet: string;
+}
+
+export interface NodeExamplesResponse {
+  node_id: string;
+  total: number;
+  examples: ErrorExample[];
+}
+
 export interface PracticeHistoryExport {
   export_version: string;
   export_time: string;
@@ -514,6 +557,39 @@ export const practiceAPI = {
       onError(error instanceof Error ? error.message : '未知错误');
     }
   }
+};
+
+export const grammarMapAPI = {
+  getMap: async (params?: {
+    since?: string;
+    until?: string;
+    folder_id?: string;
+  }): Promise<APIResponse<GrammarMapResponse>> => {
+    const query = new URLSearchParams();
+    if (params?.since) query.set('since', params.since);
+    if (params?.until) query.set('until', params.until);
+    if (params?.folder_id) query.set('folder_id', params.folder_id);
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    const response = await api.get(`/api/grammar-map${suffix}`) as APIResponse<GrammarMapResponse>;
+    return response;
+  },
+
+  getExamples: async (
+    nodeId: string,
+    params?: {
+      limit?: number;
+      severity?: CorrectionSeverity;
+      source?: CorrectionSource;
+    }
+  ): Promise<APIResponse<NodeExamplesResponse>> => {
+    const query = new URLSearchParams();
+    if (params?.limit !== undefined) query.set('limit', String(params.limit));
+    if (params?.severity) query.set('severity', params.severity);
+    if (params?.source) query.set('source', params.source);
+    const suffix = query.toString() ? `?${query.toString()}` : '';
+    const response = await api.get(`/api/grammar-map/nodes/${encodeURIComponent(nodeId)}/examples${suffix}`) as APIResponse<NodeExamplesResponse>;
+    return response;
+  },
 };
 
 export const healthAPI = {

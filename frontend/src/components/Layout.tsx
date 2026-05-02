@@ -10,6 +10,7 @@ import {
   History,
   Home,
   Layers,
+  Network,
   PanelLeft,
   Plus,
   Search,
@@ -30,6 +31,7 @@ const pageLabels: Record<string, string> = {
   '/upload': '上传文本',
   '/history': '练习历史',
   '/review': '智能复习',
+  '/grammar-map': '语法地图',
 };
 
 const countTextsInFolder = (folder: FolderType, texts: TextSummary[]): number => {
@@ -192,6 +194,10 @@ const Layout: React.FC = () => {
           <NavLink to="/review" className="sb-link">
             <Brain size={16} />
             <span>智能复习</span>
+          </NavLink>
+          <NavLink to="/grammar-map" className="sb-link">
+            <Network size={16} />
+            <span>语法地图</span>
           </NavLink>
           <NavLink to="/history" className="sb-link">
             <History size={16} />

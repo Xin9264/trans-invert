@@ -5,6 +5,7 @@ import Upload from './pages/Upload';
 import Practice from './pages/Practice';
 import History from './pages/History';
 import Review from './pages/Review';
+import GrammarMap from './pages/GrammarMap';
 
 function App() {
   // 简化版本：移除认证系统，直接显示主要功能
@@ -17,6 +18,7 @@ function App() {
           <Route path="practice/:id" element={<Practice />} />
           <Route path="history" element={<History />} />
           <Route path="review" element={<Review />} />
+          <Route path="grammar-map" element={<GrammarMap />} />
         </Route>
       </Routes>
     </div>
