@@ -71,6 +71,24 @@ class ReviewStatsResponse(BaseModel):
     focus_areas: List[str] = Field(..., description="重点复习领域")
     recent_errors: List[Dict[str, Any]] = Field(..., description="近期错误摘要")
 
+class GenerateMaterialRequest(BaseModel):
+    """个性化练习材料生成请求"""
+    topic: Optional[str] = Field(None, description="期望主题")
+    genre: Optional[str] = Field(None, description="期望体裁")
+    word_count: int = Field(default=150, ge=50, le=500, description="目标词数")
+    difficulty: int = Field(default=3, ge=1, le=5, description="目标难度(1-5)")
+    folder_id: Optional[str] = Field(None, description="生成材料保存到的文件夹ID")
+
+class GeneratedMaterial(BaseModel):
+    """AI生成的练习材料元数据"""
+    title: str = Field(..., description="英文标题")
+    content: str = Field(..., min_length=10, description="英文正文")
+    topic: str = Field(..., description="实际话题")
+    estimated_difficulty: int = Field(..., ge=1, le=5, description="估计难度")
+    word_count: int = Field(..., ge=1, description="实际词数")
+    targeted_weaknesses: List[str] = Field(..., description="针对的弱点")
+    design_rationale: str = Field(..., description="设计理由")
+
 class APIResponse(BaseModel):
     """统一API响应格式"""
     success: bool = Field(..., description="请求是否成功")

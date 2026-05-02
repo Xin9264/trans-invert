@@ -16,80 +16,20 @@ from app.schemas.text import (
     PracticeHistoryImportRequest,
     APIResponse
 )
-from app.services.ai_service import ai_service, AIService
+from app.services.ai_config_service import create_user_ai_service, get_user_ai_config
+from app.services.ai_service import ai_service
 from app.services.template_service import template_service
 from app.services.data_persistence import data_persistence
+from app.services.text_service import (
+    analyze_text_into_storage,
+    count_words,
+    create_text_record,
+)
 
 router = APIRouter(prefix="/api/texts", tags=["texts"])
 
 # 内存存储（简化版，生产环境应使用数据库）
 texts_storage: Dict[str, Dict[str, Any]] = {}
-
-def get_user_ai_config(request: Request) -> Optional[Dict[str, str]]:
-    """从请求头中获取用户的AI配置"""
-    headers = request.headers
-    
-    provider = headers.get('x-ai-provider')
-    api_key = headers.get('x-ai-key')
-    base_url = headers.get('x-ai-base-url')
-    model = headers.get('x-ai-model')
-    
-    if not provider or not api_key:
-        return None
-        
-    return {
-        'provider': provider,
-        'api_key': api_key,
-        'base_url': base_url,
-        'model': model
-    }
-
-def create_user_ai_service(user_config: Dict[str, str]) -> AIService:
-    """为用户创建临时的AI服务实例"""
-    from app.services.ai_service import AIProvider
-    
-    # 创建一个新的AI服务实例，使用用户的配置
-    temp_service = AIService.__new__(AIService)  # 不调用__init__
-    temp_service.config_file = None  # 不使用配置文件
-    
-    # 设置提供商
-    provider_str = user_config['provider'].lower()
-    if provider_str == "volcano":
-        temp_service.provider = AIProvider.VOLCANO
-    elif provider_str == "openai":
-        temp_service.provider = AIProvider.OPENAI
-    else:
-        temp_service.provider = AIProvider.DEEPSEEK
-    
-    # 设置配置
-    temp_service.api_key = user_config['api_key']
-    
-    # 设置默认URL和模型
-    if user_config.get('base_url'):
-        temp_service.base_url = user_config['base_url']
-    else:
-        if temp_service.provider == AIProvider.VOLCANO:
-            temp_service.base_url = "https://ark.cn-beijing.volces.com/api/v3"
-        elif temp_service.provider == AIProvider.OPENAI:
-            temp_service.base_url = "https://api.openai.com/v1"
-        else:
-            temp_service.base_url = "https://api.deepseek.com"
-    
-    if user_config.get('model'):
-        temp_service.model = user_config['model']
-    else:
-        if temp_service.provider == AIProvider.VOLCANO:
-            temp_service.model = "doubao-1-5-pro-32k-250115"
-        elif temp_service.provider == AIProvider.OPENAI:
-            temp_service.model = "gpt-4.1"
-        else:
-            temp_service.model = "deepseek-chat"
-    
-    # 初始化客户端
-    temp_service.client = temp_service._init_client()
-    temp_service.async_client = temp_service._init_async_client()
-    
-    return temp_service
 analyses_storage: Dict[str, Dict[str, Any]] = {}
 practice_history: List[PracticeHistoryRecord] = []
 folders_storage: Dict[str, Dict[str, Any]] = {}
@@ -121,14 +61,10 @@ def save_data():
 # 启动时自动加载数据
 initialize_data()
 
-# AI配置路由已移除 - 现在使用浏览器本地存储管理API key
+# AI配置路由已移除 - 现在使用浏览器本地存储管理DeepSeek API key
 
 # 注意：原有的AI配置路由（/ai/status, /ai/configure, /ai/providers, /ai/switch）
-# 已被移除，因为现在使用浏览器本地存储来管理用户的API key配置
-
-def count_words(text: str) -> int:
-    """计算单词数量"""
-    return len(text.strip().split())
+# 已被移除，因为现在使用浏览器本地存储来管理用户的DeepSeek API key配置
 
 def calculate_json_progress(content: str) -> int:
     """根据JSON字段的出现情况计算进度"""
@@ -162,29 +98,20 @@ async def upload_text(request: TextUploadRequest, http_request: Request, backgro
         if not user_config:
             raise HTTPException(
                 status_code=400, 
-                detail="请先在浏览器中配置AI服务（提供商和API密钥）"
+                detail="请先在浏览器中配置DeepSeek API密钥"
             )
         
-        # 生成唯一ID
-        text_id = str(uuid.uuid4())
-        
-        # 计算单词数
-        word_count = count_words(request.content)
-        
-        # 存储文本
-        texts_storage[text_id] = {
-            "id": text_id,
-            "title": request.title or f"文本_{text_id[:8]}",
-            "content": request.content,
-            "word_count": word_count,
-            "created_at": datetime.now().isoformat(),
-            "practice_type": request.practice_type or "translation",
-            "topic": request.topic,
-            "folder_id": getattr(request, 'folder_id', None)  # 支持文件夹分类
-        }
-        
-        # 自动保存数据
-        save_data()
+        created = create_text_record(
+            content=request.content,
+            title=request.title,
+            practice_type=request.practice_type or "translation",
+            topic=request.topic,
+            folder_id=getattr(request, 'folder_id', None),
+            texts_storage=texts_storage,
+            save_callback=save_data
+        )
+        text_id = created["text_id"]
+        word_count = created["word_count"]
         
         # 后台异步分析文本，传递用户配置
         background_tasks.add_task(analyze_text_background, text_id, request.content, user_config)
@@ -195,6 +122,8 @@ async def upload_text(request: TextUploadRequest, http_request: Request, backgro
             message="文本上传成功，AI正在分析中..."
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"文本上传失败: {str(e)}")
 
@@ -203,91 +132,36 @@ async def analyze_text_background(text_id: str, content: str, user_config: Dict[
     try:
         # 使用用户的AI配置创建临时服务
         user_ai_service = create_user_ai_service(user_config)
+        analysis = await analyze_text_into_storage(
+            text_id=text_id,
+            content=content,
+            user_ai_service=user_ai_service,
+            analyses_storage=analyses_storage,
+            save_callback=save_data,
+            fallback_on_error=True
+        )
         
-        # 使用模板渲染提示词
-        prompt = template_service.render_analyze_text_prompt(content)
-        
-        # 调用统一API
-        response = await user_ai_service.call_ai_api(prompt)
-        
-        # 解析JSON响应
-        analysis_result = user_ai_service.extract_json_from_response(response)
-        
-        # 验证必要字段
-        required_fields = ["translation", "difficult_words", "difficulty", "key_points"]
-        for field in required_fields:
-            if field not in analysis_result:
-                raise Exception(f"AI响应缺少必要字段: {field}")
-        
-        # 确保数据类型正确
-        analysis_result["difficulty"] = int(analysis_result["difficulty"])
-        if not isinstance(analysis_result["difficult_words"], list):
-            analysis_result["difficult_words"] = []
-        if not isinstance(analysis_result["key_points"], list):
-            analysis_result["key_points"] = []
-        
-        # 存储分析结果
-        analyses_storage[text_id] = {
-            "text_id": text_id,
-            "translation": analysis_result["translation"],
-            "difficult_words": analysis_result["difficult_words"],
-            "difficulty": analysis_result["difficulty"],
-            "key_points": analysis_result["key_points"],
-            "word_count": count_words(content)
-        }
-        
-        # 自动保存数据
-        save_data()
-        
-        print(f"✅ 文本 {text_id} 分析完成")
+        if analysis.get("translation") != "分析失败，请重试":
+            print(f"✅ 文本 {text_id} 分析完成")
         
     except Exception as e:
         print(f"❌ 文本 {text_id} 分析失败: {str(e)}")
-        # 存储失败信息
-        analyses_storage[text_id] = {
-            "text_id": text_id,
-            "translation": "分析失败，请重试",
-            "difficult_words": [{"word": "分析失败", "meaning": "请稍后重试"}],
-            "difficulty": 3,
-            "key_points": ["分析失败"],
-            "word_count": count_words(content)
-        }
 
 async def re_analyze_imported_text(text_id: str, content: str, existing_translation: str):
     """重新分析从历史记录导入的文本"""
     try:
-        # 使用模板渲染提示词
-        prompt = template_service.render_analyze_text_prompt(content)
-        
-        # 调用统一API
-        response = await ai_service.call_ai_api(prompt)
-        
-        # 解析JSON响应
-        analysis_result = ai_service.extract_json_from_response(response)
-        
-        # 验证必要字段
-        required_fields = ["translation", "difficult_words", "difficulty", "key_points"]
-        for field in required_fields:
-            if field not in analysis_result:
-                raise Exception(f"AI响应缺少必要字段: {field}")
-        
-        # 确保数据类型正确
-        analysis_result["difficulty"] = int(analysis_result["difficulty"])
-        if not isinstance(analysis_result["difficult_words"], list):
-            analysis_result["difficult_words"] = []
-        if not isinstance(analysis_result["key_points"], list):
-            analysis_result["key_points"] = []
-        
-        # 更新分析结果，但保留已有的翻译（来自历史记录）
-        analyses_storage[text_id] = {
-            "text_id": text_id,
-            "translation": existing_translation,  # 保留历史记录中的翻译
-            "difficult_words": analysis_result["difficult_words"],
-            "difficulty": analysis_result["difficulty"],
-            "key_points": analysis_result["key_points"],
-            "word_count": count_words(content)
-        }
-        
+        if ai_service is None:
+            raise Exception("DeepSeek服务未初始化")
+
+        await analyze_text_into_storage(
+            text_id=text_id,
+            content=content,
+            user_ai_service=ai_service,
+            analyses_storage=analyses_storage,
+            save_callback=save_data,
+            fallback_on_error=False,
+            translation_override=existing_translation
+        )
         print(f"✅ 导入文本 {text_id} 重新分析完成")
         
     except Exception as e:
@@ -334,7 +208,7 @@ async def submit_practice(request: PracticeSubmitRequest, http_request: Request)
         if not user_config:
             raise HTTPException(
                 status_code=400, 
-                detail="请先在浏览器中配置AI服务（提供商和API密钥）"
+                detail="请先在浏览器中配置DeepSeek API密钥"
             )
         
         if request.text_id not in texts_storage:
@@ -539,7 +413,7 @@ async def submit_practice_stream(request: PracticeSubmitRequest, http_request: R
         if not user_config:
             raise HTTPException(
                 status_code=400, 
-                detail="请先在浏览器中配置AI服务（提供商和API密钥）"
+                detail="请先在浏览器中配置DeepSeek API密钥"
             )
         
         if request.text_id not in texts_storage:

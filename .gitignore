@@ -57,8 +57,9 @@ Thumbs.db
 *.swp
 *.swo
 
-# Docker
-docker-compose.override.yml
+# Local runtime logs
+.logs/
+*.pid
 
 # Prisma
 */prisma/migrations/

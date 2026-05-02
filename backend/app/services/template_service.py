@@ -1,6 +1,6 @@
 """模板渲染服务"""
 import os
-from typing import Dict, Any
+from typing import Dict, Any, List, Optional
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 class TemplateService:
@@ -47,6 +47,30 @@ class TemplateService:
         return template.render(
             analysis_data=analysis_data,
             history_stats=history_stats
+        )
+
+    def render_generate_practice_material_prompt(
+        self,
+        history_stats: Dict[str, Any],
+        focus_areas: List[str],
+        recent_errors: List[Dict[str, Any]],
+        topic: Optional[str] = None,
+        genre: Optional[str] = None,
+        word_count: int = 150,
+        difficulty: int = 3,
+        user_level: str = "B2"
+    ) -> str:
+        """渲染个性化练习材料生成提示词"""
+        template = self.env.get_template('generate_practice_material.j2')
+        return template.render(
+            history_stats=history_stats,
+            focus_areas=focus_areas,
+            recent_errors=recent_errors,
+            topic=topic,
+            genre=genre,
+            word_count=word_count,
+            difficulty=difficulty,
+            user_level=user_level
         )
     
     def render_template(self, template_name: str, **kwargs: Any) -> str:

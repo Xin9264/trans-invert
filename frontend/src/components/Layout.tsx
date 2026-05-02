@@ -61,14 +61,14 @@ const Layout: React.FC = () => {
                     ? 'text-red-600 hover:text-red-700 hover:bg-red-50'
                     : 'text-gray-700 hover:text-primary-600 hover:bg-gray-100'
                 }`}
-                title="AI服务配置"
+                title="DeepSeek配置"
               >
                 {!isConfigured ? (
                   <AlertTriangle size={18} className="text-red-500" />
                 ) : (
                   <Settings size={18} />
                 )}
-                <span>AI配置</span>
+                <span>DeepSeek</span>
               </button>
               
               <div className="text-sm text-gray-600">
@@ -87,7 +87,7 @@ const Layout: React.FC = () => {
               <div className="flex items-center space-x-2">
                 <AlertTriangle size={20} className="text-red-500" />
                 <span className="text-red-800 font-medium">
-                  AI服务未配置，部分功能可能无法正常使用
+                  DeepSeek API 未配置，部分功能可能无法正常使用
                 </span>
               </div>
               <button

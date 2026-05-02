@@ -1,79 +1,21 @@
 """复习相关的路由和业务逻辑"""
 import uuid
-import json
-from typing import Dict, Any, List, Optional
-from datetime import datetime, timedelta
+import re
+from collections import Counter
+from typing import Dict, Any, List
+from datetime import datetime
 from fastapi import APIRouter, HTTPException, Request
-from app.schemas.text import APIResponse, ReviewGenerateResponse, ReviewStatsResponse
+from app.schemas.text import (
+    APIResponse,
+    GeneratedMaterial,
+    GenerateMaterialRequest,
+)
+from app.services.ai_config_service import create_user_ai_service, get_user_ai_config
 from app.services.data_persistence import data_persistence
-from app.services.ai_service import AIService, AIProvider  
 from app.services.template_service import template_service
+from app.services.text_service import create_text_with_analysis
 
 router = APIRouter(prefix="/api/review", tags=["review"])
-
-def get_user_ai_config(request: Request) -> Optional[Dict[str, str]]:
-    """从请求头中获取用户的AI配置"""
-    headers = request.headers
-    
-    provider = headers.get('x-ai-provider')
-    api_key = headers.get('x-ai-key')
-    base_url = headers.get('x-ai-base-url')
-    model = headers.get('x-ai-model')
-    
-    if not provider or not api_key:
-        return None
-        
-    return {
-        'provider': provider,
-        'api_key': api_key,
-        'base_url': base_url,
-        'model': model
-    }
-
-def create_user_ai_service(user_config: Dict[str, str]) -> AIService:
-    """为用户创建临时的AI服务实例"""
-    # 创建一个新的AI服务实例，使用用户的配置
-    temp_service = AIService.__new__(AIService)  # 不调用__init__
-    temp_service.config_file = None  # 不使用配置文件
-    
-    # 设置提供商
-    provider_str = user_config['provider'].lower()
-    if provider_str == "volcano":
-        temp_service.provider = AIProvider.VOLCANO
-    elif provider_str == "openai":
-        temp_service.provider = AIProvider.OPENAI
-    else:
-        temp_service.provider = AIProvider.DEEPSEEK
-    
-    # 设置配置
-    temp_service.api_key = user_config['api_key']
-    
-    # 设置默认URL和模型
-    if user_config.get('base_url'):
-        temp_service.base_url = user_config['base_url']
-    else:
-        if temp_service.provider == AIProvider.VOLCANO:
-            temp_service.base_url = "https://ark.cn-beijing.volces.com/api/v3"
-        elif temp_service.provider == AIProvider.OPENAI:
-            temp_service.base_url = "https://api.openai.com/v1"
-        else:
-            temp_service.base_url = "https://api.deepseek.com"
-    
-    if user_config.get('model'):
-        temp_service.model = user_config['model']
-    else:
-        if temp_service.provider == AIProvider.VOLCANO:
-            temp_service.model = "doubao-1-5-pro-32k-250115"
-        elif temp_service.provider == AIProvider.OPENAI:
-            temp_service.model = "gpt-4.1"
-        else:
-            temp_service.model = "deepseek-chat"
-    
-    # 初始化客户端
-    temp_service.client = temp_service._init_client()
-    temp_service.async_client = temp_service._init_async_client()
-    
-    return temp_service
 
 @router.post("/generate", response_model=APIResponse)
 async def generate_review_material(http_request: Request):
@@ -82,7 +24,7 @@ async def generate_review_material(http_request: Request):
         # 获取用户AI配置
         user_config = get_user_ai_config(http_request)
         if not user_config:
-            raise HTTPException(status_code=400, detail="请先配置AI服务")
+            raise HTTPException(status_code=400, detail="请先配置DeepSeek API密钥")
         
         # 加载练习历史
         history_data = data_persistence.load_practice_history()
@@ -155,8 +97,90 @@ async def generate_review_material(http_request: Request):
             message="复习材料生成成功"
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"生成复习材料失败: {str(e)}")
+
+@router.post("/generate-practice", response_model=APIResponse)
+async def generate_practice_material(request: GenerateMaterialRequest, http_request: Request):
+    """基于错题生成新的个性化回译练习材料，并同步完成文本分析。"""
+    try:
+        user_config = get_user_ai_config(http_request)
+        if not user_config:
+            raise HTTPException(status_code=400, detail="请先配置DeepSeek API密钥")
+
+        history_data = data_persistence.load_practice_history()
+        history_stats = build_generation_history_stats(history_data)
+        focus_areas = summarize_focus_areas_from_history(history_data)
+        recent_errors = extract_recent_errors(history_data)
+
+        user_ai_service = create_user_ai_service(user_config)
+        prompt = template_service.render_generate_practice_material_prompt(
+            history_stats=history_stats,
+            focus_areas=focus_areas,
+            recent_errors=recent_errors,
+            topic=request.topic,
+            genre=request.genre,
+            word_count=request.word_count,
+            difficulty=request.difficulty,
+            user_level="B2"
+        )
+
+        response = await user_ai_service.call_ai_api(prompt)
+        try:
+            generated_payload = user_ai_service.extract_json_from_response(response)
+            generated_material = GeneratedMaterial(**generated_payload)
+        except Exception as exc:
+            raise HTTPException(
+                status_code=500,
+                detail=f"AI返回的练习材料不是合法JSON或字段不完整: {str(exc)}"
+            )
+
+        from app.routers.texts import analyses_storage, save_data, texts_storage
+
+        created = await create_text_with_analysis(
+            content=generated_material.content,
+            title=generated_material.title,
+            user_ai_service=user_ai_service,
+            texts_storage=texts_storage,
+            analyses_storage=analyses_storage,
+            save_callback=save_data,
+            practice_type="translation",
+            topic=generated_material.topic,
+            folder_id=request.folder_id,
+            source="ai_generated_practice",
+            extra_fields={
+                "generation_metadata": {
+                    "estimated_difficulty": generated_material.estimated_difficulty,
+                    "targeted_weaknesses": generated_material.targeted_weaknesses,
+                    "design_rationale": generated_material.design_rationale,
+                }
+            }
+        )
+
+        analysis = created["analysis"]
+        return APIResponse(
+            success=True,
+            data={
+                "text_id": created["text_id"],
+                "generated_material": generated_material.model_dump(),
+                "analysis_summary": {
+                    "difficulty": analysis.get("difficulty"),
+                    "word_count": analysis.get("word_count"),
+                    "difficult_words": analysis.get("difficult_words", []),
+                    "key_points": analysis.get("key_points", []),
+                    "focus_areas": focus_areas,
+                    "recent_errors_count": len(recent_errors),
+                }
+            },
+            message="个性化练习材料生成成功"
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"生成个性化练习材料失败: {str(e)}")
 
 @router.get("/stats", response_model=APIResponse)
 async def get_review_stats():
@@ -229,8 +253,101 @@ async def mark_reviewed(text_id: str):
             message="复习记录更新成功"
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"更新复习记录失败: {str(e)}")
+
+ERROR_KEYWORDS = [
+    "冠词", "时态", "介词", "单复数", "主谓一致", "词汇", "搭配", "语序", "句子结构",
+    "从句", "虚拟语气", "过去式", "完成时", "被动语态", "动词形式", "名词", "形容词",
+    "副词", "逻辑", "语义", "自然度", "表达", "不地道", "过度简化", "复杂度"
+]
+
+ENGLISH_STOPWORDS = {
+    "the", "and", "for", "with", "that", "this", "from", "into", "should", "would",
+    "could", "because", "use", "used", "word", "words", "sentence", "grammar",
+}
+
+
+def build_generation_history_stats(history_data: List) -> Dict[str, Any]:
+    """Build compact stats for the practice-material prompt."""
+    total_practiced = len(history_data or [])
+    if not total_practiced:
+        return {"total_practiced": 0, "avg_score": "N/A"}
+
+    scores = [int(getattr(record, "score", 0) or 0) for record in history_data]
+    avg_score = round(sum(scores) / total_practiced, 1)
+    return {"total_practiced": total_practiced, "avg_score": avg_score}
+
+
+def iter_history_corrections(history_data: List):
+    """Yield corrections with their parent history record, newest first."""
+    records = sorted(
+        history_data or [],
+        key=lambda record: getattr(record, "timestamp", ""),
+        reverse=True
+    )
+
+    for record in records:
+        evaluation = getattr(record, "ai_evaluation", {}) or {}
+        corrections = evaluation.get("corrections", [])
+        if not isinstance(corrections, list):
+            continue
+        for correction in corrections:
+            if isinstance(correction, dict):
+                yield record, correction
+
+
+def summarize_focus_areas_from_history(history_data: List, limit: int = 5) -> List[str]:
+    """Summarize frequent weakness areas from correction reasons with a local Counter."""
+    counter: Counter[str] = Counter()
+
+    for _, correction in iter_history_corrections(history_data):
+        reason = str(correction.get("reason", "")).strip()
+        if not reason:
+            continue
+
+        matched = False
+        for keyword in ERROR_KEYWORDS:
+            if keyword in reason:
+                counter[keyword] += 1
+                matched = True
+
+        for token in re.findall(r"[A-Za-z]{3,}", reason.lower()):
+            if token not in ENGLISH_STOPWORDS:
+                counter[token] += 1
+                matched = True
+
+        if not matched:
+            counter[reason[:40]] += 1
+
+    return [f"{area}（{count}次）" for area, count in counter.most_common(limit)]
+
+
+def extract_recent_errors(history_data: List, limit: int = 8) -> List[Dict[str, Any]]:
+    """Extract recent concrete correction examples for the generation prompt."""
+    recent_errors = []
+
+    for record, correction in iter_history_corrections(history_data):
+        reason = str(correction.get("reason", "")).strip()
+        suggestion = str(correction.get("suggestion", "")).strip()
+        user_wrote = str(correction.get("original", "")).strip()
+        if not reason and not suggestion and not user_wrote:
+            continue
+
+        text_content = getattr(record, "text_content", "") or ""
+        original_excerpt = " ".join(text_content.split())[:240]
+        recent_errors.append({
+            "original": original_excerpt or user_wrote,
+            "user_wrote": user_wrote or "(缺失)",
+            "suggestion": suggestion or "(缺失)",
+            "reason": reason or "未说明",
+        })
+        if len(recent_errors) >= limit:
+            break
+
+    return recent_errors
 
 def analyze_user_patterns(history_data: List) -> Dict[str, Any]:
     """分析用户的错误模式"""

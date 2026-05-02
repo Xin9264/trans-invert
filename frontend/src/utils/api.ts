@@ -1,21 +1,36 @@
 import axios from 'axios';
 
-// 在开发模式下使用相对路径，通过 Vite 代理转发
-// 在生产模式下使用绝对路径
-const API_BASE_URL = (import.meta as any).env?.MODE === 'production' 
-  ? 'https://trans-invert-production.up.railway.app' 
-  : ''; // 开发模式使用相对路径，通过 Vite 代理
+// 本地自用：始终走相对路径，由 Vite 代理转发到 http://localhost:8000
+const API_BASE_URL = '';
+export const DEEPSEEK_PROVIDER = 'deepseek';
+export const DEEPSEEK_BASE_URL = 'https://api.deepseek.com';
+export const DEEPSEEK_MODEL = 'deepseek-v4-pro';
 
 // 本地存储管理
 export const localStorageManager = {
   // API配置相关
   getAIConfig: (): AIConfigData | null => {
     const config = localStorage.getItem('ai_config');
-    return config ? JSON.parse(config) : null;
+    if (!config) return null;
+    const parsed = JSON.parse(config);
+    if (parsed.provider && parsed.provider !== DEEPSEEK_PROVIDER) {
+      return null;
+    }
+    return {
+      provider: DEEPSEEK_PROVIDER,
+      api_key: parsed.api_key || '',
+      base_url: parsed.base_url || DEEPSEEK_BASE_URL,
+      model: DEEPSEEK_MODEL
+    };
   },
   
   setAIConfig: (config: AIConfigData): void => {
-    localStorage.setItem('ai_config', JSON.stringify(config));
+    localStorage.setItem('ai_config', JSON.stringify({
+      provider: DEEPSEEK_PROVIDER,
+      api_key: config.api_key,
+      base_url: config.base_url || DEEPSEEK_BASE_URL,
+      model: DEEPSEEK_MODEL
+    }));
   },
   
   removeAIConfig: (): void => {
@@ -41,15 +56,13 @@ api.interceptors.request.use(
   (config) => {
     const aiConfig = localStorageManager.getAIConfig();
     if (aiConfig) {
-      // 将用户的AI配置添加到请求头
-      config.headers['X-AI-Provider'] = aiConfig.provider;
+      // 将用户的DeepSeek配置添加到请求头
+      config.headers['X-AI-Provider'] = DEEPSEEK_PROVIDER;
       config.headers['X-AI-Key'] = aiConfig.api_key;
       if (aiConfig.base_url) {
         config.headers['X-AI-Base-URL'] = aiConfig.base_url;
       }
-      if (aiConfig.model) {
-        config.headers['X-AI-Model'] = aiConfig.model;
-      }
+      config.headers['X-AI-Model'] = DEEPSEEK_MODEL;
     }
     return config;
   },
@@ -301,22 +314,20 @@ export const practiceAPI = {
     };
 
     try {
-      // 获取用户的AI配置
+      // 获取用户的DeepSeek配置
       const aiConfig = localStorageManager.getAIConfig();
       const headers: Record<string, string> = {
         'Content-Type': 'application/json',
       };
       
-      // 添加AI配置到请求头
+      // 添加DeepSeek配置到请求头
       if (aiConfig) {
-        headers['X-AI-Provider'] = aiConfig.provider;
+        headers['X-AI-Provider'] = DEEPSEEK_PROVIDER;
         headers['X-AI-Key'] = aiConfig.api_key;
         if (aiConfig.base_url) {
           headers['X-AI-Base-URL'] = aiConfig.base_url;
         }
-        if (aiConfig.model) {
-          headers['X-AI-Model'] = aiConfig.model;
-        }
+        headers['X-AI-Model'] = DEEPSEEK_MODEL;
       }
 
       const response = await fetch(`${API_BASE_URL}/api/texts/practice/submit-stream`, {
@@ -436,8 +447,8 @@ export const aiAPI = {
         success: true,
         data: {
           configured: true,
-          provider: config.provider,
-          model: config.model || '',
+          provider: DEEPSEEK_PROVIDER,
+          model: DEEPSEEK_MODEL,
           api_key_preview: '***已在浏览器中配置***'
         }
       };
@@ -454,23 +465,28 @@ export const aiAPI = {
     }
   },
 
-  // 配置AI服务（保存到浏览器本地存储）
+  // 配置DeepSeek（保存到浏览器本地存储）
   configure: async (config: AIConfigData): Promise<APIResponse<any>> => {
     try {
       // 验证配置
-      if (!config.provider || !config.api_key) {
+      if (!config.api_key) {
         return {
           success: false,
-          message: '提供商和API密钥不能为空'
+          message: 'DeepSeek API密钥不能为空'
         };
       }
 
       // 保存到本地存储
-      localStorageManager.setAIConfig(config);
+      localStorageManager.setAIConfig({
+        provider: DEEPSEEK_PROVIDER,
+        api_key: config.api_key,
+        base_url: config.base_url || DEEPSEEK_BASE_URL,
+        model: DEEPSEEK_MODEL
+      });
       
       return {
         success: true,
-        message: 'AI配置已保存到浏览器本地存储'
+        message: 'DeepSeek配置已保存到浏览器本地存储'
       };
     } catch (error) {
       return {
@@ -480,17 +496,17 @@ export const aiAPI = {
     }
   },
 
-  // 获取浏览器中已配置的提供商
+  // 获取浏览器中已配置的DeepSeek信息
   getProviders: async (): Promise<APIResponse<any>> => {
     const config = localStorageManager.getAIConfig();
     if (config) {
       return {
         success: true,
-        data: {
-          [config.provider]: {
-            provider: config.provider,
-            model: config.model || '',
-            base_url: config.base_url || '',
+      data: {
+          [DEEPSEEK_PROVIDER]: {
+            provider: DEEPSEEK_PROVIDER,
+            model: DEEPSEEK_MODEL,
+            base_url: config.base_url || DEEPSEEK_BASE_URL,
             api_key_configured: true,
             api_key_preview: '***浏览器本地存储***'
           }
@@ -504,18 +520,18 @@ export const aiAPI = {
     }
   },
 
-  // 切换提供商（从本地存储中的配置）
+  // 兼容旧调用：当前版本只支持DeepSeek
   switchProvider: async (provider: string): Promise<APIResponse<any>> => {
     const config = localStorageManager.getAIConfig();
-    if (config && config.provider === provider) {
+    if (config && provider === DEEPSEEK_PROVIDER) {
       return {
         success: true,
-        message: `已使用 ${provider} 提供商`
+        message: '已使用 DeepSeek'
       };
     } else {
       return {
         success: false,
-        message: '提供商配置不存在'
+        message: 'DeepSeek配置不存在'
       };
     }
   },
