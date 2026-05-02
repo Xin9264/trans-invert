@@ -7,7 +7,10 @@ from fastapi.staticfiles import StaticFiles
 from app.core.settings import settings
 from app.routers import texts, config, folders, review
 from app.routers import backup
+from app.data.grammar_syllabus import validate_syllabus_categories
 from app.schemas.text import APIResponse
+
+validate_syllabus_categories(texts.ALLOWED_CATEGORIES)
 
 # 创建FastAPI应用
 app = FastAPI(
