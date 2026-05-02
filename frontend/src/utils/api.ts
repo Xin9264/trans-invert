@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { useAppStore } from '../store';
 
 // 本地自用：始终走相对路径，由 Vite 代理转发到 http://localhost:8000
 const API_BASE_URL = '';
@@ -409,6 +410,7 @@ export const practiceAPI = {
   // 提交练习答案
   submit: async (request: PracticeSubmitRequest): Promise<APIResponse<PracticeEvaluation>> => {
     const response = await api.post('/api/texts/practice/submit', request) as APIResponse<PracticeEvaluation>;
+    if (response.success) useAppStore.getState().clearGrammarMapCache();
     return response;
   },
 
@@ -435,6 +437,7 @@ export const practiceAPI = {
   // 导入练习历史
   importHistory: async (data: PracticeHistoryExport): Promise<APIResponse<any>> => {
     const response = await api.post('/api/texts/practice/history/import', { data }) as APIResponse<any>;
+    if (response.success) useAppStore.getState().clearGrammarMapCache();
     return response;
   },
 
@@ -538,6 +541,7 @@ export const practiceAPI = {
                 onProgress(currentProgress, parsed.content);
               } else if (parsed.type === 'complete') {
                 cleanupTimer();
+                useAppStore.getState().clearGrammarMapCache();
                 onComplete(parsed.result);
                 return;
               } else if (parsed.type === 'error') {
@@ -580,12 +584,18 @@ export const grammarMapAPI = {
       limit?: number;
       severity?: CorrectionSeverity;
       source?: CorrectionSource;
+      since?: string;
+      until?: string;
+      folder_id?: string;
     }
   ): Promise<APIResponse<NodeExamplesResponse>> => {
     const query = new URLSearchParams();
     if (params?.limit !== undefined) query.set('limit', String(params.limit));
     if (params?.severity) query.set('severity', params.severity);
     if (params?.source) query.set('source', params.source);
+    if (params?.since) query.set('since', params.since);
+    if (params?.until) query.set('until', params.until);
+    if (params?.folder_id) query.set('folder_id', params.folder_id);
     const suffix = query.toString() ? `?${query.toString()}` : '';
     const response = await api.get(`/api/grammar-map/nodes/${encodeURIComponent(nodeId)}/examples${suffix}`) as APIResponse<NodeExamplesResponse>;
     return response;

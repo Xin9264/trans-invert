@@ -1,5 +1,12 @@
 import { create } from 'zustand';
 import { User, Text, PracticeSession, TypingState } from '../types';
+import type { GrammarMapResponse } from '../utils/api';
+
+interface GrammarMapCache {
+  key: string;
+  data: GrammarMapResponse;
+  fetchedAt: number;
+}
 
 interface AppState {
   // User state
@@ -17,6 +24,7 @@ interface AppState {
   // UI state
   isLoading: boolean;
   error: string | null;
+  grammarMapCache: GrammarMapCache | null;
   
   // Actions
   setUser: (user: User | null) => void;
@@ -27,6 +35,8 @@ interface AppState {
   submitAnswer: (answer: string) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
+  setGrammarMapCache: (cache: GrammarMapCache) => void;
+  clearGrammarMapCache: () => void;
   logout: () => void;
 }
 
@@ -47,6 +57,7 @@ export const useAppStore = create<AppState>((set, get) => ({
   },
   isLoading: false,
   error: null,
+  grammarMapCache: null,
   
   // Actions
   setUser: (user) => set({ user, isAuthenticated: !!user }),
@@ -84,6 +95,10 @@ export const useAppStore = create<AppState>((set, get) => ({
   setLoading: (loading) => set({ isLoading: loading }),
   
   setError: (error) => set({ error }),
+
+  setGrammarMapCache: (cache) => set({ grammarMapCache: cache }),
+
+  clearGrammarMapCache: () => set({ grammarMapCache: null }),
   
   logout: () => set({
     user: null,
@@ -98,6 +113,7 @@ export const useAppStore = create<AppState>((set, get) => ({
       errors: 0,
       startTime: null,
       endTime: null,
-    }
+    },
+    grammarMapCache: null,
   })
 }));

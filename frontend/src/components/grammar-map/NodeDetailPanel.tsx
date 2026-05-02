@@ -2,6 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ExternalLink } from 'lucide-react';
 import { ErrorExample, GrammarMapNode, NodeExamplesResponse } from '../../utils/api';
+import TrendSparkline from './TrendSparkline';
 
 interface NodeDetailPanelProps {
   node: GrammarMapNode;
@@ -136,6 +137,8 @@ const NodeDetailPanel: React.FC<NodeDetailPanelProps> = ({
     </div>
 
     {node.tip && <p className="grammar-node-tip">{node.tip}</p>}
+
+    <TrendSparkline trend7d={node.stats.trend_7d} trend30d={node.stats.trend_30d} />
 
     <div className="grammar-detail-section">
       <DistributionBars title="严重程度" values={node.stats.by_severity} labels={severityLabels} />

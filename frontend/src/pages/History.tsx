@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Calendar, Download, Upload } from 'lucide-react';
 import { practiceAPI, PracticeHistoryExport, PracticeHistoryRecord } from '../utils/api';
 
@@ -57,6 +57,8 @@ const History: React.FC = () => {
   const [isImporting, setIsImporting] = useState(false);
   const [filter, setFilter] = useState<'all' | 'good' | 'bad'>('all');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [searchParams] = useSearchParams();
+  const focusedRecordId = searchParams.get('record');
 
   const loadHistory = async () => {
     try {
@@ -86,6 +88,14 @@ const History: React.FC = () => {
   useEffect(() => {
     loadHistory();
   }, []);
+
+  useEffect(() => {
+    if (!focusedRecordId || records.length === 0) return;
+    document.getElementById(`history-${focusedRecordId}`)?.scrollIntoView({
+      block: 'center',
+      behavior: 'smooth',
+    });
+  }, [focusedRecordId, records]);
 
   const stats = useMemo(() => {
     const total = records.length;
@@ -226,7 +236,12 @@ const History: React.FC = () => {
             {filteredRecords.map((record) => {
               const date = formatTimelineDate(record.timestamp);
               return (
-                <div className="tl-row" key={record.id}>
+                <div
+                  className="tl-row"
+                  id={`history-${record.id}`}
+                  key={record.id}
+                  data-focused={focusedRecordId === record.id || undefined}
+                >
                   <div className="tl-date">
                     <span className="dim tiny">{date.month}</span>
                     <strong>{date.day}</strong>

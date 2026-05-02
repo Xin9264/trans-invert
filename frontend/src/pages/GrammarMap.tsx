@@ -3,12 +3,27 @@ import { AlertTriangle, Network, RefreshCcw } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import GrammarTree from '../components/grammar-map/GrammarTree';
 import NodeDetailPanel from '../components/grammar-map/NodeDetailPanel';
-import { grammarMapAPI, GrammarMapNode, GrammarMapResponse, NodeExamplesResponse } from '../utils/api';
+import { useAppStore } from '../store';
+import { folderAPI, Folder, grammarMapAPI, GrammarMapNode, GrammarMapResponse, NodeExamplesResponse } from '../utils/api';
+
+type RangeKey = 'all' | '7d' | '30d' | '90d';
+
+const CACHE_TTL_MS = 5 * 60 * 1000;
 
 const flattenNodes = (node: GrammarMapNode): GrammarMapNode[] => [
   node,
   ...node.children.flatMap((child) => flattenNodes(child)),
 ];
+
+const flattenFolders = (folders: Folder[]): Folder[] => (
+  folders.flatMap((folder) => [folder, ...(folder.children ? flattenFolders(folder.children) : [])])
+);
+
+const rangeToSince = (range: RangeKey): string | undefined => {
+  const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : null;
+  if (!days) return undefined;
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
+};
 
 const formatDateTime = (value: string | null) => {
   if (!value) return '—';
@@ -27,17 +42,41 @@ const GrammarMap: React.FC = () => {
   const [examples, setExamples] = useState<NodeExamplesResponse | null>(null);
   const [isLoadingExamples, setIsLoadingExamples] = useState(false);
   const [examplesError, setExamplesError] = useState<string | null>(null);
+  const [folders, setFolders] = useState<Folder[]>([]);
   const [searchParams, setSearchParams] = useSearchParams();
+  const grammarMapCache = useAppStore((state) => state.grammarMapCache);
+  const setGrammarMapCache = useAppStore((state) => state.setGrammarMapCache);
 
-  const loadMap = async () => {
+  const range = (searchParams.get('range') || 'all') as RangeKey;
+  const safeRange: RangeKey = ['all', '7d', '30d', '90d'].includes(range) ? range : 'all';
+  const folderId = searchParams.get('folder') || '';
+  const filterKey = useMemo(() => JSON.stringify({ range: safeRange, folder: folderId }), [safeRange, folderId]);
+  const flatFolders = useMemo(() => flattenFolders(folders), [folders]);
+  const grammarQuery = useMemo(() => ({
+    since: rangeToSince(safeRange),
+    folder_id: folderId || undefined,
+  }), [safeRange, folderId]);
+
+  const loadMap = async (force = false) => {
     setIsLoading(true);
     setError(null);
+    if (!force && grammarMapCache?.key === filterKey && Date.now() - grammarMapCache.fetchedAt < CACHE_TTL_MS) {
+      setData(grammarMapCache.data);
+      setIsLoading(false);
+      return;
+    }
+
     try {
-      const response = await grammarMapAPI.getMap();
+      const response = await grammarMapAPI.getMap(grammarQuery);
       if (!response.success || !response.data) {
         throw new Error(response.error || response.message || '语法地图加载失败');
       }
       setData(response.data);
+      setGrammarMapCache({
+        key: filterKey,
+        data: response.data,
+        fetchedAt: Date.now(),
+      });
     } catch (err) {
       setError(err instanceof Error ? err.message : '语法地图加载失败');
     } finally {
@@ -47,6 +86,19 @@ const GrammarMap: React.FC = () => {
 
   useEffect(() => {
     loadMap();
+  }, [filterKey]);
+
+  useEffect(() => {
+    const loadFolders = async () => {
+      try {
+        const response = await folderAPI.getTree();
+        if (response.success && response.data) setFolders(response.data);
+      } catch (err) {
+        console.warn('语法地图文件夹筛选加载失败:', err);
+      }
+    };
+
+    loadFolders();
   }, []);
 
   const summary = useMemo(() => {
@@ -74,6 +126,16 @@ const GrammarMap: React.FC = () => {
     setSearchParams(params);
   };
 
+  const setFilterParam = (key: string, value: string) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set(key, value);
+    } else {
+      params.delete(key);
+    }
+    setSearchParams(params);
+  };
+
   useEffect(() => {
     if (!selectedNode) return;
 
@@ -82,7 +144,11 @@ const GrammarMap: React.FC = () => {
       setIsLoadingExamples(true);
       setExamplesError(null);
       try {
-        const response = await grammarMapAPI.getExamples(selectedNode.id, { limit: 20 });
+        const response = await grammarMapAPI.getExamples(selectedNode.id, {
+          limit: 20,
+          since: grammarQuery.since,
+          folder_id: grammarQuery.folder_id,
+        });
         if (!response.success || !response.data) {
           throw new Error(response.error || response.message || '错误样例加载失败');
         }
@@ -98,7 +164,7 @@ const GrammarMap: React.FC = () => {
     return () => {
       cancelled = true;
     };
-  }, [selectedNode]);
+  }, [selectedNode, filterKey]);
 
   if (isLoading) {
     return (
@@ -116,9 +182,40 @@ const GrammarMap: React.FC = () => {
           <h2 className="page-title" style={{ marginTop: 6 }}>语法地图</h2>
           <p className="page-sub">把历史纠错按语法体系聚合，定位高频错误和最近升温的语言点。</p>
         </div>
-        <button className="btn" type="button" onClick={loadMap}>
+        <button className="btn" type="button" onClick={() => loadMap(true)}>
           <RefreshCcw size={14} /> 刷新
         </button>
+      </div>
+
+      <div className="grammar-toolbar">
+        <div className="seg">
+          {[
+            ['all', '全部'],
+            ['7d', '7 天'],
+            ['30d', '30 天'],
+            ['90d', '90 天'],
+          ].map(([value, label]) => (
+            <button
+              key={value}
+              type="button"
+              aria-pressed={safeRange === value}
+              onClick={() => setFilterParam('range', value === 'all' ? '' : value)}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        <select
+          className="grammar-filter-select"
+          value={folderId}
+          onChange={(event) => setFilterParam('folder', event.target.value)}
+          aria-label="文件夹筛选"
+        >
+          <option value="">全部文件夹</option>
+          {flatFolders.map((folder) => (
+            <option key={folder.id} value={folder.id}>{folder.name}</option>
+          ))}
+        </select>
       </div>
 
       {error && (
