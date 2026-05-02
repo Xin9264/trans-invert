@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Trans·invert — 回译练习</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,300..700;1,8..60,300..700&family=Inter:wght@400;500;600;700&family=Noto+Serif+SC:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+  <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+  <script src="mocks.js"></script>
+</head>
+<body data-direction="paper" data-theme="light" data-screen-label="App">
+  <div id="root"></div>
+
+  <script type="text/babel" src="tweaks-panel.jsx"></script>
+  <script type="text/babel" src="icons.jsx"></script>
+  <script type="text/babel" src="layout.jsx"></script>
+  <script type="text/babel" src="page-home.jsx"></script>
+  <script type="text/babel" src="page-history.jsx"></script>
+  <script type="text/babel" src="page-practice.jsx"></script>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+      "direction": "manuscript",
+      "theme": "light",
+      "fontFamily": "serif",
+      "fontSize": 16,
+      "lineHeight": 1.7,
+      "accent": "ink"
+    }/*EDITMODE-END*/;
+
+    const ACCENTS = {
+      amber:   { l: '#b8590e', l2: '#d97a2a', d: '#e89759', d2: '#f3b277', soft_l: '#fbe6cb', soft_d: '#3a2613', ink_l: '#6a3208', ink_d: '#f7c990' },
+      indigo:  { l: '#3b4bb8', l2: '#5d6ee0', d: '#8a96e8', d2: '#a8b2f0', soft_l: '#dee2f5', soft_d: '#1f2245', ink_l: '#1f2469', ink_d: '#c5cdf5' },
+      ink:     { l: '#1d1b18', l2: '#3a342b', d: '#e7e3d0', d2: '#c1bda5', soft_l: '#e4e0d4', soft_d: '#2a2620', ink_l: '#1d1b18', ink_d: '#e7e3d0' },
+      sage:    { l: '#4f6a3b', l2: '#6c8a55', d: '#a8c47e', d2: '#bcd594', soft_l: '#dfe8cd', soft_d: '#22301a', ink_l: '#2e3f1f', ink_d: '#bcd594' },
+    };
+
+    function applyTweaks(t) {
+      const root = document.body;
+      root.setAttribute('data-direction', t.direction);
+      root.setAttribute('data-theme', t.theme);
+      const ff = t.fontFamily === 'serif' ? 'var(--ff-serif)' : t.fontFamily === 'sans' ? 'var(--ff-sans)' : 'var(--ff-mono)';
+      root.style.setProperty('--body-ff', ff);
+      root.style.setProperty('--body-fs', t.fontSize + 'px');
+      root.style.setProperty('--body-lh', t.lineHeight);
+      const a = ACCENTS[t.accent] || ACCENTS.amber;
+      const dark = t.theme === 'dark';
+      root.style.setProperty('--accent', dark ? a.d : a.l);
+      root.style.setProperty('--accent-2', dark ? a.d2 : a.l2);
+      root.style.setProperty('--accent-soft', dark ? a.soft_d : a.soft_l);
+      root.style.setProperty('--accent-ink', dark ? a.ink_d : a.ink_l);
+      root.style.setProperty('--highlight', dark ? a.soft_d : a.soft_l);
+    }
+
+    function App() {
+      const [tweaks, setTweak] = useTweaks(TWEAK_DEFAULTS);
+      const [route, setRoute] = useState('home');
+      const [folderId, setFolderId] = useState(null);
+
+      useEffect(() => { applyTweaks(tweaks); }, [tweaks]);
+
+      return (
+        <div className="app">
+          <Sidebar route={route} onRoute={setRoute} selectedFolderId={folderId} onSelectFolder={setFolderId} />
+          <main className="main" data-screen-label={route}>
+            <Topbar route={route} selectedFolderId={folderId} />
+            {route === 'home'     && <Home onRoute={setRoute} selectedFolderId={folderId} onSelectFolder={setFolderId} />}
+            {route === 'history'  && <History onRoute={setRoute} />}
+            {route === 'practice' && <Practice onRoute={setRoute} />}
+            {route === 'review'   && <Placeholder title="智能复习" subtitle="根据历史薄弱处生成新练习。本次原型未展开 —— 主要演示首页 / 历史 / 练习 / 布局。" />}
+            {route === 'upload'   && <Placeholder title="上传文本" subtitle="粘贴英文段落，AI 生成翻译与难词。本原型未展开此页。" />}
+          </main>
+
+          <TweaksPanel title="Tweaks">
+            <TweakSection title="方向 · Visual direction">
+              <TweakRadio label="风格" value={tweaks.direction} onChange={v => setTweak('direction', v)}
+                options={[
+                  { value: 'paper',      label: 'Paper · 暖纸' },
+                  { value: 'manuscript', label: 'Manuscript · 手稿' },
+                  { value: 'terminal',   label: 'Terminal · 终端' },
+                ]} />
+              <TweakRadio label="主题" value={tweaks.theme} onChange={v => setTweak('theme', v)}
+                options={[{ value: 'light', label: '明' }, { value: 'dark', label: '暗' }]} />
+            </TweakSection>
+
+            <TweakSection title="排版 · Typography">
+              <TweakRadio label="字体" value={tweaks.fontFamily} onChange={v => setTweak('fontFamily', v)}
+                options={[
+                  { value: 'serif', label: '衬线' },
+                  { value: 'sans',  label: '无衬线' },
+                  { value: 'mono',  label: '等宽' },
+                ]} />
+              <TweakSlider label="字号" value={tweaks.fontSize} onChange={v => setTweak('fontSize', v)} min={14} max={20} step={1} suffix="px" />
+              <TweakSlider label="行距" value={tweaks.lineHeight} onChange={v => setTweak('lineHeight', v)} min={1.4} max={2.1} step={0.05} />
+            </TweakSection>
+
+            <TweakSection title="强调色 · Accent">
+              <TweakRadio label="" value={tweaks.accent} onChange={v => setTweak('accent', v)}
+                options={[
+                  { value: 'amber',  label: '琥珀' },
+                  { value: 'indigo', label: '靛蓝' },
+                  { value: 'ink',    label: '墨' },
+                  { value: 'sage',   label: '苔绿' },
+                ]} />
+            </TweakSection>
+
+            <TweakSection title="导航 · Navigate">
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {['home','practice','history','review','upload'].map(r => (
+                  <button key={r} className={'btn sm' + (route===r ? ' primary' : '')} onClick={() => setRoute(r)}>{r}</button>
+                ))}
+              </div>
+            </TweakSection>
+          </TweaksPanel>
+        </div>
+      );
+    }
+
+    function Placeholder({ title, subtitle }) {
+      return (
+        <div className="page">
+          <div className="section-head" style={{ marginTop: 0 }}>
+            <div>
+              <div className="eyebrow">Stub</div>
+              <h2 className="page-title" style={{ marginTop: 6 }}>{title}</h2>
+              <p className="page-sub">{subtitle}</p>
+            </div>
+          </div>
+          <div className="card" style={{ padding: 36, textAlign: 'center', color: 'var(--ink-3)' }}>
+            该页面在此原型中未展开 — 主要打磨 Home / History / Practice / Layout 四处。
+          </div>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
