@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { AlertTriangle, Network, RefreshCcw } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
+import GrammarTree from '../components/grammar-map/GrammarTree';
 import { grammarMapAPI, GrammarMapNode, GrammarMapResponse } from '../utils/api';
 
 const flattenNodes = (node: GrammarMapNode): GrammarMapNode[] => [
@@ -21,6 +23,7 @@ const GrammarMap: React.FC = () => {
   const [data, setData] = useState<GrammarMapResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const loadMap = async () => {
     setIsLoading(true);
@@ -52,6 +55,20 @@ const GrammarMap: React.FC = () => {
       leaves: leaves.length,
     };
   }, [data]);
+
+  const nodesById = useMemo(() => {
+    if (!data) return new Map<string, GrammarMapNode>();
+    return new Map(flattenNodes(data.tree).map((node) => [node.id, node]));
+  }, [data]);
+
+  const selectedNodeId = searchParams.get('node') || data?.tree.id || 'root';
+  const selectedNode = nodesById.get(selectedNodeId) || data?.tree || null;
+
+  const selectNode = (nodeId: string) => {
+    const params = new URLSearchParams(searchParams);
+    params.set('node', nodeId);
+    setSearchParams(params);
+  };
 
   if (isLoading) {
     return (
@@ -108,24 +125,55 @@ const GrammarMap: React.FC = () => {
             </div>
           </div>
 
-          <div className="card" style={{ padding: 24 }}>
-            <div className="row" style={{ alignItems: 'center', marginBottom: 18 }}>
-              <Network size={18} style={{ color: 'var(--accent)' }} />
-              <h3 style={{ margin: 0, fontFamily: 'var(--ff-display)', fontSize: 20 }}>English Grammar</h3>
+          <div className="grammar-map-layout">
+            <div className="grammar-tree-panel">
+              <div className="grammar-panel-head">
+                <Network size={17} />
+                <div>
+                  <div className="eyebrow">Tree</div>
+                  <h3>English Grammar</h3>
+                </div>
+              </div>
+              <GrammarTree
+                root={data.tree}
+                selectedNodeId={selectedNode?.id || data.tree.id}
+                onSelect={selectNode}
+              />
             </div>
-            <div className="materials" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
-              {data.tree.children.map((node) => (
-                <div className="material" key={node.id} style={{ minHeight: 130, cursor: 'default' }}>
-                  <div className="num">{node.id}</div>
-                  <h3>{node.label}</h3>
-                  <div className="preview">{node.stats.error_count} 个错误 · 近 7 天 {node.stats.trend_7d}</div>
-                  <div className="meta">
-                    <span className={`tag ${node.stats.mastery === 'weak' ? 'bad' : node.stats.mastery === 'warning' ? 'warn' : ''}`}>
-                      {node.stats.mastery}
+
+            <div className="grammar-detail-panel">
+              {selectedNode && (
+                <>
+                  <div className="grammar-panel-head">
+                    <div>
+                      <div className="eyebrow">Selected Node</div>
+                      <h3>{selectedNode.label}</h3>
+                    </div>
+                    <span className={`tag ${selectedNode.stats.mastery === 'weak' ? 'bad' : selectedNode.stats.mastery === 'warning' ? 'warn' : ''}`}>
+                      {selectedNode.stats.mastery}
                     </span>
                   </div>
-                </div>
-              ))}
+                  <div className="grammar-detail-grid">
+                    <div>
+                      <span>累计错误</span>
+                      <strong>{selectedNode.stats.error_count}</strong>
+                    </div>
+                    <div>
+                      <span>近 7 天</span>
+                      <strong>{selectedNode.stats.trend_7d}</strong>
+                    </div>
+                    <div>
+                      <span>近 30 天</span>
+                      <strong>{selectedNode.stats.trend_30d}</strong>
+                    </div>
+                    <div>
+                      <span>最近出错</span>
+                      <strong>{formatDateTime(selectedNode.stats.last_error_at)}</strong>
+                    </div>
+                  </div>
+                  {selectedNode.tip && <p className="grammar-node-tip">{selectedNode.tip}</p>}
+                </>
+              )}
             </div>
           </div>
         </>
