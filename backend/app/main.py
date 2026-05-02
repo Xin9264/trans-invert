@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 from app.core.settings import settings
-from app.routers import texts, config, folders, review
+from app.routers import texts, config, folders, review, grammar_map
 from app.routers import backup
 from app.data.grammar_syllabus import validate_syllabus_categories
 from app.schemas.text import APIResponse
@@ -34,6 +34,7 @@ app.include_router(texts.router)
 app.include_router(config.router)
 app.include_router(folders.router)
 app.include_router(review.router)
+app.include_router(grammar_map.router)
 app.include_router(backup.router)
 
 # API根路径（仅在开发环境或没有静态文件时显示）
